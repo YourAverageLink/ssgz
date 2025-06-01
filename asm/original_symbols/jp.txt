@@ -65,6 +65,7 @@ main.dol:
     STATIC_STORYFLAGS: 0x805aab50
     STATIC_ITEMFLAGS: 0x805ace58
     STATIC_DUNGEON_FLAGS: 0x805aced8
+    getCounterByIndex: 0x8016dd60
     increaseCounter: 0x8016dd40
     # --------------- RELOADER --------------------------------
     RoomManager__getRoomByIndex: 0x801b3ea0

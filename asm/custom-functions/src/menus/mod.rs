@@ -26,3 +26,7 @@ pub fn update() {
 pub fn is_active() -> bool {
     MainMenu::is_active()
 }
+
+pub fn do_cheats() {
+    cheats_menu::update_cheats();
+}

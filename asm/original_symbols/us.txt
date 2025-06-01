@@ -79,6 +79,7 @@ main.dol:
     STATIC_STORYFLAGS: 0x805a9ad8
     STATIC_ITEMFLAGS: 0x805a9bd8
     STATIC_DUNGEON_FLAGS: 0x805a9c58
+    getCounterByIndex: 0x8016d730
     # counterId, count
     increaseCounter: 0x8016d710
     # --------------- RELOADER --------------------------------

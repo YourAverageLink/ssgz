@@ -20,6 +20,7 @@ fn custom_main_additions() -> u32 {
         return 0;
     }
     live_info::display();
+    menus::do_cheats();
 
     return 1;
 }

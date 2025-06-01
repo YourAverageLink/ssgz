@@ -59,7 +59,8 @@ extern "C" {
     fn ItemflagManager__doCommit(mgr: *mut ItemflagManager);
     fn checkStoryflagIsSet(p: *const StoryflagManager, flag: u16) -> bool;
     fn AcItem__checkItemFlag(flag: u16) -> bool;
-
+    fn getCounterByIndex(index: u16) -> u16;
+    fn increaseCounter(index: u16, count: u16);
 }
 
 impl StoryflagManager {
@@ -101,6 +102,16 @@ impl ItemflagManager {
 
     pub fn set_to_value(flag: u16, value: u16) {
         unsafe { FlagManager__setFlagOrCounter(ITEMFLAG_MANAGER as _, flag, value) };
+    }
+
+    pub fn get_counter_by_index(index: u16) -> u16 {
+        unsafe { getCounterByIndex(index) }
+    }
+
+    pub fn increase_counter(index: u16, count: u16) {
+        unsafe {
+            increaseCounter(index, count);
+        }
     }
 }
 
