@@ -5,27 +5,27 @@ import re
 from sslib.fs_helpers import *
 from sslib.rel import REL, RELSection, RELRelocation, RELRelocationType
 
-ORIGINAL_FREE_SPACE_RAM_ADDRESS = 0x806782C0 # US 1.0
-# ORIGINAL_FREE_SPACE_RAM_ADDRESS = 0x8067b540 # JP 1.0
-ORIGINAL_DOL_SIZE = 0x57A680 # US 1.0
-# ORIGINAL_DOL_SIZE = 0x57D8C0 # JP 1.0
+ORIGINAL_FREE_SPACE_RAM_ADDRESS_US = 0x806782C0 # US 1.0
+ORIGINAL_FREE_SPACE_RAM_ADDRESS_JP = 0x8067b540 # JP 1.0
+ORIGINAL_DOL_SIZE_US = 0x57A680 # US 1.0
+ORIGINAL_DOL_SIZE_JP = 0x57D8C0 # JP 1.0
 
-THREAD_STACK_UPDATE_END_LOCATIONS = [0x803AC480, 0x803AC48C] # US 1.0
-# THREAD_STACK_UPDATE_END_LOCATIONS = [0x803acdd0, 0x803acddc] # JP 1.0
+THREAD_STACK_UPDATE_END_LOCATIONS_US = [0x803AC480, 0x803AC48C] # US 1.0
+THREAD_STACK_UPDATE_END_LOCATIONS_JP = [0x803acdd0, 0x803acddc] # JP 1.0
 
 # US 1.0
-THREAD_STACK_UPDATE_START_LOCATIONS = [
+THREAD_STACK_UPDATE_START_LOCATIONS_US = [
     [0x803ac47c, 0x803AC484],
     [0x803A2988, 0x803A2990],
     [0x803A2AF0, 0x803A2AF4],
 ]
 
 # JP 1.0
-# THREAD_STACK_UPDATE_START_LOCATIONS = [
-#     [0x803acdcc, 0x803acdd4],
-#     [0x803a32d8, 0x803a32d8],
-#     [0x803a3440, 0x803a3444],
-# ]
+THREAD_STACK_UPDATE_START_LOCATIONS_JP = [
+     [0x803acdcc, 0x803acdd4],
+     [0x803a32d8, 0x803a32d8],
+     [0x803a3440, 0x803a3444],
+]
 
 def split_pointer_into_high_and_low_half_for_hardcoding(pointer):
     high_halfword = (pointer & 0xFFFF0000) >> 16
@@ -39,14 +39,14 @@ def split_pointer_into_high_and_low_half_for_hardcoding(pointer):
     return high_halfword, low_halfword
 
 
-def apply_dol_patch(self, dol, patch):
+def apply_dol_patch(self, dol, patch, japanese):
     for org_address, patchlet in patch.items():
         new_bytes = patchlet["Data"]
 
         free_space_start = self.free_space_start_offsets["main.dol"]
 
         if org_address >= free_space_start:
-            add_free_space_section_to_main_dol(dol, new_bytes)
+            add_free_space_section_to_main_dol(dol, new_bytes, japanese)
         else:
             dol.write_data(
                 write_and_pack_bytes, org_address, new_bytes, "B" * len(new_bytes)
@@ -87,7 +87,7 @@ def apply_rel_patch(self, rel, rel_name, patches):
                 )
 
 
-def add_free_space_section_to_main_dol(main_dol, new_bytes):
+def add_free_space_section_to_main_dol(main_dol, new_bytes, japanese):
     dol_section = main_dol.sections[2]
     patch_length = len(new_bytes)
 
@@ -97,14 +97,14 @@ def add_free_space_section_to_main_dol(main_dol, new_bytes):
         )
 
     # First add a new text section to the dol (Text2).
-    dol_section.offset = ORIGINAL_DOL_SIZE  # Set the file offset of new Text2 section (which will be the original end of the file, where we put the patch)
-    dol_section.address = ORIGINAL_FREE_SPACE_RAM_ADDRESS  # Write loading address of the new Text2 section
+    dol_section.offset = ORIGINAL_DOL_SIZE_JP if japanese else ORIGINAL_DOL_SIZE_US # Set the file offset of new Text2 section (which will be the original end of the file, where we put the patch)
+    dol_section.address = ORIGINAL_FREE_SPACE_RAM_ADDRESS_JP if japanese else ORIGINAL_FREE_SPACE_RAM_ADDRESS_US # Write loading address of the new Text2 section
     dol_section.size = patch_length  # Write length of the new Text2 section
 
     # Next write our custom code to the end of the dol file.
     main_dol.write_data(
         write_and_pack_bytes,
-        ORIGINAL_FREE_SPACE_RAM_ADDRESS,
+        dol_section.address,
         new_bytes,
         "B" * len(new_bytes),
     )
@@ -114,25 +114,27 @@ def add_free_space_section_to_main_dol(main_dol, new_bytes):
         patch_length + 3
     ) & ~3  # Pad length of patch to next 4 just in case
     new_start_pointer_for_default_thread = (
-        ORIGINAL_FREE_SPACE_RAM_ADDRESS + padded_patch_length
+        dol_section.address + padded_patch_length
     )  # New free space pointer after our custom code
     high_halfword, low_halfword = split_pointer_into_high_and_low_half_for_hardcoding(
         new_start_pointer_for_default_thread
     )
     # Now update the asm instructions that load this hardcoded pointer.
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_END_LOCATIONS[0], 0x3CA00000 | high_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_END_LOCATIONS[1], 0x38A50000 | low_halfword)
+    thread_stack_update_start_locations = THREAD_STACK_UPDATE_START_LOCATIONS_JP if japanese else THREAD_STACK_UPDATE_START_LOCATIONS_US
+    thread_stack_update_end_locations = THREAD_STACK_UPDATE_END_LOCATIONS_JP if japanese else THREAD_STACK_UPDATE_END_LOCATIONS_US
+    main_dol.write_data(write_u32, thread_stack_update_end_locations[0], 0x3CA00000 | high_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_end_locations[1], 0x38A50000 | low_halfword)
     # more hardcoded pointers that come later
     new_end_pointer_for_default_thread = new_start_pointer_for_default_thread + 0x10000
     high_halfword, low_halfword = split_pointer_into_high_and_low_half_for_hardcoding(
         new_end_pointer_for_default_thread
     )
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[0][0], 0x3C600000 | high_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[0][1], 0x38630000 | low_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[1][0], 0x3C600000 | high_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[1][1], 0x38630000 | low_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[2][0], 0x3C600000 | high_halfword)
-    main_dol.write_data(write_u32, THREAD_STACK_UPDATE_START_LOCATIONS[2][1], 0x38630000 | low_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[0][0], 0x3C600000 | high_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[0][1], 0x38630000 | low_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[1][0], 0x3C600000 | high_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[1][1], 0x38630000 | low_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[2][0], 0x3C600000 | high_halfword)
+    main_dol.write_data(write_u32, thread_stack_update_start_locations[2][1], 0x38630000 | low_halfword)
     high_halfword = (new_end_pointer_for_default_thread & 0xFFFF0000) >> 16
     low_halfword = new_end_pointer_for_default_thread & 0xFFFF
     # default stack pointer

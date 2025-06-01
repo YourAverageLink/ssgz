@@ -8,9 +8,10 @@ import disc_riider_py
 
 WIT_PROGRESS_REGEX = re.compile(rb" +([0-9]+)%.*")
 CLEAN_NTSC_U_1_00_DOL_HASH = "450a6806f46d59dcf8278db08e06f94865a4b18a"
+CLEAN_NTSC_J_1_00_DOL_HASH = "2848bb574bfcbf97f075adc4e0f4692ddd7fd0e8"
+VALID_HASHES = [CLEAN_NTSC_U_1_00_DOL_HASH, CLEAN_NTSC_J_1_00_DOL_HASH]
 
 WRONG_VERSION_DOL_HASHES = {
-    "2848bb574bfcbf97f075adc4e0f4692ddd7fd0e8": "JP 1.00",
     # "TODO": "US 1.01",
     "30cad7e8a88442b1388867f01bc6461097f4a152": "US 1.02",
     "8f6bf468447d9f10172cc4a472a56e1f526a5cb4": "PAL 1.00",
@@ -37,16 +38,21 @@ class ExtractManager:
             self.rootpath / "actual-extract" / "DATA" / "sys" / "main.dol"
         ).is_file()
 
+    def is_japanese(self):
+        return (
+            self.rootpath / "actual-extract" / "DATA" / "files" / "JP"
+        ).is_dir()
+
     def extract_game(self, iso_path, progress_cb=NOP):
         if not self.actual_extract_already_exists():
             dest_path = self.rootpath / "actual-extract"
             extractor = disc_riider_py.WiiIsoExtractor(iso_path)
             extractor.prepare_extract_section("DATA")
             checksum = bytes(extractor.get_dol_hash("DATA")).hex()
-            if CLEAN_NTSC_U_1_00_DOL_HASH != checksum:
+            if checksum not in VALID_HASHES:
                 if wrong_version := WRONG_VERSION_DOL_HASHES.get(checksum):
                     raise WrongChecksumException(
-                        f"This ISO is {wrong_version}, but the rando only support NTSC-U 1.00 (North American).",
+                        f"This ISO is {wrong_version}, but the practice patcher only supports NTSC-U 1.00 (North American) or NTSC-J 1.00 (Japanese).",
                     )
                 else:
                     raise WrongChecksumException(
@@ -55,6 +61,14 @@ class ExtractManager:
             extractor.extract_to(
                 dest_path, lambda x: progress_cb("Extracting files...", x)
             )
+            # delete all videos, they take up way too much space
+            for hint_vid in (dest_path / "DATA" / "files" / "THP").glob("*.thp"):
+                os.remove(str(hint_vid))
+
+            if self.is_japanese():
+                print("Successfully extracted JP Skyward Sword")
+            else:
+                print("Successfully extracted US Skyward Sword")
 
     def modified_extract_already_exists(self):
         return (
@@ -90,12 +104,9 @@ class ExtractManager:
                     progress_cb("copy to modified...", (num_copied / file_count) * 100)
 
     def repack_game(self, modified_iso_dir: Path, progress_cb=NOP):
-        modified_iso_path = modified_iso_dir / "SOUE01.iso"
+        modified_iso_path = modified_iso_dir / ("SOUJ01.iso" if self.is_japanese() else "SOUE01.iso")
         if modified_iso_path.is_file():
             modified_iso_path.unlink()
-        legacy_wbfs_path = modified_iso_dir / "SOUE01.wbfs"
-        if legacy_wbfs_path.is_file():
-            legacy_wbfs_path.unlink()
         disc_riider_py.rebuild_from_directory(
             self.rootpath / "modified-extract",
             modified_iso_path,

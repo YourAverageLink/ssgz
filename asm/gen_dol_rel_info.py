@@ -31,8 +31,8 @@ all_rel_info = {}
 free_start_offsets = {}
 
 # it's possible to calculate that, not necessary though
-free_start_offsets["main.dol"] = 0x806782C0 # US 1.0
-# free_start_offsets["main.dol"] = 0x8067b540 # JP 1.0
+#free_start_offsets["main.dol"] = 0x806782C0 # US 1.0
+free_start_offsets["main.dol"] = 0x8067B540 # JP 1.0
 
 for relpath in rel_arc.get_all_paths():
     rel = REL()

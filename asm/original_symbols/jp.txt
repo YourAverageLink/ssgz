@@ -1,5 +1,6 @@
 main.dol:
     # --------------- C STUFFS --------------------------------
+    printf: 0x802df3e0
     float_to_unsigned: 0x804c73b4
     memcpy: 0x800043c4
     memset: 0x80004714
@@ -38,6 +39,7 @@ main.dol:
     CURRENT_HEAP: 0x805799a0
     HEAP_MEM1: 0x8057848c
     HEAP_MEM2: 0x80578490
+    HEAP_LIST: 0x80676d68
     Heap__alloc: 0x80495eb0
     requestFileLoadFromDisk: 0x802f0460
     # --------------- FLAG MANAGERS ---------------------------
@@ -52,6 +54,7 @@ main.dol:
     FlagManager__setFlagOrCounter: 0x800bfa80
     FlagManager__setFlagTo1: 0x800bfb00
     FlagManager__getUncommittedFlags: 0x800bfb40
+    FlagManger__copyAllFromSave: 0x800c0740
     ItemflagManager__doCommit: 0x800c0940
     StoryflagManager__doCommit: 0x800c09b0
     checkStoryflagIsSet: 0x80142540
@@ -71,6 +74,8 @@ main.dol:
     isCurrentStage: 0x801bb8f0
     actuallyTriggerEntrance: 0x801bbb00
     RELOADER_PTR: 0x805789f4
+    RELOADER_TYPE: 0x805789fd
+    SPAWN_MASTER: 0x805b6b0c
     SPAWN_SLAVE: 0x805b6ae0
     # --------------- ITEMS -----------------------------------
     AcItem__spawnItem: 0x80248cf0

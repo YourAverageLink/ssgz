@@ -118,7 +118,7 @@ unsafe impl Sync for HeapAllocator {}
 unsafe impl GlobalAlloc for HeapAllocator {
     unsafe fn alloc(&self, layout: core::alloc::Layout) -> *mut u8 {
         unsafe {
-            super::printf(
+            printf(
                 b"Allocating on: %s\0".as_ptr() as *const i8,
                 get_heap_idx(17).unwrap().get_name().as_ptr(),
             )

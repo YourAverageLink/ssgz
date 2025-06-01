@@ -225,7 +225,7 @@ impl Menu for WarpMenu {
                 menu.set_heading(stage_ref.name);
                 menu.set_cursor(warp_menu.stage_cursor);
                 for stage in stage_ref.stages {
-                    menu.add_entry(stage.name);
+                    menu.add_entry(stage.pretty_name);
                 }
                 menu.draw();
 

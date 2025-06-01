@@ -3,7 +3,7 @@ import numpy as np
 import colorsys
 
 
-def replace_mask(texture: np.mat, mask: np.mat, new_color: str) -> np.mat:
+def replace_mask(texture, mask, new_color: str):
     mask_inv = cv2.bitwise_not(mask)
 
     new_color = cvt_hex_to_RGBA(new_color)

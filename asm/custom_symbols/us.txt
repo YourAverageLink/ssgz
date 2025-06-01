@@ -1,0 +1,12 @@
+main.dol:
+  storyflag_set_to_1: 0x806783B0
+  custom_main_additions: 0x8067E698
+  compiler_builtins::int::specialized_div_rem::u64_div_rem: 0x80681E10
+  ACTION_MENU: 0x806839E4
+  SAVE_INFO: 0x806839EC
+  HEAP_MENU: 0x80683A14
+  WARP_MENU: 0x80683A1C
+  DISPLAY_MENU: 0x80683A34
+  MAIN_MENU: 0x80683A3C
+  CHEATS: 0x80683A50
+  CHEAT_MENU: 0x80683A8C

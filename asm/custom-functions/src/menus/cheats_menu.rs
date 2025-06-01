@@ -36,7 +36,7 @@ enum MenuState {
     Main,
 }
 
-struct CheatsMenu {
+pub struct CheatsMenu {
     state:  MenuState,
     cursor: u32,
 }

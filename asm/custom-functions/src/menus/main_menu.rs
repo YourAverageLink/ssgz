@@ -1,4 +1,5 @@
 use super::action_menu::ActionMenu;
+// use super::cheats_menu::CheatsMenu;
 use super::display_menu::DisplayMenu;
 use super::heap_menu::HeapMenu;
 use super::warp_menu::WarpMenu;
@@ -17,6 +18,7 @@ enum MenuState {
     WarpMenu,
     HeapMenu,
     ActionMenu,
+    // CheatsMenu,
 }
 
 impl MenuState {
@@ -26,6 +28,7 @@ impl MenuState {
             1 => MenuState::WarpMenu,
             2 => MenuState::HeapMenu,
             3 => MenuState::ActionMenu,
+            // 4 => MenuState::CheatsMenu,
             _ => MenuState::MenuSelect,
         }
     }
@@ -51,7 +54,7 @@ impl super::Menu for MainMenu {
             return;
         };
 
-        if is_down(Buttons::ONE | Buttons::TWO) {
+        if is_down(Buttons::DPAD_RIGHT | Buttons::TWO) {
             unsafe { MAIN_MENU.state = MenuState::MenuSelect };
         }
     }
@@ -75,6 +78,7 @@ impl super::Menu for MainMenu {
                         MenuState::WarpMenu => WarpMenu::enable(),
                         MenuState::HeapMenu => HeapMenu::enable(),
                         MenuState::ActionMenu => ActionMenu::enable(),
+                        // MenuState::CheatsMenu => CheatsMenu::enable(),
                         _ => {},
                     };
                 }
@@ -83,6 +87,7 @@ impl super::Menu for MainMenu {
             MenuState::WarpMenu => WarpMenu::input(),
             MenuState::HeapMenu => HeapMenu::input(),
             MenuState::ActionMenu => ActionMenu::input(),
+            // MenuState::CheatsMenu => CheatsMenu::input(),
             _ => {},
         }
     }
@@ -115,6 +120,7 @@ impl super::Menu for MainMenu {
                 menu.add_entry("Warp Menu");
                 menu.add_entry("Heap Menu");
                 menu.add_entry("Action Menu");
+                // menu.add_entry("Cheats Menu");
                 menu.draw();
 
                 main_menu.cursor = menu.move_cursor();
@@ -143,6 +149,12 @@ impl super::Menu for MainMenu {
                     main_menu.state = MenuState::MenuSelect;
                 }
             },
+            // MenuState::CheatsMenu => {
+            // CheatsMenu::display();
+            // if !CheatsMenu::is_active() {
+            // main_menu.state = MenuState::MenuSelect;
+            // }
+            // },
         }
         if main_menu.force_close {
             main_menu.force_close = false;
