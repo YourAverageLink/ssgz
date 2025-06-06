@@ -1,7 +1,6 @@
 use super::action_menu::ActionMenu;
 use super::cheats_menu::CheatsMenu;
 use super::display_menu::DisplayMenu;
-use super::heap_menu::HeapMenu;
 use super::warp_menu::WarpMenu;
 use crate::system::button::*;
 use crate::utils::char_writer::TextWriterBase;
@@ -16,7 +15,7 @@ enum MenuState {
     MenuSelect,
     DisplayMenu,
     WarpMenu,
-    HeapMenu,
+    // HeapMenu,
     ActionMenu,
     CheatsMenu,
 }
@@ -26,9 +25,9 @@ impl MenuState {
         match num {
             0 => MenuState::DisplayMenu,
             1 => MenuState::WarpMenu,
-            2 => MenuState::HeapMenu,
-            3 => MenuState::ActionMenu,
-            4 => MenuState::CheatsMenu,
+            // 2 => MenuState::HeapMenu,
+            2 => MenuState::ActionMenu,
+            3 => MenuState::CheatsMenu,
             _ => MenuState::MenuSelect,
         }
     }
@@ -76,7 +75,7 @@ impl super::Menu for MainMenu {
                     match main_menu.state {
                         MenuState::DisplayMenu => DisplayMenu::enable(),
                         MenuState::WarpMenu => WarpMenu::enable(),
-                        MenuState::HeapMenu => HeapMenu::enable(),
+                        // MenuState::HeapMenu => HeapMenu::enable(),
                         MenuState::ActionMenu => ActionMenu::enable(),
                         MenuState::CheatsMenu => CheatsMenu::enable(),
                         _ => {},
@@ -85,7 +84,7 @@ impl super::Menu for MainMenu {
             },
             MenuState::DisplayMenu => DisplayMenu::input(),
             MenuState::WarpMenu => WarpMenu::input(),
-            MenuState::HeapMenu => HeapMenu::input(),
+            // MenuState::HeapMenu => HeapMenu::input(),
             MenuState::ActionMenu => ActionMenu::input(),
             MenuState::CheatsMenu => CheatsMenu::input(),
             _ => {},
@@ -113,12 +112,12 @@ impl super::Menu for MainMenu {
         match main_menu.state {
             MenuState::Off => {},
             MenuState::MenuSelect => {
-                let mut menu: SimpleMenu<5> = SimpleMenu::new();
+                let mut menu: SimpleMenu<4> = SimpleMenu::new();
                 menu.set_heading("Main Menu Select");
                 menu.set_cursor(main_menu.cursor);
                 menu.add_entry("Display Menu");
                 menu.add_entry("Warp Menu");
-                menu.add_entry("Heap Menu");
+                // menu.add_entry("Heap Menu");
                 menu.add_entry("Action Menu");
                 menu.add_entry("Cheats Menu");
                 menu.draw();
@@ -137,12 +136,12 @@ impl super::Menu for MainMenu {
                     main_menu.state = MenuState::MenuSelect;
                 }
             },
-            MenuState::HeapMenu => {
-                HeapMenu::display();
-                if !HeapMenu::is_active() {
-                    main_menu.state = MenuState::MenuSelect;
-                }
-            },
+            // MenuState::HeapMenu => {
+            // HeapMenu::display();
+            // if !HeapMenu::is_active() {
+            // main_menu.state = MenuState::MenuSelect;
+            // }
+            // },
             MenuState::ActionMenu => {
                 ActionMenu::display();
                 if !ActionMenu::is_active() {

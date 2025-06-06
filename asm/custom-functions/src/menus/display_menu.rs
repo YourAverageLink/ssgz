@@ -50,9 +50,6 @@ impl super::Menu for DisplayMenu {
                             2 => {
                                 live_info::SCENE_FLAG_VIEWER = !live_info::SCENE_FLAG_VIEWER;
                             },
-                            3 => {
-                                live_info::HEAP_VIEWER = !live_info::HEAP_VIEWER;
-                            },
                             _ => {},
                         }
                     }
@@ -63,7 +60,7 @@ impl super::Menu for DisplayMenu {
 
     fn display() {
         let disp_menu = unsafe { &mut DISPLAY_MENU };
-        let mut menu: SimpleMenu<6> = SimpleMenu::new();
+        let mut menu: SimpleMenu<3> = SimpleMenu::new();
         menu.set_heading("Display Menu");
         menu.set_cursor(disp_menu.cursor);
         menu.add_entry_fmt(format_args!(
@@ -85,14 +82,6 @@ impl super::Menu for DisplayMenu {
         menu.add_entry_fmt(format_args!(
             "Scene Flag Viewer [{}]",
             if unsafe { live_info::SCENE_FLAG_VIEWER } {
-                "x"
-            } else {
-                " "
-            }
-        ));
-        menu.add_entry_fmt(format_args!(
-            "Heap Viewer [{}]",
-            if unsafe { live_info::HEAP_VIEWER } {
                 "x"
             } else {
                 " "

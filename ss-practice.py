@@ -10,6 +10,7 @@ from enum import IntEnum
 from typing import Optional
 import re
 import struct
+import shutil
 from extractmanager import ExtractManager
 
 import tkinter as tk
@@ -110,6 +111,13 @@ class GamePatcher:
                 self.modified_extract_path / "DATA" / "files" / "rels.arc",
                 rel_data,
             )
+    
+    def copy_practice_saves(self):
+        print("Copying practice saves...")
+        src_path = ROOT_PATH / "practice-saves" / ("JP" if self.is_japanese else "US") / "saves"
+        dest_path = self.modified_extract_path / "DATA" / "files" / "saves"
+        shutil.rmtree(dest_path)
+        shutil.copytree(src_path, dest_path)
 
 if __name__ == "__main__":
     extract = ExtractManager(ROOT_PATH)
@@ -134,6 +142,7 @@ if __name__ == "__main__":
             print("Patching North American Version")
         patcher = GamePatcher(ROOT_PATH / "actual-extract", ROOT_PATH / "modified-extract", japanese)
         patcher.do_all_gamepatches()
+        patcher.copy_practice_saves()
         user_wants_iso = input("Patching done, want to write an output iso? (y or n): ")
         if user_wants_iso.strip().lower() == "y":
             root = tk.Tk()

@@ -4,15 +4,15 @@
 #![allow(non_snake_case)]
 #![allow(unused)]
 
-use core::ffi::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort};
+use core::ffi::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort, c_void};
 
-use super::save_file::{SaveFile, SavedSaveFiles};
+use super::save_file::{SaveFile, SavedSaveFiles, SkipDatArr};
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct FileManager {
     pub saveFiles:        *mut SavedSaveFiles,
-    pub saveTails:        u32,
+    pub skipData:         *mut SkipDatArr,
     pub FA:               SaveFile,
     pub FB:               SaveFile,
     pub skipFlags:        [c_ushort; 16usize],
@@ -33,17 +33,58 @@ pub struct FileManager {
     pub field_0xa84f:     [u8; 1usize],
 }
 
+#[repr(C)]
+pub struct SaveManager {
+    pub checkIsFileRequest:      u32, // NandRequestCheckIsFileHolder
+    pub checkRequest:            u32,
+    pub createRequest:           u32,
+    pub writeRequest:            u32,
+    pub saveBannerRequest:       u32,
+    pub loadSaveRequest:         u32,
+    pub deleteRequest:           u32,
+    pub window:                  *mut c_void,
+    pub textBuf:                 [u16; 0x400],
+    pub currentState:            u32,
+    pub field_0x824:             i32,
+    pub checkForFreeSpaceResult: i32,
+    pub step:                    i32,
+    pub delayTimer:              i32,
+    pub copyToFile:              u8,
+    pub copyFromFile:            u8,
+    pub field_0x836:             u8,
+    pub field_0x837:             u8,
+    pub field_0x838:             u8,
+    pub field_0x839:             u8,
+    pub field_0x83A:             u8,
+    pub field_0x83B:             u8,
+    pub field_0x83C:             u8,
+    pub field_0x83D:             u8,
+    pub field_0x83E:             u8,
+    pub field_0x83F:             u8,
+    pub instance:                *mut SaveManager,
+}
+
 extern "C" {
     static FILE_MANAGER: *mut FileManager;
+    static SAVE_MANAGER: *mut SaveManager;
     fn FileManager__getDungeonFlags(_: *mut FileManager) -> *mut [[c_ushort; 8usize]; 22usize];
     fn FileManager__SaveFileAToSelected(_: *mut FileManager);
     fn FileManager__LoadSelectedToFileA(_: *mut FileManager);
     fn FileManager__GetCurrentHealth(_: *mut FileManager) -> u16;
     fn FileManager__GetCurrentFile(_: *const FileManager) -> *mut SaveFile;
+    fn SaveManager__initializeWriteSave(_: *mut SaveManager);
 }
 
 pub fn get_ptr() -> *mut FileManager {
     unsafe { FILE_MANAGER }
+}
+
+pub fn get_saved_save_files() -> *mut SavedSaveFiles {
+    unsafe { (*FILE_MANAGER).saveFiles }
+}
+
+pub fn get_skip_dat() -> *mut SkipDatArr {
+    unsafe { (*FILE_MANAGER).skipData }
 }
 
 pub fn get_file_A() -> &'static mut SaveFile {
@@ -68,4 +109,9 @@ pub fn get_current_health() -> u16 {
 }
 pub fn get_current_file() -> *mut SaveFile {
     unsafe { FileManager__GetCurrentFile(FILE_MANAGER) }
+}
+pub fn initialize_write_save() {
+    unsafe {
+        SaveManager__initializeWriteSave(SAVE_MANAGER);
+    }
 }

@@ -5,6 +5,9 @@
 #![allow(dead_code)]
 #![feature(slice_ptr_get)]
 
+#[macro_use]
+extern crate alloc;
+
 mod game;
 mod live_info;
 mod menus;

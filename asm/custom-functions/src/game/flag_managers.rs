@@ -122,6 +122,9 @@ impl SceneflagManager {
     pub fn set_global(scn_idx: u16, flag: u16) {
         unsafe { SceneflagManager__setFlagGlobal(SCENEFLAG_MANAGER, scn_idx, flag) };
     }
+    pub fn set_local(flag: u16) {
+        SceneflagManager::set_global(SceneflagManager::get_scene_idx(), flag);
+    }
     pub fn unset_global(scn_idx: u16, flag: u16) {
         unsafe { SceneflagManager__unsetFlagGlobal(SCENEFLAG_MANAGER, scn_idx, flag) };
     }

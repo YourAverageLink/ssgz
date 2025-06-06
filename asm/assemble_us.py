@@ -203,7 +203,7 @@ try:
     with open("asm_macros.asm") as f:
         asm_macros = f.read()
 
-    all_asm_file_paths = glob.glob("./patches/*.asm")
+    all_asm_file_paths = glob.glob("./patches/us/*.asm")
     all_asm_files = [os.path.basename(rel_path) for rel_path in all_asm_file_paths]
 
     # First parse all the asm files into code chunks.
@@ -212,7 +212,7 @@ try:
     next_free_space_id_for_file = {}
     for patch_filename in all_asm_files:
         print("Assembling " + patch_filename)
-        patch_path = os.path.join(".", "patches", patch_filename)
+        patch_path = os.path.join(".", "patches", "us", patch_filename)
         with open(patch_path) as f:
             asm = f.read()
 

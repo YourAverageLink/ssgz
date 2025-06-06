@@ -14,6 +14,8 @@ main.dol:
     FileManager__SaveFileAToSelected: 0x8000f0a0
     FileManager__GetCurrentFile: 0x80011360
     FILE_MANAGER: 0x8057825c
+    SAVE_MANAGER: 0x80578260
+    SaveManager__initializeWriteSave: 0x80013af0
     # --------------- PLAYER STUFF ----------------------------
     checkXZDistanceFromLink: 0x8002d530
     isPlayingHarp: 0x80381650
@@ -41,7 +43,18 @@ main.dol:
     HEAP_MEM2: 0x80578490
     HEAP_LIST: 0x80676d68
     Heap__alloc: 0x80495eb0
+    Heap__free: 0x80496110
+    __ct__Loader: 0x80052250
+    Loader__request: 0x800522c0
+    DVD_Command__waitUntilDone: 0x802EF590
+    requestFileLoadFromDiskOrDie: 0x802f0430
     requestFileLoadFromDisk: 0x802f0460
+    loadToMainRAM: 0x80495080
+    IsExistPath: 0x802EF4A0
+    DVDOpen: 0x803c3d60
+    DVDClose: 0x803c3e80
+    DVDReadPrio: 0x803c40c0
+    doSoftResetMaybe: 0x80068440
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800be400
     SceneflagManager__checkFlagGlobal: 0x800be470
@@ -62,6 +75,7 @@ main.dol:
     STORYFLAG_MANAGER: 0x8057865c
     ITEMFLAG_MANAGER: 0x80578660
     DUNGEONFLAG_MANAGER: 0x80578664
+    reload_color_fader: 0x805784d4
     STATIC_STORYFLAGS: 0x805aab50
     STATIC_ITEMFLAGS: 0x805ace58
     STATIC_DUNGEON_FLAGS: 0x805aced8
@@ -102,6 +116,7 @@ main.dol:
     Printf_TextWriterBase_WChar: 0x80432ee0
     Print_TextWriterBase_WChar: 0x804332c0
     PrintMutable_TextWriterBase_WChar: 0x804335c0
+    lineForInstantText: 0x801160b4
     # ----------------- GX Stuffs -----------------------------
     PSMTXIdentity: 0x803b8890
     C_MTXOrtho: 0x803b99c0

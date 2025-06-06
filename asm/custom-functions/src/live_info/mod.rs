@@ -22,7 +22,7 @@ pub fn display() {
     if unsafe { SCENE_FLAG_VIEWER } {
         flag_info::disp_scene_flags();
     }
-    if unsafe { HEAP_VIEWER } {
-        heap_viewer::disp_heaps();
-    }
+    // if unsafe { HEAP_VIEWER } {
+    // heap_viewer::disp_heaps();
+    // }
 }

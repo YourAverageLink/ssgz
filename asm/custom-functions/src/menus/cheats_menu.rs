@@ -8,9 +8,15 @@ pub struct Cheat {
     active: bool,
 }
 
+extern "C" {
+    static mut lineForInstantText: u32; // REALLY BAD AND HACKY
+}
+
+const NUM_CHEATS: usize = 6;
+
 #[no_mangle]
 #[link_section = "data"]
-pub static mut CHEATS: [Cheat; 6] = [
+pub static mut CHEATS: [Cheat; NUM_CHEATS] = [
     Cheat {
         name:   "Infinite Health",
         active: false,
@@ -35,6 +41,10 @@ pub static mut CHEATS: [Cheat; 6] = [
         name:   "Infinite Rupees",
         active: false,
     },
+    // Cheat {
+    // name:   "Instant Text",
+    // active: false,
+    // },
 ];
 
 #[derive(PartialEq, Eq)]
@@ -84,7 +94,7 @@ impl super::Menu for CheatsMenu {
     fn display() {
         let cheats_menu: &mut CheatsMenu = unsafe { &mut CHEAT_MENU };
 
-        let mut menu = SimpleMenu::<6>::new();
+        let mut menu = SimpleMenu::<{ NUM_CHEATS }>::new();
         menu.set_cursor(cheats_menu.cursor);
         menu.set_heading("Cheats");
         for cheat in unsafe { &CHEATS } {
@@ -144,5 +154,10 @@ pub fn update_cheats() {
                 ItemflagManager::increase_counter(0, 9900);
             }
         }
+        // if CHEATS[6].active {
+        // lineForInstantText = 0x38800001; // li r4, 1
+        // } else {
+        // lineForInstantText = 0x38800000; // li r4, 0
+        // }
     }
 }
