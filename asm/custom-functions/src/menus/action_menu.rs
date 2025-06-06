@@ -1,7 +1,6 @@
 use crate::game::{file_manager, flag_managers, item, player, reloader};
 use crate::system::button::*;
 use crate::utils::menu::SimpleMenu;
-use crate::utils::practice_saves::load_practice_save;
 
 use super::main_menu;
 
@@ -10,26 +9,48 @@ enum ActionMenuState {
     Off,
     Main,
     Item,
-    PracticeSave,
-    Category,
+    SceneFlag,
+}
+
+const BYTESTRS: [&'static str; 16usize] = [
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F",
+];
+const BITSTRS: [&'static str; 8usize] = ["01", "02", "04", "08", "10", "20", "40", "80"];
+
+struct SceneflagCursor {
+    menu_cursor: u32,
+    byte_cursor: u8,
+    bit_cursor:  u8,
+}
+
+fn calc_sceneflag_num(cursor: &SceneflagCursor) -> u16 {
+    let byte_offset = if cursor.byte_cursor & 1 == 1 {
+        cursor.byte_cursor * 8 - 8
+    } else {
+        cursor.byte_cursor * 8 + 8
+    };
+
+    (byte_offset + cursor.bit_cursor) as u16
 }
 
 pub struct ActionMenu {
-    state:           ActionMenuState,
-    cursor:          u32,
-    item_cursor:     u16,
-    category_cursor: u32,
-    cat_save_cursor: u8,
+    state:       ActionMenuState,
+    cursor:      u32,
+    item_cursor: u16,
+    flag_cursor: SceneflagCursor,
 }
 
 #[no_mangle]
 #[link_section = "data"]
 static mut ACTION_MENU: ActionMenu = ActionMenu {
-    state:           ActionMenuState::Off,
-    cursor:          0,
-    item_cursor:     0,
-    category_cursor: 0,
-    cat_save_cursor: 0,
+    state:       ActionMenuState::Off,
+    cursor:      0,
+    item_cursor: 0,
+    flag_cursor: SceneflagCursor {
+        menu_cursor: 0,
+        byte_cursor: 0,
+        bit_cursor:  0,
+    },
 };
 
 struct SavedInfo {
@@ -100,89 +121,6 @@ fn load_file(direct: bool) {
 
 fn give_item() {}
 
-struct SpeedrunCategory {
-    name:      &'static str,
-    base_path: &'static str,
-    saves:     [&'static str; 25usize],
-    num_saves: u8,
-}
-
-const ANY: SpeedrunCategory = SpeedrunCategory {
-    name:      "Any%",
-    base_path: "/saves/Any",
-    saves:     [
-        "Start",
-        "First BiT",
-        "Copy After Cave",
-        "Sky RBW",
-        "Skyview RBW",
-        "F3 in Skyview",
-        "Ghirahim 1",
-        "Goddess Statue RBW",
-        "Eldin RBW",
-        "Eldin OoB",
-        "ET Door RBM",
-        "ET Bridge RBM",
-        "F1 Keese Yeet F2 Scaldera",
-        "Lanayru Pillar RBM",
-        "Lanayru Mine BiTWarp",
-        "Rock RBM",
-        "Machi RBM",
-        "Gorge BiTWarp",
-        "2x20 Crystal RBM",
-        "3 in 1 - G3 Escape, Statue, Demise",
-        "",
-        "",
-        "",
-        "",
-        "",
-    ],
-    num_saves: 20,
-};
-
-// TODO - AD Saves for NTSC
-const AD: SpeedrunCategory = SpeedrunCategory {
-    name:      "All Dungeons",
-    base_path: "/saves/All Dungeons",
-    saves:     [
-        "Start",
-        "After Waterfall Cave",
-        "Sealed Grounds",
-        "Faron Woods Entry",
-        "Skyview",
-        "After Skyview",
-        "Volcano Ascent",
-        "Earth Temple",
-        "After ET",
-        "AC CSWW",
-        "Ancient Cistern",
-        "After Cistern",
-        "Stone Cache",
-        "Raise LMF",
-        "Sand Sea Skip",
-        "Sandship",
-        "Lanayru Mining Facility",
-        "After LMF",
-        "Sky Keep",
-        "After Sky Keep",
-        "Eldin Trial RBM",
-        "After Eldin Trial",
-        "Fire Sanctuary",
-        "Gate of Time Skip",
-        "Horde",
-    ],
-    num_saves: 25,
-};
-
-// const HUNDO: SpeedrunCategory = SpeedrunCategory {
-// name:      "100%",
-// base_path: "/saves/100",
-// saves:     [""],
-// num_saves: 1,
-// };
-
-const CATEGORIES: [SpeedrunCategory; 2usize] = [ANY, AD]; // HUNDO];
-
 impl super::Menu for ActionMenu {
     fn enable() {
         let action_menu = unsafe { &mut ACTION_MENU };
@@ -201,7 +139,7 @@ impl super::Menu for ActionMenu {
         const LOAD_FILE_DIRECT: u32 = 2;
         const GIVE_ITEM: u32 = 3;
         const KILL_LINK: u32 = 4;
-        const PRAC_SAVE: u32 = 5;
+        const SCENE_FLAG: u32 = 5;
 
         match action_menu.state {
             ActionMenuState::Off => {},
@@ -238,12 +176,8 @@ impl super::Menu for ActionMenu {
                             action_menu.state = ActionMenuState::Off;
                             main_menu::MainMenu::disable();
                         },
-                        PRAC_SAVE => {
-                            action_menu.state = ActionMenuState::PracticeSave;
-                            // load_practice_save("/saves/All Dungeons/Gate of
-                            // Time Skip");
-                            // action_menu.state = ActionMenuState::Off;
-                            // main_menu::MainMenu::disable();
+                        SCENE_FLAG => {
+                            action_menu.state = ActionMenuState::SceneFlag;
                         },
                         _ => {},
                     }
@@ -270,35 +204,53 @@ impl super::Menu for ActionMenu {
                     };
                 }
             },
-            ActionMenuState::PracticeSave => {
+            ActionMenuState::SceneFlag => {
                 if is_pressed(B) {
                     action_menu.state = ActionMenuState::Main;
                 } else if is_pressed(A) {
-                    action_menu.state = ActionMenuState::Category;
-                }
-            },
-            ActionMenuState::Category => {
-                let category = &CATEGORIES[action_menu.category_cursor as usize];
-                if is_pressed(B) {
-                    action_menu.state = ActionMenuState::PracticeSave;
-                } else if is_pressed(A) {
-                    let save = category.saves[action_menu.cat_save_cursor as usize];
-                    load_practice_save(format!("{0}/{save}", category.base_path).as_str());
+                    flag_managers::SceneflagManager::set_local(calc_sceneflag_num(
+                        &action_menu.flag_cursor,
+                    ));
                     action_menu.state = ActionMenuState::Off;
                     main_menu::MainMenu::disable();
                 } else if is_pressed(DPAD_RIGHT) {
-                    action_menu.cat_save_cursor =
-                        if action_menu.cat_save_cursor == category.num_saves - 1 {
-                            0
-                        } else {
-                            action_menu.cat_save_cursor + 1
-                        };
+                    match action_menu.flag_cursor.menu_cursor {
+                        0 => {
+                            action_menu.flag_cursor.byte_cursor =
+                                if action_menu.flag_cursor.byte_cursor == 15 {
+                                    0
+                                } else {
+                                    action_menu.flag_cursor.byte_cursor + 1
+                                };
+                        },
+                        _ => {
+                            action_menu.flag_cursor.bit_cursor =
+                                if action_menu.flag_cursor.bit_cursor == 7 {
+                                    0
+                                } else {
+                                    action_menu.flag_cursor.bit_cursor + 1
+                                };
+                        },
+                    }
                 } else if is_pressed(DPAD_LEFT) {
-                    action_menu.cat_save_cursor = if action_menu.cat_save_cursor == 0 {
-                        category.num_saves - 1
-                    } else {
-                        action_menu.cat_save_cursor - 1
-                    };
+                    match action_menu.flag_cursor.menu_cursor {
+                        0 => {
+                            action_menu.flag_cursor.byte_cursor =
+                                if action_menu.flag_cursor.byte_cursor == 0 {
+                                    15
+                                } else {
+                                    action_menu.flag_cursor.byte_cursor - 1
+                                };
+                        },
+                        _ => {
+                            action_menu.flag_cursor.bit_cursor =
+                                if action_menu.flag_cursor.bit_cursor == 0 {
+                                    7
+                                } else {
+                                    action_menu.flag_cursor.bit_cursor - 1
+                                };
+                        },
+                    }
                 }
             },
         }
@@ -317,7 +269,7 @@ impl super::Menu for ActionMenu {
                 menu.add_entry("Direct Load File");
                 menu.add_entry("Give Item");
                 menu.add_entry("Kill Link");
-                menu.add_entry("Load Practice Save");
+                menu.add_entry("RBM Scene Flag");
                 menu.draw();
                 action_menu.cursor = menu.move_cursor();
             },
@@ -327,26 +279,17 @@ impl super::Menu for ActionMenu {
                 menu.add_entry_fmt(format_args!("Id: {}", action_menu.item_cursor));
                 menu.draw();
             },
-            ActionMenuState::PracticeSave => {
+            ActionMenuState::SceneFlag => {
                 let mut menu: SimpleMenu<2> = SimpleMenu::new();
-                menu.set_heading("Choose a Category");
-                menu.set_cursor(action_menu.category_cursor);
-                for n in 0..2 {
-                    menu.add_entry_fmt(format_args!("{}", CATEGORIES[n].name));
-                }
+                let flag_cursor = &mut action_menu.flag_cursor;
+                let byte_str = BYTESTRS[flag_cursor.byte_cursor as usize];
+                let bit_str = BITSTRS[flag_cursor.bit_cursor as usize];
+                menu.set_cursor(flag_cursor.menu_cursor);
+                menu.set_heading_fmt(format_args!("RBM Scene Flag ({}x{})", byte_str, bit_str,));
+                menu.add_entry_fmt(format_args!("Byte: {}", byte_str));
+                menu.add_entry_fmt(format_args!("Bit: {}", bit_str));
                 menu.draw();
-                action_menu.category_cursor = menu.move_cursor();
-            },
-            ActionMenuState::Category => {
-                let category = &CATEGORIES[action_menu.category_cursor as usize];
-                let mut menu: SimpleMenu<1> = SimpleMenu::new();
-                menu.set_heading("Choose a Practice Save");
-                menu.add_entry_fmt(format_args!(
-                    "{}: {}",
-                    action_menu.cat_save_cursor,
-                    category.saves[action_menu.cat_save_cursor as usize]
-                ));
-                menu.draw();
+                flag_cursor.menu_cursor = menu.move_cursor();
             },
         }
     }

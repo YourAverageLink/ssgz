@@ -3,8 +3,9 @@ use self::main_menu::MainMenu;
 mod action_menu;
 mod cheats_menu;
 mod display_menu;
-mod heap_menu;
+// mod heap_menu;
 mod main_menu;
+mod practice_saves_menu;
 mod warp_menu;
 
 pub trait Menu {

@@ -116,7 +116,8 @@ class GamePatcher:
         print("Copying practice saves...")
         src_path = ROOT_PATH / "practice-saves" / ("JP" if self.is_japanese else "US") / "saves"
         dest_path = self.modified_extract_path / "DATA" / "files" / "saves"
-        shutil.rmtree(dest_path)
+        if dest_path.is_dir():
+            shutil.rmtree(dest_path)
         shutil.copytree(src_path, dest_path)
 
 if __name__ == "__main__":

@@ -1,12 +1,13 @@
 main.dol:
-  storyflag_set_to_1: 0x8067B6A0
-  load_practice_save: 0x806817E0
-  custom_main_additions: 0x806819D0
-  compiler_builtins::int::specialized_div_rem::u64_div_rem: 0x80684B60
-  ACTION_MENU: 0x806869BC
-  SAVE_INFO: 0x806869C8
-  DISPLAY_MENU: 0x806869FC
-  MAIN_MENU: 0x80686A04
-  CHEATS: 0x80686A0C
-  CHEAT_MENU: 0x80686A54
-  WARP_MENU: 0x80686A5C
+  load_practice_save: 0x8067B94C
+  custom_main_additions: 0x80681630
+  storyflag_set_to_1: 0x80684374
+  compiler_builtins::int::specialized_div_rem::u64_div_rem: 0x80684ED0
+  ACTION_MENU: 0x80686D48
+  SAVE_INFO: 0x80686D58
+  MAIN_MENU: 0x80686D80
+  PRACTICE_SAVES_MENU: 0x80686D88
+  CHEATS: 0x80686D94
+  CHEAT_MENU: 0x80686DDC
+  DISPLAY_MENU: 0x80686DE4
+  WARP_MENU: 0x80686DEC

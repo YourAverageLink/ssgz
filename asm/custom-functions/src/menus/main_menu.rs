@@ -1,6 +1,7 @@
 use super::action_menu::ActionMenu;
 use super::cheats_menu::CheatsMenu;
 use super::display_menu::DisplayMenu;
+use super::practice_saves_menu::PracticeSavesMenu;
 use super::warp_menu::WarpMenu;
 use crate::system::button::*;
 use crate::utils::char_writer::TextWriterBase;
@@ -18,6 +19,7 @@ enum MenuState {
     // HeapMenu,
     ActionMenu,
     CheatsMenu,
+    PracticeSavesMenu,
 }
 
 impl MenuState {
@@ -28,6 +30,7 @@ impl MenuState {
             // 2 => MenuState::HeapMenu,
             2 => MenuState::ActionMenu,
             3 => MenuState::CheatsMenu,
+            4 => MenuState::PracticeSavesMenu,
             _ => MenuState::MenuSelect,
         }
     }
@@ -78,6 +81,7 @@ impl super::Menu for MainMenu {
                         // MenuState::HeapMenu => HeapMenu::enable(),
                         MenuState::ActionMenu => ActionMenu::enable(),
                         MenuState::CheatsMenu => CheatsMenu::enable(),
+                        MenuState::PracticeSavesMenu => PracticeSavesMenu::enable(),
                         _ => {},
                     };
                 }
@@ -87,6 +91,7 @@ impl super::Menu for MainMenu {
             // MenuState::HeapMenu => HeapMenu::input(),
             MenuState::ActionMenu => ActionMenu::input(),
             MenuState::CheatsMenu => CheatsMenu::input(),
+            MenuState::PracticeSavesMenu => PracticeSavesMenu::input(),
             _ => {},
         }
     }
@@ -112,7 +117,7 @@ impl super::Menu for MainMenu {
         match main_menu.state {
             MenuState::Off => {},
             MenuState::MenuSelect => {
-                let mut menu: SimpleMenu<4> = SimpleMenu::new();
+                let mut menu: SimpleMenu<5> = SimpleMenu::new();
                 menu.set_heading("Main Menu Select");
                 menu.set_cursor(main_menu.cursor);
                 menu.add_entry("Display Menu");
@@ -120,6 +125,7 @@ impl super::Menu for MainMenu {
                 // menu.add_entry("Heap Menu");
                 menu.add_entry("Action Menu");
                 menu.add_entry("Cheats Menu");
+                menu.add_entry("Practice Saves Menu");
                 menu.draw();
 
                 main_menu.cursor = menu.move_cursor();
@@ -151,6 +157,12 @@ impl super::Menu for MainMenu {
             MenuState::CheatsMenu => {
                 CheatsMenu::display();
                 if !CheatsMenu::is_active() {
+                    main_menu.state = MenuState::MenuSelect;
+                }
+            },
+            MenuState::PracticeSavesMenu => {
+                PracticeSavesMenu::display();
+                if !PracticeSavesMenu::is_active() {
                     main_menu.state = MenuState::MenuSelect;
                 }
             },
