@@ -440,7 +440,7 @@ try:
                     if result := call(["cargo", "fmt"], cwd="./custom-functions"):
                         raise Exception("Formatting rust functions failed.")
                     if result := call(
-                        ["cargo", "build", "--release"], cwd="./custom-functions"
+                        ["cargo", "build", "--features", "static", "--release"], cwd="./custom-functions"
                     ):
                         raise Exception("Building rust functions failed.")
 

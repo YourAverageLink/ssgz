@@ -1,13 +1,3 @@
-#![no_std]
-#![feature(allocator_api)]
-#![feature(split_array)]
-#![feature(const_trait_impl)]
-#![allow(dead_code)]
-#![feature(slice_ptr_get)]
-
-#[macro_use]
-extern crate alloc;
-
 mod game;
 mod live_info;
 mod menus;
@@ -17,7 +7,7 @@ mod utils;
 // A Common Place where Custom code can be injected to run once per frame
 // Returns whether or not to stop (1 == continue)
 #[no_mangle]
-pub extern "C" fn dyn_hook() -> u32 {
+pub fn dyn_hook() -> u32 {
     menus::update();
     if menus::is_active() {
         return 0;
@@ -40,12 +30,16 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _prolog() {
-    set_hook(dyn_hook);
+    unsafe {
+        set_hook(dyn_hook);
+    }
 }
 
 #[no_mangle]
 pub extern "C" fn _epilog() {
-    clear_hook();
+    unsafe {
+        clear_hook();
+    }
 }
 
 #[no_mangle]

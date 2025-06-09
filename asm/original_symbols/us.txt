@@ -163,4 +163,8 @@ main.dol:
     GXSetChanCtrl: 0x803bea00
     __GXSetIndirectMask: 0x803c0340
     GXSetChanMatColor: 0x803be8f0
+    # ----------------- REL Stuffs ------------------------------
+    __ct__DynamicModuleControl: 0x802df3d0
+    DynamicModuleControl__do_load: 0x802df5d0
+    DynamicModuleControl__do_link: 0x802df810
 
