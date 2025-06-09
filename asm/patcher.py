@@ -22,9 +22,9 @@ THREAD_STACK_UPDATE_START_LOCATIONS_US = [
 
 # JP 1.0
 THREAD_STACK_UPDATE_START_LOCATIONS_JP = [
-     [0x803acdcc, 0x803acdd4],
-     [0x803a32d8, 0x803a32d8],
-     [0x803a3440, 0x803a3444],
+    [0x803acdcc, 0x803acdd4],
+    [0x803a32d8, 0x803a32e0],
+    [0x803a3440, 0x803a3444],
 ]
 
 def split_pointer_into_high_and_low_half_for_hardcoding(pointer):
