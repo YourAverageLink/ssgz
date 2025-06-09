@@ -30,22 +30,27 @@ class WrongChecksumException(Exception):
 
 
 class ExtractManager:
-    def __init__(self, rootpath: Path):
+    def __init__(self, rootpath: Path, japanese: bool):
         self.rootpath = rootpath
+        self.japanese = japanese
 
     def actual_extract_already_exists(self):
         return (
-            self.rootpath / "actual-extract" / "DATA" / "sys" / "main.dol"
+            self.actual_extract_path() / "DATA" / "sys" / "main.dol"
         ).is_file()
 
+    def actual_extract_path(self):
+        return self.rootpath / ("actual-extract-jp" if self.japanese else "actual-extract-us")
+    
+    def modified_extract_path(self):
+        return self.rootpath / ("modified-extract-jp" if self.japanese else "modified-extract-us")
+
     def is_japanese(self):
-        return (
-            self.rootpath / "actual-extract" / "DATA" / "files" / "JP"
-        ).is_dir()
+        return self.japanese
 
     def extract_game(self, iso_path, progress_cb=NOP):
         if not self.actual_extract_already_exists():
-            dest_path = self.rootpath / "actual-extract"
+            dest_path = self.actual_extract_path()
             extractor = disc_riider_py.WiiIsoExtractor(iso_path)
             extractor.prepare_extract_section("DATA")
             checksum = bytes(extractor.get_dol_hash("DATA")).hex()
@@ -72,15 +77,15 @@ class ExtractManager:
 
     def modified_extract_already_exists(self):
         return (
-            self.rootpath / "modified-extract" / "DATA" / "sys" / "main.dol"
+            self.modified_extract_path() / "DATA" / "sys" / "main.dol"
         ).is_file()
 
     def copy_to_modified(self, progress_cb=NOP):
         # check if it already exists
         if not self.modified_extract_already_exists():
             progress_cb("copy to modified...", 0)
-            src = str(self.rootpath / "actual-extract")
-            dest = str(self.rootpath / "modified-extract")
+            src = str(self.actual_extract_path())
+            dest = str(self.modified_extract_path())
             file_count = 0
             for path, dirs, filenames in os.walk(src):
                 file_count += len(filenames)
@@ -108,7 +113,7 @@ class ExtractManager:
         if modified_iso_path.is_file():
             modified_iso_path.unlink()
         disc_riider_py.rebuild_from_directory(
-            self.rootpath / "modified-extract",
+            self.modified_extract_path(),
             modified_iso_path,
             lambda x: progress_cb("Writing patched game...", x),
         )

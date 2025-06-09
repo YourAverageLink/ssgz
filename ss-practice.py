@@ -2,6 +2,7 @@ import copy
 from pathlib import Path
 import random
 from collections import Counter, OrderedDict, defaultdict
+import argparse
 
 import yaml
 import json
@@ -120,40 +121,54 @@ class GamePatcher:
             shutil.rmtree(dest_path)
         shutil.copytree(src_path, dest_path)
 
+parser = argparse.ArgumentParser(
+                    prog='ss-practice',
+                    description='Patches a US or JP copy of Skyward Sword with useful speedrunning practice features',
+                    epilog='Text at the bottom of help')
+
+parser.add_argument('version')
+
 if __name__ == "__main__":
-    extract = ExtractManager(ROOT_PATH)
-    if not extract.actual_extract_already_exists():
-        print("To create a practice rom, a clean copy of the NTSC US 1.00 or JP 1.00 version is needed.")
-        root = tk.Tk()
-        root.withdraw()
-        file_path = filedialog.askopenfilename(defaultextension=".iso", filetypes=[("Wii ROMs",".iso")], title="Select a .iso file.")
-        root.destroy()
-        print("Extracting game files, this may take some time...")
-        extract.extract_game(file_path)
-        print("Extracting done")
-    
-    if not extract.modified_extract_already_exists():
-        print("Making a copy to modified-extract...")
-        extract.copy_to_modified()
-    
-    if extract.actual_extract_already_exists():
-        if japanese := extract.is_japanese():
-            print("Patching Japanese version")
-        else:
-            print("Patching North American Version")
-        patcher = GamePatcher(ROOT_PATH / "actual-extract", ROOT_PATH / "modified-extract", japanese)
-        patcher.do_all_gamepatches()
-        patcher.copy_practice_saves()
-        user_wants_iso = input("Patching done, want to write an output iso? (y or n): ")
-        if user_wants_iso.strip().lower() == "y":
+    args = parser.parse_args()
+    version = args.version.lower().strip()
+
+    if version not in ['us', 'jp']:
+        print("Version must be 'US' or 'JP'")
+    else:
+        japanese = version == 'jp'
+        extract = ExtractManager(ROOT_PATH, japanese)
+        if not extract.actual_extract_already_exists():
+            print(f"To create a practice rom for the {"JP" if japanese else "NTSC US"} version, a clean copy of the {"JP" if japanese else "NTSC US"} version is needed.")
             root = tk.Tk()
             root.withdraw()
-            output_dir = Path(filedialog.askdirectory(title="Select a directory to output the iso to."))
+            file_path = filedialog.askopenfilename(defaultextension=".iso", filetypes=[("Wii ROMs",".iso")], title="Select a .iso file.")
             root.destroy()
-            if output_dir.exists():
-                print("Writing patched iso, this may take some time...")
-                extract.repack_game(output_dir)
-            else:
-                print("Error when selecting output directory!")
+            print("Extracting game files, this may take some time...")
+            extract.extract_game(file_path)
+            print("Extracting done")
         
-        print("All done, happy speedrunning! Press 2 and D-Pad right to access practice menus!")
+        if not extract.modified_extract_already_exists():
+            print("Making a copy to modified-extract...")
+            extract.copy_to_modified()
+        
+        if extract.actual_extract_already_exists():
+            if japanese := extract.is_japanese():
+                print("Patching Japanese version")
+            else:
+                print("Patching North American Version")
+            patcher = GamePatcher(extract.actual_extract_path(), extract.modified_extract_path(), japanese)
+            patcher.do_all_gamepatches()
+            patcher.copy_practice_saves()
+            user_wants_iso = input("Patching done, want to write an output iso? (y or n): ")
+            if user_wants_iso.strip().lower() == "y":
+                root = tk.Tk()
+                root.withdraw()
+                output_dir = Path(filedialog.askdirectory(title="Select a directory to output the iso to."))
+                root.destroy()
+                if output_dir.exists():
+                    print("Writing patched iso, this may take some time...")
+                    extract.repack_game(output_dir)
+                else:
+                    print("Error when selecting output directory!")
+            
+            print("All done, happy speedrunning! Press 2 and D-Pad right to access practice menus!")
