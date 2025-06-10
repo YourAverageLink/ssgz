@@ -170,7 +170,7 @@ def try_apply_local_relocation(bin_name, elf_relocation, elf_symbol):
 
 
 SDA_RE = re.compile(r"([a-z]+) (r[0-9]+), *([a-zA-Z0-9_]+)@sda21 *\(r13\).*")
-SDA_13_BASE = 0x80579440 # US 1.0
+SDA_13_BASE = 0x80579440  # US 1.0
 # SDA_13_BASE = 0x8057c6a0 # JP 1.0
 SDA_13_MAX = SDA_13_BASE + 0x7FFF
 SDA_13_MIN = SDA_13_BASE - 0x8000
@@ -229,7 +229,9 @@ try:
             line = line.strip()
 
             open_file_match = re.match(r"\.open\s+\"([^\"]+)\"$", line, re.IGNORECASE)
-            org_match = re.match(r"\.org\s+(0x[0-9a-f]+|@MainInjection)$", line, re.IGNORECASE)
+            org_match = re.match(
+                r"\.org\s+(0x[0-9a-f]+|@MainInjection)$", line, re.IGNORECASE
+            )
             org_symbol_match = re.match(
                 r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)$", line, re.IGNORECASE
             )
@@ -258,8 +260,8 @@ try:
                 org_symbol = org_match.group(1)
 
                 if org_symbol == "@MainInjection":
-                    org_symbol = "0x80062e60" # JP: 0x80062f40, US: 0x80062e60
-                
+                    org_symbol = "0x80062e60"  # JP: 0x80062f40, US: 0x80062e60
+
                 org_offset = int(org_symbol, 16)
 
                 if org_offset >= free_space_start_offsets[most_recent_file_path]:
@@ -443,7 +445,8 @@ try:
                     if result := call(["cargo", "fmt"], cwd="./custom-functions"):
                         raise Exception("Formatting rust functions failed.")
                     if result := call(
-                        ["cargo", "build", "--features", "static", "--release"], cwd="./custom-functions"
+                        ["cargo", "build", "--features", "static", "--release"],
+                        cwd="./custom-functions",
                     ):
                         raise Exception("Building rust main.dol functions failed.")
 
@@ -560,15 +563,18 @@ try:
                 line_break="\n",
             )
         )
-    
+
     # Build dynamic rust code (for a custom rel)
     if result := call(
-        ["cargo", "build", "--features", "dynamic", "--release"], cwd="./custom-functions"
+        ["cargo", "build", "--features", "dynamic", "--release"],
+        cwd="./custom-functions",
     ):
         raise Exception("Building rust rel functions failed.")
-    
-    outpath = os.path.abspath("./custom-functions/target/powerpc-unknown-eabi/release/libcustom_functions.a")
-    
+
+    outpath = os.path.abspath(
+        "./custom-functions/target/powerpc-unknown-eabi/release/libcustom_functions.a"
+    )
+
     command = [
         get_bin("powerpc-eabi-ar"),
         "x",
@@ -594,10 +600,18 @@ try:
 
     if result := call(command):
         raise Exception("Linker call failed.")
-    
+
     create_lst("us", temp_dir)
-    map_rel(os.path.join(temp_dir, "us_dyn.lst"), None, os.path.join(temp_dir, "us.lst"), 0, [custom_elf])
-    with open(custom_elf, "rb") as elf_file, open(os.path.join(temp_dir, "us_dyn.lst")) as sym:
+    map_rel(
+        os.path.join(temp_dir, "us_dyn.lst"),
+        None,
+        os.path.join(temp_dir, "us.lst"),
+        0,
+        [custom_elf],
+    )
+    with open(custom_elf, "rb") as elf_file, open(
+        os.path.join(temp_dir, "us_dyn.lst")
+    ) as sym:
         dat = elf_to_rel(1000, elf_file, sym)
 
     with open("../custom-rel/US/customNP.rel", "wb") as f:

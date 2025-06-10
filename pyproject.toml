@@ -19,6 +19,7 @@ pyclip = "^0.7.0"
 opencv-python = "^4.7.0.68"
 numpy = "^1.24.2"
 disc-riider-py = "==0.3.1"
+pyelf2rel = ">=1.0.9"
 
 [tool.poetry.group.build.dependencies]
 pyinstaller = "^5.9.0"

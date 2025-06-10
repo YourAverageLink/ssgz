@@ -38,7 +38,7 @@ class EIData(IntEnum):
 
 
 @dataclass
-class ELFIdent():
+class ELFIdent:
     magic: bytes
     clss: EIClass
     data: EIData
@@ -61,7 +61,7 @@ class ELFType(IntEnum):
 
 
 @dataclass
-class ELFHeader():
+class ELFHeader:
     e_ident: ELFIdent
     e_type: ELFType
     e_machine: int
@@ -83,7 +83,7 @@ class ELFHeader():
 
 
 @dataclass
-class ELFProgramHeader():
+class ELFProgramHeader:
     p_type: int
     p_offset: int
     p_vaddr: int
@@ -120,7 +120,7 @@ class SectionHeaderType(IntEnum):
 
 
 @dataclass
-class ELFSectionHeader():
+class ELFSectionHeader:
     sh_name: int
     sh_type: SectionHeaderType
     sh_flags: int
@@ -152,7 +152,7 @@ class SymbolType(IntEnum):
 
 
 @dataclass
-class ELFSymbol():
+class ELFSymbol:
     st_name: int
     st_value: int
     st_size: int
@@ -165,11 +165,11 @@ class ELFSymbol():
     FORMAT_B64: ClassVar[struct.Struct] = struct.Struct(">IQQBBH")
 
     def get_bind(self) -> Union[SymbolBinding, int]:
-        b = (self.st_info & 0xf0) >> 4
+        b = (self.st_info & 0xF0) >> 4
         return SymbolBinding(b) if b < len(SymbolBinding) else b
 
     def get_type(self) -> Union[SymbolType, int]:
-        t = (self.st_info & 0xf)
+        t = self.st_info & 0xF
         return SymbolType(t) if t < len(SymbolType) else t
 
 
@@ -180,26 +180,33 @@ class DataFormat(IntEnum):
     B64 = 3
 
 
-class ELFFile():
-    __slots__ = ("header", "p_headers", "sections",
-                 "shstr", "strtab", "symbols")
+class ELFFile:
+    __slots__ = ("header", "p_headers", "sections", "shstr", "strtab", "symbols")
 
     def __init__(self, reader: BufferedReader):
-        e_ident = ELFIdent(
-            *ELFIdent.FORMAT.unpack(reader.read(ELFIdent.FORMAT.size)))
-        if not e_ident.magic == b"\x7FELF":
+        e_ident = ELFIdent(*ELFIdent.FORMAT.unpack(reader.read(ELFIdent.FORMAT.size)))
+        if not e_ident.magic == b"\x7fELF":
             raise TypeError("Unsupported file format (not ELF)")
         e_ident.clss = EIClass(e_ident.clss)
         e_ident.data = EIData(e_ident.data)
 
-        data_format = DataFormat(
-            (e_ident.clss - 1) | ((e_ident.data - 1) << 1))
-        h_formats = {DataFormat.L32: ELFHeader.FORMAT_L32, DataFormat.L64: ELFHeader.FORMAT_L64,
-                     DataFormat.B32: ELFHeader.FORMAT_B32, DataFormat.B64: ELFHeader.FORMAT_B64}
-        p_formats = {DataFormat.L32: ELFProgramHeader.FORMAT_L32, DataFormat.L64: ELFProgramHeader.FORMAT_L64,
-                     DataFormat.B32: ELFProgramHeader.FORMAT_B32, DataFormat.B64: ELFProgramHeader.FORMAT_B64}
-        self.header = ELFHeader(e_ident, *h_formats[data_format].unpack(
-            reader.read(h_formats[data_format].size)))
+        data_format = DataFormat((e_ident.clss - 1) | ((e_ident.data - 1) << 1))
+        h_formats = {
+            DataFormat.L32: ELFHeader.FORMAT_L32,
+            DataFormat.L64: ELFHeader.FORMAT_L64,
+            DataFormat.B32: ELFHeader.FORMAT_B32,
+            DataFormat.B64: ELFHeader.FORMAT_B64,
+        }
+        p_formats = {
+            DataFormat.L32: ELFProgramHeader.FORMAT_L32,
+            DataFormat.L64: ELFProgramHeader.FORMAT_L64,
+            DataFormat.B32: ELFProgramHeader.FORMAT_B32,
+            DataFormat.B64: ELFProgramHeader.FORMAT_B64,
+        }
+        self.header = ELFHeader(
+            e_ident,
+            *h_formats[data_format].unpack(reader.read(h_formats[data_format].size)),
+        )
         self.header.e_type = ELFType(self.header.e_type)
         # Load program header table
         self.p_headers: List[ELFProgramHeader] = []
@@ -207,28 +214,37 @@ class ELFFile():
             reader.seek(self.header.e_phoff + i * self.header.e_phentsize)
             if e_ident.clss == EIClass.C32:
                 p_header = ELFProgramHeader(
-                    *p_formats[data_format].unpack(reader.read(p_formats[data_format].size)))
+                    *p_formats[data_format].unpack(
+                        reader.read(p_formats[data_format].size)
+                    )
+                )
             else:
                 tmp = p_formats[data_format].unpack(
-                    reader.read(p_formats[data_format].size))
-                p_header = ELFProgramHeader(
-                    tmp[0], *tmp[2:7], tmp[1], *tmp[7:])
+                    reader.read(p_formats[data_format].size)
+                )
+                p_header = ELFProgramHeader(tmp[0], *tmp[2:7], tmp[1], *tmp[7:])
             self.p_headers.append(p_header)
         # Load the section header table
-        sh_formats = {DataFormat.L32: ELFSectionHeader.FORMAT_L32, DataFormat.L64: ELFSectionHeader.FORMAT_L64,
-                      DataFormat.B32: ELFSectionHeader.FORMAT_B32, DataFormat.B64: ELFSectionHeader.FORMAT_B64}
+        sh_formats = {
+            DataFormat.L32: ELFSectionHeader.FORMAT_L32,
+            DataFormat.L64: ELFSectionHeader.FORMAT_L64,
+            DataFormat.B32: ELFSectionHeader.FORMAT_B32,
+            DataFormat.B64: ELFSectionHeader.FORMAT_B64,
+        }
         self.sections: List[ELFSectionHeader] = []
         for i in range(self.header.e_shnum):
             reader.seek(self.header.e_shoff + i * self.header.e_shentsize)
             sh_header = ELFSectionHeader(
-                *sh_formats[data_format].unpack(reader.read(sh_formats[data_format].size)))
+                *sh_formats[data_format].unpack(
+                    reader.read(sh_formats[data_format].size)
+                )
+            )
             if sh_header.sh_type < SectionHeaderType.NUM:
                 sh_header.sh_type = SectionHeaderType(sh_header.sh_type)
             self.sections.append(sh_header)
         # load main name table
         reader.seek(self.sections[self.header.e_shstrndx].sh_offset)
-        section_str_table = reader.read(
-            self.sections[self.header.e_shstrndx].sh_size)
+        section_str_table = reader.read(self.sections[self.header.e_shstrndx].sh_size)
         self.shstr = section_str_table
         # Set section names
         for section in self.sections:
@@ -242,13 +258,18 @@ class ELFFile():
         # Get the symbol table
         symtab_idx = self.get_section_idx(b".symtab")
         symtab: ELFSectionHeader = self.sections[symtab_idx]
-        st_formats = {DataFormat.L32: ELFSymbol.FORMAT_L32, DataFormat.L64: ELFSymbol.FORMAT_L64,
-                      DataFormat.B32: ELFSymbol.FORMAT_B32, DataFormat.B64: ELFSymbol.FORMAT_B64}
+        st_formats = {
+            DataFormat.L32: ELFSymbol.FORMAT_L32,
+            DataFormat.L64: ELFSymbol.FORMAT_L64,
+            DataFormat.B32: ELFSymbol.FORMAT_B32,
+            DataFormat.B64: ELFSymbol.FORMAT_B64,
+        }
         self.symbols: List[ELFSymbol] = []
         for i in range(symtab.sh_size // symtab.sh_entsize):
             reader.seek(symtab.sh_offset + i * symtab.sh_entsize)
             sym = ELFSymbol(
-                *st_formats[data_format].unpack(reader.read(symtab.sh_entsize)))
+                *st_formats[data_format].unpack(reader.read(symtab.sh_entsize))
+            )
             sym.st_name = self._get_str(sym.st_name)
             self.symbols.append(sym)
 
@@ -256,13 +277,13 @@ class ELFFile():
         c = 0
         while self.strtab[idx + c] != 0 and c + idx < len(self.strtab):
             c += 1
-        return self.strtab[idx: idx+c]
+        return self.strtab[idx : idx + c]
 
     def _get_shstr(self, idx: int):
         c = 0
         while self.shstr[idx + c] != 0 and c + idx < len(self.shstr):
             c += 1
-        return self.shstr[idx: idx+c]
+        return self.shstr[idx : idx + c]
 
     def get_section_by_name(self, name: ByteString):
         ret = None
@@ -280,13 +301,25 @@ class ELFFile():
                 break
         return ret
 
-def map_rel(output_lst: str, config_file: str, input_lst: str, start_id: int, elf_files: list[str]):
-    EXCLUDED_ENTRIES = ["^_prolog$", "^_epilog$", "^_unresolved$",
-        "^_ZN4tpgz7modules4mainEv$", "^_ZN4tpgz7modules4exitEv$",
+
+def map_rel(
+    output_lst: str,
+    config_file: str,
+    input_lst: str,
+    start_id: int,
+    elf_files: list[str],
+):
+    EXCLUDED_ENTRIES = [
+        "^_prolog$",
+        "^_epilog$",
+        "^_unresolved$",
+        "^_ZN4tpgz7modules4mainEv$",
+        "^_ZN4tpgz7modules4exitEv$",
         r"^_rest(?:g|f)pr_[a-zA-Z0-9_]*_x$",
         r"^_(?:c|d)tors_(?:start|end)$",
         r"^__(?:s?bss|stack)_(?:start|end)$",
-        r"^_e(?:data|nd)$"]
+        r"^_e(?:data|nd)$",
+    ]
     provided_lst = {}
 
     # Load the provided lst file (if needed)
@@ -298,10 +331,18 @@ def map_rel(output_lst: str, config_file: str, input_lst: str, start_id: int, el
                     # Comment line, skip
                     continue
                 m = re.match(
-                    r"^(?:([a-zA-Z0-9]{1,8}),([a-zA-Z0-9]{1,8}),)?([a-zA-Z0-9]{1,8}):([^/\s]+?)(?:\s*//.*)?$", line)
+                    r"^(?:([a-zA-Z0-9]{1,8}),([a-zA-Z0-9]{1,8}),)?([a-zA-Z0-9]{1,8}):([^/\s]+?)(?:\s*//.*)?$",
+                    line,
+                )
                 if m:
-                    provided_lst.setdefault(m[4], (0 if m[1] is None else int(
-                        m[1], 16), 0 if m[2] is None else int(m[2], 16), int(m[3], 16)))
+                    provided_lst.setdefault(
+                        m[4],
+                        (
+                            0 if m[1] is None else int(m[1], 16),
+                            0 if m[2] is None else int(m[2], 16),
+                            int(m[3], 16),
+                        ),
+                    )
 
     module_ids = {}
     # Load module ids
@@ -312,11 +353,18 @@ def map_rel(output_lst: str, config_file: str, input_lst: str, start_id: int, el
     curr_id = start_id
 
     def skip_symbol_predicate(symbol: ELFSymbol):
-        if any(not re.search(excluded, str(symbol.st_name, encoding="utf-8")) is None for excluded in EXCLUDED_ENTRIES):
+        if any(
+            not re.search(excluded, str(symbol.st_name, encoding="utf-8")) is None
+            for excluded in EXCLUDED_ENTRIES
+        ):
             return True
         if symbol.st_shndx == SHID.UND or symbol.st_shndx >= len(elf.sections):
             return True
-        if symbol.st_size == 0 and symbol.get_type() is SymbolType.NOTYPE and symbol.st_name:
+        if (
+            symbol.st_size == 0
+            and symbol.get_type() is SymbolType.NOTYPE
+            and symbol.st_name
+        ):
             return False
         if symbol.st_size == 0:
             return True
@@ -335,13 +383,24 @@ def map_rel(output_lst: str, config_file: str, input_lst: str, start_id: int, el
             for symbol in elf.symbols:
                 if skip_symbol_predicate(symbol):
                     continue
-                provided_lst.setdefault(str(symbol.st_name, encoding="utf-8"),
-                                        (module_ids[file_name], symbol.st_shndx, symbol.st_value))
+                provided_lst.setdefault(
+                    str(symbol.st_name, encoding="utf-8"),
+                    (module_ids[file_name], symbol.st_shndx, symbol.st_value),
+                )
 
     # Output lst file
     with open(output_lst, "w") as f:
-        f.writelines([f"0x{t[0]:x},{t[1]:d},{t[2]:x}:{name}\n" if t[0] !=
-                     0 else f"{t[2]:x}:{name}\n" for name, t in provided_lst.items()])
+        f.writelines(
+            [
+                (
+                    f"0x{t[0]:x},{t[1]:d},{t[2]:x}:{name}\n"
+                    if t[0] != 0
+                    else f"{t[2]:x}:{name}\n"
+                )
+                for name, t in provided_lst.items()
+            ]
+        )
+
 
 def main():
     # Parsing functions
@@ -358,19 +417,38 @@ def main():
         return string
 
     parser = argparse.ArgumentParser(
-        sys.argv[0], description="Tool to extract the symbols from ELF file(s).")
-    parser.add_argument("-o", "--output-lst", type=parseOutputLstFile,
-                        required=True, help="Path to the output file")
-    parser.add_argument("-m", "--input-modules", type=parseInputConfigFile,
-                        required=False, help="Path to list of module IDs")
-    parser.add_argument("-i", "--input-lst",
-                        type=parseInputLstFile, help="Path to the input file")
+        sys.argv[0], description="Tool to extract the symbols from ELF file(s)."
+    )
+    parser.add_argument(
+        "-o",
+        "--output-lst",
+        type=parseOutputLstFile,
+        required=True,
+        help="Path to the output file",
+    )
+    parser.add_argument(
+        "-m",
+        "--input-modules",
+        type=parseInputConfigFile,
+        required=False,
+        help="Path to list of module IDs",
+    )
+    parser.add_argument(
+        "-i", "--input-lst", type=parseInputLstFile, help="Path to the input file"
+    )
     parser.add_argument("-s", "--start-id", type=int, default=0x1000)
-    parser.add_argument("elf", type=parseInputElfFile,
-                        nargs="+", help="List of additional modules to add")
+    parser.add_argument(
+        "elf",
+        type=parseInputElfFile,
+        nargs="+",
+        help="List of additional modules to add",
+    )
     args = parser.parse_args()
 
-    map_rel(args.output_lst, args.input_modules, args.input_lst, args.start_id, args.elf)
+    map_rel(
+        args.output_lst, args.input_modules, args.input_lst, args.start_id, args.elf
+    )
+
 
 if __name__ == "__main__":
     main()

@@ -1,16 +1,10 @@
-import copy
 from pathlib import Path
-import random
-from collections import Counter, OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict
 import argparse
 
 import yaml
-import json
+import sys
 from io import BytesIO
-from enum import IntEnum
-from typing import Optional
-import re
-import struct
 import shutil
 from extractmanager import ExtractManager
 
@@ -19,11 +13,8 @@ from tkinter import filedialog
 
 from paths import ROOT_PATH
 
-import nlzss11
-from sslib import AllPatcher, U8File
-from sslib.msb import process_control_sequences
-from sslib.utils import write_bytes_create_dirs, encodeBytes, toBytes
-from sslib.fs_helpers import write_str, write_u16, write_float, write_u8
+from sslib import U8File
+from sslib.utils import write_bytes_create_dirs
 from sslib.dol import DOL
 from sslib.rel import REL
 
@@ -51,20 +42,41 @@ class GamePatcher:
         self.all_asm_patches = defaultdict(OrderedDict)
 
         # for asm, custom symbols
-        with (ROOT_PATH / "asm" / "custom_symbols" / ("jp.txt" if self.is_japanese else "us.txt")).open("r") as f:
+        with (
+            ROOT_PATH
+            / "asm"
+            / "custom_symbols"
+            / ("jp.txt" if self.is_japanese else "us.txt")
+        ).open("r") as f:
             self.custom_symbols = yaml.safe_load(f)
         self.main_custom_symbols = self.custom_symbols.get("main.dol", {})
-        with (ROOT_PATH / "asm" / "original_symbols" / ("jp.txt" if self.is_japanese else "us.txt")).open("r") as f:
+        with (
+            ROOT_PATH
+            / "asm"
+            / "original_symbols"
+            / ("jp.txt" if self.is_japanese else "us.txt")
+        ).open("r") as f:
             self.original_symbols = yaml.safe_load(f)
         self.main_original_symbols = self.original_symbols.get("main.dol", {})
 
         # for asm, free space start offset
-        with (ROOT_PATH / "asm" / "free_space_start_offsets" / ("jp.txt" if self.is_japanese else "us.txt")).open("r") as f:
+        with (
+            ROOT_PATH
+            / "asm"
+            / "free_space_start_offsets"
+            / ("jp.txt" if self.is_japanese else "us.txt")
+        ).open("r") as f:
             self.free_space_start_offsets = yaml.safe_load(f)
         self.add_asm_patch("ss_necessary")
 
     def add_asm_patch(self, name):
-        with (ROOT_PATH / "asm" / "patch_diffs" / ("jp" if self.is_japanese else "us") / f"{name}_diff.txt").open("r") as f:
+        with (
+            ROOT_PATH
+            / "asm"
+            / "patch_diffs"
+            / ("jp" if self.is_japanese else "us")
+            / f"{name}_diff.txt"
+        ).open("r") as f:
             asm_patch_file_data = yaml.safe_load(f)
         for exec_file, patches in asm_patch_file_data.items():
             self.all_asm_patches[exec_file].update(patches)
@@ -112,70 +124,105 @@ class GamePatcher:
                 self.modified_extract_path / "DATA" / "files" / "rels.arc",
                 rel_data,
             )
-    
+
     def copy_practice_saves(self):
         print("Copying practice saves...")
-        src_path = ROOT_PATH / "practice-saves" / ("JP" if self.is_japanese else "US") / "saves"
+        src_path = (
+            ROOT_PATH
+            / "practice-saves"
+            / ("JP" if self.is_japanese else "US")
+            / "saves"
+        )
         dest_path = self.modified_extract_path / "DATA" / "files" / "saves"
         if dest_path.is_dir():
             shutil.rmtree(dest_path)
         shutil.copytree(src_path, dest_path)
-    
+
     def copy_custom_rel(self):
-        print("Copying custing REL file...")
-        src_path = ROOT_PATH / "custom-rel" / ("JP" if self.is_japanese else "US") / "customNP.rel"
-        dest_path = self.modified_extract_path / "DATA" / "files" / "rels" / "customNP.rel"
+        print("Copying custom REL file...")
+        src_path = (
+            ROOT_PATH
+            / "custom-rel"
+            / ("JP" if self.is_japanese else "US")
+            / "customNP.rel"
+        )
+        dest_path = (
+            self.modified_extract_path / "DATA" / "files" / "rels" / "customNP.rel"
+        )
         shutil.copyfile(src_path, dest_path)
 
-parser = argparse.ArgumentParser(
-                    prog='ss-practice',
-                    description='Patches a US or JP copy of Skyward Sword with useful speedrunning practice features',
-                    epilog='Text at the bottom of help')
 
-parser.add_argument('version')
+parser = argparse.ArgumentParser(
+    prog=sys.argv[0],
+    description="Patches a US or JP copy of Skyward Sword with useful speedrunning practice features",
+    epilog="Text at the bottom of help",
+)
+
+parser.add_argument(
+    "version",
+    choices=["us", "jp"],
+    help="Which version of the game you want to patch. Note that only their respective 1.0 versions are supported.",
+)
 
 if __name__ == "__main__":
     args = parser.parse_args()
     version = args.version.lower().strip()
 
-    if version not in ['us', 'jp']:
-        print("Version must be 'US' or 'JP'")
+    if version not in ["us", "jp"]:
+        print("Version must be 'us' or 'jp'")
     else:
-        japanese = version == 'jp'
-        extract = ExtractManager(ROOT_PATH, japanese)
+        japanese = version == "jp"
+        extract = ExtractManager(Path(".").resolve(), japanese)
         if not extract.actual_extract_already_exists():
-            print(f"To create a practice rom for the {"JP" if japanese else "NTSC US"} version, a clean copy of the {"JP" if japanese else "NTSC US"} version is needed.")
+            print(
+                f"To create a practice rom for the {"JP" if japanese else "NTSC US"} version, a clean copy of the {"JP" if japanese else "NTSC US"} version is needed."
+            )
             root = tk.Tk()
             root.withdraw()
-            file_path = filedialog.askopenfilename(defaultextension=".iso", filetypes=[("Wii ROMs",".iso")], title="Select a .iso file.")
+            file_path = filedialog.askopenfilename(
+                defaultextension=".iso",
+                filetypes=[("Wii ROMs", ".iso")],
+                title="Select a .iso file.",
+            )
             root.destroy()
             print("Extracting game files, this may take some time...")
             extract.extract_game(file_path)
             print("Extracting done")
-        
+
         if not extract.modified_extract_already_exists():
             print("Making a copy to modified-extract...")
             extract.copy_to_modified()
-        
+
         if extract.actual_extract_already_exists():
             if japanese := extract.is_japanese():
                 print("Patching Japanese version")
             else:
                 print("Patching North American Version")
-            patcher = GamePatcher(extract.actual_extract_path(), extract.modified_extract_path(), japanese)
+            patcher = GamePatcher(
+                extract.actual_extract_path(), extract.modified_extract_path(), japanese
+            )
             patcher.do_all_gamepatches()
             patcher.copy_practice_saves()
             patcher.copy_custom_rel()
-            user_wants_iso = input("Patching done, want to write an output iso? (y or n): ")
+            user_wants_iso = input(
+                "Patching done, want to write an output iso? (y or n): "
+            )
             if user_wants_iso.strip().lower() == "y":
                 root = tk.Tk()
                 root.withdraw()
-                output_dir = Path(filedialog.askdirectory(title="Select a directory to output the iso to."))
+                output_dir = Path(
+                    filedialog.askdirectory(
+                        title="Select a directory to output the iso to."
+                    )
+                )
                 root.destroy()
                 if output_dir.exists():
                     print("Writing patched iso, this may take some time...")
                     extract.repack_game(output_dir)
                 else:
                     print("Error when selecting output directory!")
-            
-            print("All done, happy speedrunning! Press 2 and D-Pad right to access practice menus!")
+
+            print(
+                "All done, happy speedrunning! Press Z and C simultaneously to access practice menus!"
+            )
+            input("Press Enter to exit.")

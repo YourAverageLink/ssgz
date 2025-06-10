@@ -1,0 +1,39 @@
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-14]
+        python-version: [3.12]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup poetry
+        run: python -mpip install poetry
+      - name: Install dependencies
+        run: poetry install
+        env:
+          POETRY_VIRTUALENVS_CREATE: false
+      - name: Test if the formatting is correct
+        run: black . --check
+      - name: Build distribution
+        run: python -mPyInstaller ssrando.spec --log-level=WARN
+      # - name: Copy Readme
+      #   run: cp README.md dist
+      #   shell: bash
+      - uses: SebRollen/toml-action@v1.2.0
+        id: read_toml
+        with:
+          file: "pyproject.toml"
+          field: "tool.poetry.version"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SSGZ Pre-0.1.0 ${{ matrix.os }}
+          path: dist

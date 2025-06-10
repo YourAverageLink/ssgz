@@ -35,15 +35,13 @@ class ExtractManager:
         self.japanese = japanese
 
     def actual_extract_already_exists(self):
-        return (
-            self.actual_extract_path() / "DATA" / "sys" / "main.dol"
-        ).is_file()
+        return (self.actual_extract_path() / "DATA" / "sys" / "main.dol").is_file()
 
     def actual_extract_path(self):
-        return self.rootpath / ("actual-extract-jp" if self.japanese else "actual-extract-us")
-    
+        return self.rootpath / "actual-extract" / ("JP" if self.japanese else "US")
+
     def modified_extract_path(self):
-        return self.rootpath / ("modified-extract-jp" if self.japanese else "modified-extract-us")
+        return self.rootpath / "modified-extract" / ("JP" if self.japanese else "US")
 
     def is_japanese(self):
         return self.japanese
@@ -76,9 +74,7 @@ class ExtractManager:
                 print("Successfully extracted US Skyward Sword")
 
     def modified_extract_already_exists(self):
-        return (
-            self.modified_extract_path() / "DATA" / "sys" / "main.dol"
-        ).is_file()
+        return (self.modified_extract_path() / "DATA" / "sys" / "main.dol").is_file()
 
     def copy_to_modified(self, progress_cb=NOP):
         # check if it already exists
@@ -109,7 +105,9 @@ class ExtractManager:
                     progress_cb("copy to modified...", (num_copied / file_count) * 100)
 
     def repack_game(self, modified_iso_dir: Path, progress_cb=NOP):
-        modified_iso_path = modified_iso_dir / ("SOUJ01.iso" if self.is_japanese() else "SOUE01.iso")
+        modified_iso_path = modified_iso_dir / (
+            "SOUJ01.iso" if self.is_japanese() else "SOUE01.iso"
+        )
         if modified_iso_path.is_file():
             modified_iso_path.unlink()
         disc_riider_py.rebuild_from_directory(
