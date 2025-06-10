@@ -24,7 +24,7 @@ jobs:
       - name: Test if the formatting is correct
         run: black . --check
       - name: Build distribution
-        run: python -mPyInstaller ssrando.spec --log-level=WARN
+        run: python -mPyInstaller ss-practice.spec --log-level=WARN
       # - name: Copy Readme
       #   run: cp README.md dist
       #   shell: bash
