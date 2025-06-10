@@ -6,6 +6,7 @@ name = "ss-practice"
 version = "0.1"
 description = "Skyward Sword Practice"
 authors = []
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
