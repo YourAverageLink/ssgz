@@ -143,6 +143,7 @@ extern "C" {
     static HEAP_FONT: *mut Heap;
     static HEAP_HBM: *mut Heap;
     static HEAP_ACTORS: [*mut Heap; 4];
+    static HEAP_DYLINK: *mut Heap;
     fn Heap__alloc(size: c_uint, align: c_int, heap: *mut Heap) -> *mut c_void;
     fn Heap__free(ptr: *const c_void, heap: *mut Heap);
 }
@@ -193,6 +194,10 @@ pub fn get_hbm_heap() -> WiiHeapAllocator {
 
 pub fn get_actor_heap(index: usize) -> WiiHeapAllocator {
     unsafe { WiiHeapAllocator(HEAP_ACTORS[index]) }
+}
+
+pub fn get_dylink_heap() -> WiiHeapAllocator {
+    unsafe { WiiHeapAllocator(HEAP_DYLINK) }
 }
 
 #[derive(Clone, Copy)]

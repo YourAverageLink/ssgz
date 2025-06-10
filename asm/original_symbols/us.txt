@@ -46,7 +46,18 @@ main.dol:
     CURRENT_HEAP: 0x80576740
     HEAP_MEM1: 0x8057522c
     HEAP_MEM2: 0x80575230
+    HEAP_WORK1: 0x805751a8
+    HEAP_WORK2: 0x805751ac
+    HEAP_WORK_EX: 0x805751b0
+    HEAP_LAYOUT: 0x805751b4
+    HEAP_LAYOUT_EX: 0x805751b8
+    HEAP_LAYOUT_EX2: 0x805751bc
+    HEAP_LAYOUT_RES: 0x805751c0
+    HEAP_FONT: 0x805751c4
+    HEAP_HBM: 0x805751c8
+    HEAP_ACTORS: 0x805cb078
     HEAP_LIST: 0x80673ae8
+    HEAP_DYLINK: 0x80575B90
     Heap__alloc: 0x80495560
     Heap__free: 0x804957c0
     __ct__Loader: 0x80052100
@@ -165,6 +176,5 @@ main.dol:
     GXSetChanMatColor: 0x803be8f0
     # ----------------- REL Stuffs ------------------------------
     __ct__DynamicModuleControl: 0x802df3d0
-    DynamicModuleControl__do_load: 0x802df5d0
-    DynamicModuleControl__do_link: 0x802df810
+    DynamicModuleControlBase__link: 0x802DF1F0
 

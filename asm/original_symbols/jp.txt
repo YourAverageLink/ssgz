@@ -42,6 +42,7 @@ main.dol:
     HEAP_MEM1: 0x8057848c
     HEAP_MEM2: 0x80578490
     HEAP_LIST: 0x80676d68
+    HEAP_DYLINK: 0x80578df0
     Heap__alloc: 0x80495eb0
     Heap__free: 0x80496110
     __ct__Loader: 0x80052250
@@ -148,6 +149,5 @@ main.dol:
     __GXSetIndirectMask: 0x803c0c90
     GXSetChanMatColor: 0x803bf240
     # ----------------- REL Stuffs ------------------------------
-    __ct__DynamicModuleControl: 0x802df770
-    DynamicModuleControl__do_load: 0x802df970
-    DynamicModuleControl__do_link: 0x802dfbb0
+    __ct__DynamicModuleControl: 0x802df7d0
+    DynamicModuleControlBase__link: 0x802df5f0

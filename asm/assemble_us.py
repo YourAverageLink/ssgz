@@ -14,6 +14,9 @@ import sys
 sys.path.insert(0, "../sslib")
 from fs_helpers import *
 from elf import *
+from to_lst import create_lst
+from relmapper import map_rel
+from pyelf2rel import elf_to_rel
 
 if sys.platform == "win32":
     devkitbasepath = r"C:\devkitPro\devkitPPC\bin"
@@ -440,9 +443,9 @@ try:
                     if result := call(["cargo", "fmt"], cwd="./custom-functions"):
                         raise Exception("Formatting rust functions failed.")
                     if result := call(
-                        ["cargo", "build", "--release"], cwd="./custom-functions"
+                        ["cargo", "build", "--features", "static", "--release"], cwd="./custom-functions"
                     ):
-                        raise Exception("Building rust functions failed.")
+                        raise Exception("Building rust main.dol functions failed.")
 
                     command.extend(
                         (
@@ -557,6 +560,49 @@ try:
                 line_break="\n",
             )
         )
+    
+    # Build dynamic rust code (for a custom rel)
+    if result := call(
+        ["cargo", "build", "--features", "dynamic", "--release"], cwd="./custom-functions"
+    ):
+        raise Exception("Building rust rel functions failed.")
+    
+    outpath = os.path.abspath("./custom-functions/target/powerpc-unknown-eabi/release/libcustom_functions.a")
+    
+    command = [
+        get_bin("powerpc-eabi-ar"),
+        "x",
+        outpath,
+    ]
+
+    if result := call(command, cwd=temp_dir):
+        raise Exception("Extracting objects from rust rel functions failed.")
+
+    custom_elf = os.path.join(temp_dir, "dynamic-functions.o")
+
+    command = [
+        get_bin("powerpc-eabi-ld"),
+        "-r",
+        "-T",
+        "merge.ld",
+        "-o",
+        custom_elf,
+    ]
+
+    for file in glob.glob(os.path.join(temp_dir, "*.o")):
+        command.append(file)
+
+    if result := call(command):
+        raise Exception("Linker call failed.")
+    
+    create_lst("us", temp_dir)
+    map_rel(os.path.join(temp_dir, "us_dyn.lst"), None, os.path.join(temp_dir, "us.lst"), 0, [custom_elf])
+    with open(custom_elf, "rb") as elf_file, open(os.path.join(temp_dir, "us_dyn.lst")) as sym:
+        dat = elf_to_rel(1000, elf_file, sym)
+
+    with open("../custom-rel/US/customNP.rel", "wb") as f:
+        f.write(dat)
+
 except Exception as e:
     stack_trace = traceback.format_exc()
     error_message = str(e) + "\n\n" + stack_trace

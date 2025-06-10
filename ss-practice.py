@@ -120,6 +120,12 @@ class GamePatcher:
         if dest_path.is_dir():
             shutil.rmtree(dest_path)
         shutil.copytree(src_path, dest_path)
+    
+    def copy_custom_rel(self):
+        print("Copying custing REL file...")
+        src_path = ROOT_PATH / "custom-rel" / ("JP" if self.is_japanese else "US") / "customNP.rel"
+        dest_path = self.modified_extract_path / "DATA" / "files" / "rels" / "customNP.rel"
+        shutil.copyfile(src_path, dest_path)
 
 parser = argparse.ArgumentParser(
                     prog='ss-practice',
@@ -159,6 +165,7 @@ if __name__ == "__main__":
             patcher = GamePatcher(extract.actual_extract_path(), extract.modified_extract_path(), japanese)
             patcher.do_all_gamepatches()
             patcher.copy_practice_saves()
+            patcher.copy_custom_rel()
             user_wants_iso = input("Patching done, want to write an output iso? (y or n): ")
             if user_wants_iso.strip().lower() == "y":
                 root = tk.Tk()

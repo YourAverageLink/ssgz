@@ -4,11 +4,10 @@
 #![feature(const_trait_impl)]
 #![allow(dead_code)]
 #![feature(slice_ptr_get)]
+#![allow(unused_imports)]
 
 #[macro_use]
 extern crate alloc;
-
-use core::compile_error;
 
 #[cfg(feature = "static")]
 include!("static.rs");
@@ -17,4 +16,6 @@ include!("static.rs");
 include!("dynamic.rs");
 
 #[cfg(not(any(feature = "static", feature = "dynamic")))]
-compile_error!("Must specify either 'static' or 'dynamic' feature");
+core::compile_error!(
+    "Must build with either 'static' (for main.dol code) or 'dynamic' (for rel code) feature."
+);

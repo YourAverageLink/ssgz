@@ -280,15 +280,70 @@ class ELFFile():
                 break
         return ret
 
+def map_rel(output_lst: str, config_file: str, input_lst: str, start_id: int, elf_files: list[str]):
+    EXCLUDED_ENTRIES = ["^_prolog$", "^_epilog$", "^_unresolved$",
+        "^_ZN4tpgz7modules4mainEv$", "^_ZN4tpgz7modules4exitEv$",
+        r"^_rest(?:g|f)pr_[a-zA-Z0-9_]*_x$",
+        r"^_(?:c|d)tors_(?:start|end)$",
+        r"^__(?:s?bss|stack)_(?:start|end)$",
+        r"^_e(?:data|nd)$"]
+    provided_lst = {}
+
+    # Load the provided lst file (if needed)
+    if not input_lst is None:
+        with open(input_lst, "r") as f:
+            for line in f:
+                m = re.match(r"^\s*(?://.*)?$", line)
+                if m:
+                    # Comment line, skip
+                    continue
+                m = re.match(
+                    r"^(?:([a-zA-Z0-9]{1,8}),([a-zA-Z0-9]{1,8}),)?([a-zA-Z0-9]{1,8}):([^/\s]+?)(?:\s*//.*)?$", line)
+                if m:
+                    provided_lst.setdefault(m[4], (0 if m[1] is None else int(
+                        m[1], 16), 0 if m[2] is None else int(m[2], 16), int(m[3], 16)))
+
+    module_ids = {}
+    # Load module ids
+    if not config_file is None:
+        with open(config_file, "r") as f:
+            module_ids = json.load(f)
+
+    curr_id = start_id
+
+    def skip_symbol_predicate(symbol: ELFSymbol):
+        if any(not re.search(excluded, str(symbol.st_name, encoding="utf-8")) is None for excluded in EXCLUDED_ENTRIES):
+            return True
+        if symbol.st_shndx == SHID.UND or symbol.st_shndx >= len(elf.sections):
+            return True
+        if symbol.st_size == 0 and symbol.get_type() is SymbolType.NOTYPE and symbol.st_name:
+            return False
+        if symbol.st_size == 0:
+            return True
+        return False
+
+    for elf_file in elf_files:
+        with open(elf_file, "rb") as f:
+            elf = ELFFile(f)
+            file_name = os.path.splitext(os.path.basename(elf_file))
+            while file_name[1]:
+                file_name = os.path.splitext(file_name[0])
+            file_name = file_name[0]
+            if not file_name in module_ids:
+                module_ids.setdefault(file_name, curr_id)
+                curr_id += 1
+            for symbol in elf.symbols:
+                if skip_symbol_predicate(symbol):
+                    continue
+                provided_lst.setdefault(str(symbol.st_name, encoding="utf-8"),
+                                        (module_ids[file_name], symbol.st_shndx, symbol.st_value))
+
+    # Output lst file
+    with open(output_lst, "w") as f:
+        f.writelines([f"0x{t[0]:x},{t[1]:d},{t[2]:x}:{name}\n" if t[0] !=
+                     0 else f"{t[2]:x}:{name}\n" for name, t in provided_lst.items()])
 
 def main():
-    EXCLUDED_ENTRIES = ["^_prolog$", "^_epilog$", "^_unresolved$",
-                        "^_ZN4tpgz7modules4mainEv$", "^_ZN4tpgz7modules4exitEv$",
-                        r"^_rest(?:g|f)pr_[a-zA-Z0-9_]*_x$",
-                        r"^_(?:c|d)tors_(?:start|end)$",
-                        r"^__(?:s?bss|stack)_(?:start|end)$",
-                        r"^_e(?:data|nd)$"]
-
     # Parsing functions
     def parseInputLstFile(string):
         return string
@@ -315,64 +370,7 @@ def main():
                         nargs="+", help="List of additional modules to add")
     args = parser.parse_args()
 
-    provided_lst = {}
-
-    # Load the provided lst file (if needed)
-    if not args.input_lst is None:
-        with open(args.input_lst, "r") as f:
-            for line in f:
-                m = re.match(r"^\s*(?://.*)?$", line)
-                if m:
-                    # Comment line, skip
-                    continue
-                m = re.match(
-                    r"^(?:([a-zA-Z0-9]{1,8}),([a-zA-Z0-9]{1,8}),)?([a-zA-Z0-9]{1,8}):([^/\s]+?)(?:\s*//.*)?$", line)
-                if m:
-                    provided_lst.setdefault(m[4], (0 if m[1] is None else int(
-                        m[1], 16), 0 if m[2] is None else int(m[2], 16), int(m[3], 16)))
-
-    module_ids = {}
-    # Load module ids
-    if not args.input_modules is None:
-        with open(args.input_modules, "r") as f:
-            module_ids = json.load(f)
-
-    curr_id = args.start_id
-
-    def skip_symbol_predicate(symbol: ELFSymbol):
-        if any(not re.search(excluded, str(symbol.st_name, encoding="utf-8")) is None for excluded in EXCLUDED_ENTRIES):
-            return True
-        if symbol.st_shndx == SHID.UND or symbol.st_shndx >= len(elf.sections):
-            return True
-        if symbol.st_size == 0 and symbol.get_type() is SymbolType.NOTYPE and symbol.st_name:
-            return False
-        if symbol.st_size == 0:
-            return True
-        return False
-
-    for elf_file in args.elf:
-        with open(elf_file, "rb") as f:
-            elf = ELFFile(f)
-            file_name = os.path.splitext(os.path.basename(elf_file))
-            while file_name[1]:
-                file_name = os.path.splitext(file_name[0])
-            file_name = file_name[0]
-            if not file_name in module_ids:
-                module_ids.setdefault(file_name, curr_id)
-                curr_id += 1
-            for symbol in elf.symbols:
-                if b"custom_main_additions" in symbol.st_name:
-                    print(symbol)
-                if skip_symbol_predicate(symbol):
-                    continue
-                provided_lst.setdefault(str(symbol.st_name, encoding="utf-8"),
-                                        (module_ids[file_name], symbol.st_shndx, symbol.st_value))
-
-    # Output lst file
-    with open(args.output_lst, "w") as f:
-        f.writelines([f"0x{t[0]:x},{t[1]:d},{t[2]:x}:{name}\n" if t[0] !=
-                     0 else f"{t[2]:x}:{name}\n" for name, t in provided_lst.items()])
-
+    map_rel(args.output_lst, args.input_modules, args.input_lst, args.start_id, args.elf)
 
 if __name__ == "__main__":
     main()

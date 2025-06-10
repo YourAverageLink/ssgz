@@ -9,6 +9,8 @@
 .org @MainInjection
 bl custom_main_additions
 
+.org 0x80053728 ; end of callback after rel initialization
+b load_custom_rel
 
 ;.org 0x80064660
 ;lis r3, 0x16
