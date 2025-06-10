@@ -4,6 +4,7 @@ use super::display_menu::DisplayMenu;
 use super::practice_saves_menu::PracticeSavesMenu;
 use super::flag_menu::FlagMenu;
 use super::warp_menu::WarpMenu;
+use super::inventory_menu::InventoryMenu;
 use crate::system::button::*;
 use crate::utils::char_writer::TextWriterBase;
 use crate::utils::graphics::draw_rect;
@@ -22,6 +23,7 @@ enum MenuState {
     CheatsMenu,
     PracticeSavesMenu,
     FlagMenu,
+    InventoryMenu,
 }
 
 const NUM_MENUS: usize = 6;
@@ -36,6 +38,7 @@ impl MenuState {
             3 => MenuState::CheatsMenu,
             4 => MenuState::PracticeSavesMenu,
             5 => MenuState::FlagMenu,
+            6 => MenuState::InventoryMenu,
             _ => MenuState::MenuSelect,
         }
     }
@@ -88,6 +91,7 @@ impl super::Menu for MainMenu {
                         MenuState::CheatsMenu => CheatsMenu::enable(),
                         MenuState::PracticeSavesMenu => PracticeSavesMenu::enable(),
                         MenuState::FlagMenu => FlagMenu::enable(),
+                        MenuState::InventoryMenu => InventoryMenu::enable(),
                         _ => {},
                     };
                 }
@@ -99,6 +103,7 @@ impl super::Menu for MainMenu {
             MenuState::CheatsMenu => CheatsMenu::input(),
             MenuState::PracticeSavesMenu => PracticeSavesMenu::input(),
             MenuState::FlagMenu => FlagMenu::input(),
+            MenuState::InventoryMenu => InventoryMenu::input(),
             _ => {},
         }
     }
@@ -133,6 +138,7 @@ impl super::Menu for MainMenu {
                 menu.add_entry("Cheats Menu");
                 menu.add_entry("Practice Saves Menu");
                 menu.add_entry("Flag Menu");
+                menu.add_entry("Inventory Menu");
                 menu.set_cursor(main_menu.cursor);
                 menu.draw();
 
@@ -180,6 +186,12 @@ impl super::Menu for MainMenu {
                     main_menu.state = MenuState::MenuSelect;
                 }
             },
+            MenuState::InventoryMenu => {
+                InventoryMenu::display();
+                if !InventoryMenu::is_active() {
+                    main_menu.state = MenuState::MenuSelect;
+                }
+            }
         }
         if main_menu.force_close {
             main_menu.force_close = false;

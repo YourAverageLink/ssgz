@@ -12,11 +12,9 @@ extern "C" {
     static mut lineForInstantText: u32; // REALLY BAD AND HACKY
 }
 
-const NUM_CHEATS: usize = 7;
-
 #[no_mangle]
 #[link_section = "data"]
-pub static mut CHEATS: [Cheat; NUM_CHEATS] = [
+pub static mut CHEATS: [Cheat; 7] = [
     Cheat {
         name:   "Infinite Health",
         active: false,

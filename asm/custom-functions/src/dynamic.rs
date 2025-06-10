@@ -46,6 +46,7 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn _prolog() {
     unsafe {
+        menus::initialize();
         crate::system::printf("Successfully loaded this rel file!\n\0".as_ptr() as *const i8);
         set_hook(dyn_hook);
     }

@@ -1,6 +1,8 @@
 use crate::system::button::*;
 use crate::utils::menu::SimpleMenu;
 use crate::utils::practice_saves::load_practice_save;
+use alloc::vec;
+use alloc::vec::Vec;
 
 use super::main_menu;
 
@@ -15,6 +17,7 @@ pub struct PracticeSavesMenu {
     state:       PracticeSavesMenuState,
     cursor:      u32,
     save_cursor: u8,
+    categories:  Vec<SpeedrunCategory>,
 }
 
 #[no_mangle]
@@ -23,81 +26,20 @@ static mut PRACTICE_SAVES_MENU: PracticeSavesMenu = PracticeSavesMenu {
     state:       PracticeSavesMenuState::Off,
     cursor:      0,
     save_cursor: 0,
+    categories: Vec::new(),
 };
 
 struct SpeedrunCategory {
     name:      &'static str,
     base_path: &'static str,
-    saves:     [&'static str; 25usize],
-    num_saves: u8,
+    saves:     Vec<&'static str>,
 }
 
-const ANY: SpeedrunCategory = SpeedrunCategory {
-    name:      "Any%",
-    base_path: "/saves/Any",
-    saves:     [
-        "Start",
-        "First BiT",
-        "Copy After Cave",
-        "Sky RBW",
-        "Skyview RBW",
-        "F3 in Skyview",
-        "Ghirahim 1",
-        "Goddess Statue RBW",
-        "Eldin RBW",
-        "Eldin OoB",
-        "ET Door RBM",
-        "ET Bridge RBM",
-        "F1 Keese Yeet F2 Scaldera",
-        "Lanayru Pillar RBM",
-        "Lanayru Mine BiTWarp",
-        "Rock RBM",
-        "Machi RBM",
-        "Gorge BiTWarp",
-        "2x20 Crystal RBM",
-        "3 in 1 - G3 Escape, Statue, Demise",
-        "",
-        "",
-        "",
-        "",
-        "",
-    ],
-    num_saves: 20,
-};
-
-// TODO - AD Saves for NTSC
-const AD: SpeedrunCategory = SpeedrunCategory {
-    name:      "All Dungeons",
-    base_path: "/saves/All Dungeons",
-    saves:     [
-        "Start",
-        "After Waterfall Cave",
-        "Sealed Grounds",
-        "Faron Woods Entry",
-        "Skyview",
-        "After Skyview",
-        "Volcano Ascent",
-        "Earth Temple",
-        "After ET",
-        "AC CSWW",
-        "Ancient Cistern",
-        "After Cistern",
-        "Stone Cache",
-        "Raise LMF",
-        "Sand Sea Skip",
-        "Sandship",
-        "Lanayru Mining Facility",
-        "After LMF",
-        "Sky Keep",
-        "After Sky Keep",
-        "Eldin Trial RBM",
-        "After Eldin Trial",
-        "Fire Sanctuary",
-        "Gate of Time Skip",
-        "Horde",
-    ],
-    num_saves: 25,
-};
+impl SpeedrunCategory {
+    fn num_saves(&self) -> u8 {
+        self.saves.len() as u8
+    }
+}
 
 // const HUNDO: SpeedrunCategory = SpeedrunCategory {
 // name:      "100%",
@@ -105,8 +47,6 @@ const AD: SpeedrunCategory = SpeedrunCategory {
 // saves:     [""],
 // num_saves: 1,
 // };
-
-const CATEGORIES: [SpeedrunCategory; 2usize] = [ANY, AD]; // HUNDO];
 
 impl super::Menu for PracticeSavesMenu {
     fn enable() {
@@ -135,14 +75,14 @@ impl super::Menu for PracticeSavesMenu {
                     ps_menu.state = PracticeSavesMenuState::Off;
                 } else if is_pressed(A) {
                     ps_menu.state = PracticeSavesMenuState::Category;
-                    let category = &CATEGORIES[ps_menu.cursor as usize];
-                    if ps_menu.save_cursor >= category.num_saves {
+                    let category = &ps_menu.categories[ps_menu.cursor as usize];
+                    if ps_menu.save_cursor >= category.num_saves() {
                         ps_menu.save_cursor = 0;
                     }
                 }
             },
             PracticeSavesMenuState::Category => {
-                let category = &CATEGORIES[ps_menu.cursor as usize];
+                let category = &ps_menu.categories[ps_menu.cursor as usize];
                 if is_pressed(B) {
                     ps_menu.state = PracticeSavesMenuState::Main;
                 } else if is_pressed(A) {
@@ -151,14 +91,14 @@ impl super::Menu for PracticeSavesMenu {
                     ps_menu.state = PracticeSavesMenuState::Off;
                     main_menu::MainMenu::disable();
                 } else if is_pressed(DPAD_RIGHT) {
-                    ps_menu.save_cursor = if ps_menu.save_cursor == category.num_saves - 1 {
+                    ps_menu.save_cursor = if ps_menu.save_cursor == category.num_saves() - 1 {
                         0
                     } else {
                         ps_menu.save_cursor + 1
                     };
                 } else if is_pressed(DPAD_LEFT) {
                     ps_menu.save_cursor = if ps_menu.save_cursor == 0 {
-                        category.num_saves - 1
+                        category.num_saves() - 1
                     } else {
                         ps_menu.save_cursor - 1
                     };
@@ -174,7 +114,7 @@ impl super::Menu for PracticeSavesMenu {
             PracticeSavesMenuState::Main => {
                 let menu = crate::reset_menu();
                 menu.set_heading("Choose a Category");
-                for category in &CATEGORIES {
+                for category in &ps_menu.categories {
                     menu.add_entry_fmt(format_args!("{}", category.name));
                 }
 
@@ -183,7 +123,7 @@ impl super::Menu for PracticeSavesMenu {
                 ps_menu.cursor = menu.move_cursor();
             },
             PracticeSavesMenuState::Category => {
-                let category = &CATEGORIES[ps_menu.cursor as usize];
+                let category = &ps_menu.categories[ps_menu.cursor as usize];
                 let menu = crate::reset_menu();
                 menu.set_heading("Choose a Practice Save");
                 menu.add_entry_fmt(format_args!(
@@ -198,5 +138,69 @@ impl super::Menu for PracticeSavesMenu {
     fn is_active() -> bool {
         let ps_menu = unsafe { &mut PRACTICE_SAVES_MENU };
         ps_menu.state != PracticeSavesMenuState::Off
+    }
+}
+
+pub fn initialize_practice_saves() {
+    let any_percent = SpeedrunCategory {
+        name:      "Any%",
+        base_path: "/saves/Any",
+        saves:     vec![
+            "Start",
+            "First BiT",
+            "Copy After Cave",
+            "Sky RBW",
+            "Skyview RBW",
+            "F3 in Skyview",
+            "Ghirahim 1",
+            "Goddess Statue RBW",
+            "Eldin RBW",
+            "Eldin OoB",
+            "ET Door RBM",
+            "ET Bridge RBM",
+            "F1 Keese Yeet F2 Scaldera",
+            "Lanayru Pillar RBM",
+            "Lanayru Mine BiTWarp",
+            "Rock RBM",
+            "Machi RBM",
+            "Gorge BiTWarp",
+            "2x20 Crystal RBM",
+            "3 in 1 - G3 Escape, Statue, Demise",
+        ],
+    };
+    let all_dungeons = SpeedrunCategory {
+        name:      "All Dungeons",
+        base_path: "/saves/All Dungeons",
+        saves:     vec![
+            "Start",
+            "After Waterfall Cave",
+            "Sealed Grounds",
+            "Faron Woods Entry",
+            "Skyview",
+            "After Skyview",
+            "Volcano Ascent",
+            "Earth Temple",
+            "After ET",
+            "AC CSWW",
+            "Ancient Cistern",
+            "After Cistern",
+            "Stone Cache",
+            "Raise LMF",
+            "Sand Sea Skip",
+            "Sandship",
+            "Lanayru Mining Facility",
+            "After LMF",
+            "Sky Keep",
+            "After Sky Keep",
+            "Eldin Trial RBM",
+            "After Eldin Trial",
+            "Fire Sanctuary",
+            "Gate of Time Skip",
+            "Horde",
+        ],
+    };
+    unsafe {
+        PRACTICE_SAVES_MENU.categories.push(any_percent);
+        PRACTICE_SAVES_MENU.categories.push(all_dungeons);
     }
 }

@@ -46,11 +46,9 @@ impl FlagEntry {
     }
 }
 
-const NUM_FLAGS: usize = 10;
-
 #[no_mangle]
 #[link_section = "data"]
-pub static mut RELEVANT_FLAGS: [FlagEntry; NUM_FLAGS] = [
+pub static mut RELEVANT_FLAGS: [FlagEntry; 10] = [
     FlagEntry {
         name:   "B-Wheel",
         associated_flag: Flag::StoryFlag {

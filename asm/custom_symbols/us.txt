@@ -1,7 +1,8 @@
 main.dol:
   custom_main_additions: 0x806782C0
-  set_hook: 0x806782FC
-  clear_hook: 0x80678308
-  load_custom_rel: 0x80678318
-  load_rel: 0x80678340
-  UPDATE_HOOK: 0x80678424
+  set_hook: 0x80678334
+  clear_hook: 0x80678340
+  load_custom_rel: 0x80678350
+  load_rel: 0x80678360
+  UPDATE_HOOK: 0x80678444
+  COUNTDOWN_TIMER: 0x80678448
