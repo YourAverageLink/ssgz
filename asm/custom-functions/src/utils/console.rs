@@ -11,7 +11,7 @@ pub struct Console {
     bg_color:     u32,
     font_color:   u32,
     dynamic_size: bool,
-    pub buffer:   CharWriter<WRITER_BUFFER_SIZE>,
+    pub buffer:   CharWriter,
 }
 
 impl Write for Console {
@@ -28,7 +28,7 @@ impl Console {
             bg_color:     0x0000003F,
             font_color:   0x000000FF,
             dynamic_size: false,
-            buffer:       CharWriter::<WRITER_BUFFER_SIZE>::new(),
+            buffer:       CharWriter::new(),
         }
     }
 
@@ -40,7 +40,7 @@ impl Console {
             bg_color:     0x0000003F,
             font_color:   0x000000FF,
             dynamic_size: true,
-            buffer:       CharWriter::<WRITER_BUFFER_SIZE>::new(),
+            buffer:       CharWriter::new(),
         }
     }
 

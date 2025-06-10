@@ -172,18 +172,19 @@ impl super::Menu for PracticeSavesMenu {
         match ps_menu.state {
             PracticeSavesMenuState::Off => {},
             PracticeSavesMenuState::Main => {
-                let mut menu: SimpleMenu<2> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 menu.set_heading("Choose a Category");
-                menu.set_cursor(ps_menu.cursor);
-                for n in 0..2 {
-                    menu.add_entry_fmt(format_args!("{}", CATEGORIES[n].name));
+                for category in &CATEGORIES {
+                    menu.add_entry_fmt(format_args!("{}", category.name));
                 }
+
+                menu.set_cursor(ps_menu.cursor);
                 menu.draw();
                 ps_menu.cursor = menu.move_cursor();
             },
             PracticeSavesMenuState::Category => {
                 let category = &CATEGORIES[ps_menu.cursor as usize];
-                let mut menu: SimpleMenu<1> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 menu.set_heading("Choose a Practice Save");
                 menu.add_entry_fmt(format_args!(
                     "{}: {}",

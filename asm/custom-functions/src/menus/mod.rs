@@ -7,6 +7,7 @@ mod display_menu;
 mod main_menu;
 mod practice_saves_menu;
 mod warp_menu;
+mod flag_menu;
 
 pub trait Menu {
     fn enable();

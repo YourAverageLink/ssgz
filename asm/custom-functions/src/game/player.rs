@@ -10,8 +10,9 @@ pub struct ActorLink {
     pub angle:          Vec3s,
     pub pad:            [u8; 2],
     pub pos:            Vec3f,
-    pub obj_base_pad:   [u8; 0x330 - (0x64 + 0x5C + 0xC)],
-    pub pad01:          [u8; 0x4498 - 0x330],
+    pub obj_base_pad:   [u8; 0x150 - (0x64 + 0x5C + 0xC)],
+    pub velocity:       Vec3f,
+    pub pad01:          [u8; 0x4498 - 0x15C],
     pub stamina_amount: u32,
     // More after
 }

@@ -5,6 +5,8 @@ use crate::system::{
     math::{C_MTXOrtho, Matrix34f, Matrix44f},
 };
 
+use alloc::vec::Vec;
+
 // Background Color Saved
 #[link_section = "data"]
 static mut BACKGROUND_COLOR: [u32; 2] = [0x000000FF; 2];
@@ -233,14 +235,14 @@ impl TextWriterBase {
     }
 }
 
-pub struct CharWriter<const BUFFER_SIZE: usize> {
+pub struct CharWriter{
     font_color:  Color,
     bg_color:    Color,
     fixed_width: bool,
-    pub buffer:  arrayvec::ArrayVec<u16, BUFFER_SIZE>,
+    pub buffer:  Vec<u16>,
 }
 
-impl<const BUFFER_SIZE: usize> Write for CharWriter<BUFFER_SIZE> {
+impl Write for CharWriter {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         let mut idx = 0;
         let bytes = s.as_bytes();
@@ -254,15 +256,13 @@ impl<const BUFFER_SIZE: usize> Write for CharWriter<BUFFER_SIZE> {
                 idx += 1;
                 c as u16
             };
-            self.buffer
-                .try_push(char_push)
-                .map_err(|_| core::fmt::Error)?;
+            self.buffer.push(char_push);
         }
         Ok(())
     }
 }
 
-impl<const BUFFER_SIZE: usize> CharWriter<BUFFER_SIZE> {
+impl CharWriter {
     pub fn new() -> Self {
         Self {
             font_color:  Color::from_u32(0xFFFFFFFF),
@@ -292,7 +292,7 @@ impl<const BUFFER_SIZE: usize> CharWriter<BUFFER_SIZE> {
         if !writer.is_null() {
             // ensure line ending
             if *(self.buffer.last().unwrap()) != 0x0000 {
-                let _ = self.buffer.try_push(0);
+                let _ = self.buffer.push(0);
                 if let Some(last) = self.buffer.last_mut() {
                     *last = 0;
                 }
@@ -315,7 +315,7 @@ impl<const BUFFER_SIZE: usize> CharWriter<BUFFER_SIZE> {
 
         // ensure line ending
         if *(self.buffer.last().unwrap()) != 0x0000 {
-            let _ = self.buffer.try_push(0);
+            let _ = self.buffer.push(0);
             if let Some(last) = self.buffer.last_mut() {
                 *last = 0;
             }
@@ -342,7 +342,7 @@ impl<const BUFFER_SIZE: usize> CharWriter<BUFFER_SIZE> {
 }
 
 pub fn write_to_screen(args: Arguments<'_>, posx: f32, posy: f32) {
-    let mut writer = CharWriter::<512>::new();
+    let mut writer = CharWriter::new();
     let _ = writer.write_fmt(args);
 
     let mut text_writer = TextWriterBase::new();

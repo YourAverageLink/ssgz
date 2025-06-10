@@ -12,7 +12,7 @@ extern "C" {
     static mut lineForInstantText: u32; // REALLY BAD AND HACKY
 }
 
-const NUM_CHEATS: usize = 6;
+const NUM_CHEATS: usize = 7;
 
 #[no_mangle]
 #[link_section = "data"]
@@ -41,6 +41,10 @@ pub static mut CHEATS: [Cheat; NUM_CHEATS] = [
         name:   "Infinite Rupees",
         active: false,
     },
+    Cheat {
+        name:   "Moon Jump while holding D-Pad Right",
+        active: false,
+    }
     // Cheat {
     // name:   "Instant Text",
     // active: false,
@@ -94,8 +98,7 @@ impl super::Menu for CheatsMenu {
     fn display() {
         let cheats_menu: &mut CheatsMenu = unsafe { &mut CHEAT_MENU };
 
-        let mut menu = SimpleMenu::<{ NUM_CHEATS }>::new();
-        menu.set_cursor(cheats_menu.cursor);
+        let mut menu = SimpleMenu::new();
         menu.set_heading("Cheats");
         for cheat in unsafe { &CHEATS } {
             menu.add_entry_fmt(format_args!(
@@ -104,8 +107,9 @@ impl super::Menu for CheatsMenu {
                 if cheat.active { "x" } else { "" }
             ))
         }
-        cheats_menu.cursor = menu.move_cursor();
+        menu.set_cursor(cheats_menu.cursor);
         menu.draw();
+        cheats_menu.cursor = menu.move_cursor();
     }
 
     fn is_active() -> bool {
@@ -152,6 +156,11 @@ pub fn update_cheats() {
         if CHEATS[5].active {
             if ItemflagManager::get_counter_by_index(0) < 9900 {
                 ItemflagManager::increase_counter(0, 9900);
+            }
+        }
+        if CHEATS[6].active && is_down(Buttons::DPAD_RIGHT) {
+            if let Some(player) = player::as_mut() {
+                player.velocity.y = 56f32; // Minimum amount for consistent liftoff on the ground
             }
         }
         // if CHEATS[6].active {

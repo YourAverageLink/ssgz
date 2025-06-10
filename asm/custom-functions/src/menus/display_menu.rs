@@ -60,9 +60,8 @@ impl super::Menu for DisplayMenu {
 
     fn display() {
         let disp_menu = unsafe { &mut DISPLAY_MENU };
-        let mut menu: SimpleMenu<3> = SimpleMenu::new();
+        let mut menu: SimpleMenu = SimpleMenu::new();
         menu.set_heading("Display Menu");
-        menu.set_cursor(disp_menu.cursor);
         menu.add_entry_fmt(format_args!(
             "Input Viewer [{}]",
             if unsafe { live_info::INPUT_VIEWER } {
@@ -87,6 +86,7 @@ impl super::Menu for DisplayMenu {
                 " "
             }
         ));
+        menu.set_cursor(disp_menu.cursor);
         menu.draw();
         disp_menu.cursor = menu.move_cursor();
     }

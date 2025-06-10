@@ -261,33 +261,33 @@ impl super::Menu for ActionMenu {
         match action_menu.state {
             ActionMenuState::Off => {},
             ActionMenuState::Main => {
-                let mut menu: SimpleMenu<6> = SimpleMenu::new();
+                let mut menu = SimpleMenu::new();
                 menu.set_heading("Action Menu");
-                menu.set_cursor(action_menu.cursor);
                 menu.add_entry("Save File");
                 menu.add_entry("Load File");
                 menu.add_entry("Direct Load File");
                 menu.add_entry("Give Item");
                 menu.add_entry("Kill Link");
                 menu.add_entry("RBM Scene Flag");
+                menu.set_cursor(action_menu.cursor);
                 menu.draw();
                 action_menu.cursor = menu.move_cursor();
             },
             ActionMenuState::Item => {
-                let mut menu: SimpleMenu<1> = SimpleMenu::new();
+                let mut menu = SimpleMenu::new();
                 menu.set_heading("Give Item");
                 menu.add_entry_fmt(format_args!("Id: {}", action_menu.item_cursor));
                 menu.draw();
             },
             ActionMenuState::SceneFlag => {
-                let mut menu: SimpleMenu<2> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 let flag_cursor = &mut action_menu.flag_cursor;
                 let byte_str = BYTESTRS[flag_cursor.byte_cursor as usize];
                 let bit_str = BITSTRS[flag_cursor.bit_cursor as usize];
-                menu.set_cursor(flag_cursor.menu_cursor);
                 menu.set_heading_fmt(format_args!("RBM Scene Flag ({}x{})", byte_str, bit_str,));
                 menu.add_entry_fmt(format_args!("Byte: {}", byte_str));
                 menu.add_entry_fmt(format_args!("Bit: {}", bit_str));
+                menu.set_cursor(flag_cursor.menu_cursor);
                 menu.draw();
                 flag_cursor.menu_cursor = menu.move_cursor();
             },

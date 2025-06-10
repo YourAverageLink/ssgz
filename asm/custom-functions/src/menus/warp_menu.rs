@@ -209,32 +209,31 @@ impl Menu for WarpMenu {
         match warp_menu.state {
             WarpState::Off => {},
             WarpState::Main => {
-                let mut menu: SimpleMenu<{ STAGES.len() }> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 menu.set_heading("Warp Menu");
-                menu.set_cursor(warp_menu.main_cursor);
                 for stage in STAGES {
                     menu.add_entry(stage.name);
                 }
-                menu.draw();
 
+                menu.set_cursor(warp_menu.main_cursor);
+                menu.draw();
                 warp_menu.main_cursor = menu.move_cursor();
             },
             WarpState::Stage => {
                 let stage_ref = STAGES[warp_menu.main_cursor as usize];
-                let mut menu: SimpleMenu<30> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 menu.set_heading(stage_ref.name);
-                menu.set_cursor(warp_menu.stage_cursor);
                 for stage in stage_ref.stages {
                     menu.add_entry(stage.pretty_name);
                 }
-                menu.draw();
 
+                menu.set_cursor(warp_menu.stage_cursor);
+                menu.draw();
                 warp_menu.stage_cursor = menu.move_cursor();
             },
             WarpState::Details => {
-                let mut menu: SimpleMenu<5> = SimpleMenu::new();
+                let mut menu: SimpleMenu = SimpleMenu::new();
                 menu.set_heading(warp_menu.get_stage().name);
-                menu.set_cursor(warp_menu.detail_cursor);
                 let (room, layer, entrance) = (
                     warp_menu.get_room(),
                     warp_menu.get_layer(),
@@ -243,6 +242,8 @@ impl Menu for WarpMenu {
                 menu.add_entry_fmt(format_args!("Room: {room}"));
                 menu.add_entry_fmt(format_args!("Layer: {layer}"));
                 menu.add_entry_fmt(format_args!("Entrance: {entrance}"));
+
+                menu.set_cursor(warp_menu.detail_cursor);
                 menu.draw();
 
                 warp_menu.detail_cursor = menu.move_cursor();

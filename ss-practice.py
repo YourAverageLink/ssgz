@@ -225,4 +225,3 @@ if __name__ == "__main__":
             print(
                 "All done, happy speedrunning! Press Z and C simultaneously to access practice menus!"
             )
-            input("Press Enter to exit.")

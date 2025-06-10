@@ -1,6 +1,6 @@
 use core::fmt::{Arguments, Write};
 
-use arrayvec::ArrayVec;
+use alloc::vec::Vec;
 use wchar::wchz;
 
 use crate::system::{button::*, gx::Color};
@@ -9,17 +9,17 @@ use super::char_writer::{CharWriter, TextWriterBase};
 
 const DEFAULT_LINE_SIZE: usize = 72;
 
-pub struct SimpleMenu<const NUM_LINES: usize> {
+pub struct SimpleMenu {
     pos:            [f32; 2],
     font_color:     Color,
     bg_color:       Color,
     max_view_lines: u32,
     cursor:         u32,
-    heading:        CharWriter<DEFAULT_LINE_SIZE>,
-    pub lines:      ArrayVec<CharWriter<DEFAULT_LINE_SIZE>, NUM_LINES>,
+    heading:        CharWriter,
+    pub lines:      Vec<CharWriter>,
 }
 
-impl<const NUM_LINES: usize> SimpleMenu<NUM_LINES> {
+impl SimpleMenu {
     pub fn new() -> Self {
         Self {
             pos:            [10f32; 2],
@@ -28,7 +28,7 @@ impl<const NUM_LINES: usize> SimpleMenu<NUM_LINES> {
             max_view_lines: 10,
             cursor:         0,
             heading:        CharWriter::new(),
-            lines:          ArrayVec::<CharWriter<DEFAULT_LINE_SIZE>, NUM_LINES>::default(),
+            lines:          Vec::<CharWriter>::new(),
         }
     }
 
@@ -57,27 +57,23 @@ impl<const NUM_LINES: usize> SimpleMenu<NUM_LINES> {
     }
 
     pub fn set_cursor(&mut self, cursor: u32) {
-        self.cursor = cursor % NUM_LINES as u32;
+        self.cursor = cursor % self.lines.len() as u32;
     }
 
     pub fn add_entry(&mut self, str: &str) {
-        if !self.lines.is_full() {
-            let mut writer_entry = CharWriter::<DEFAULT_LINE_SIZE>::new();
-            writer_entry.set_bg_color(self.bg_color.as_u32());
-            writer_entry.set_font_color(self.font_color.as_u32());
-            let _ = writer_entry.write_str(str);
-            self.lines.try_push(writer_entry).unwrap();
-        }
+        let mut writer_entry = CharWriter::new();
+        writer_entry.set_bg_color(self.bg_color.as_u32());
+        writer_entry.set_font_color(self.font_color.as_u32());
+        let _ = writer_entry.write_str(str);
+        self.lines.push(writer_entry);
     }
 
     pub fn add_entry_fmt(&mut self, args: Arguments<'_>) {
-        if !self.lines.is_full() {
-            let mut writer_entry = CharWriter::<DEFAULT_LINE_SIZE>::new();
-            writer_entry.set_bg_color(self.bg_color.as_u32());
-            writer_entry.set_font_color(self.font_color.as_u32());
-            let _ = writer_entry.write_fmt(args);
-            self.lines.try_push(writer_entry).unwrap();
-        }
+        let mut writer_entry = CharWriter::new();
+        writer_entry.set_bg_color(self.bg_color.as_u32());
+        writer_entry.set_font_color(self.font_color.as_u32());
+        let _ = writer_entry.write_fmt(args);
+        self.lines.push(writer_entry);
     }
 
     pub fn move_cursor(&self) -> u32 {

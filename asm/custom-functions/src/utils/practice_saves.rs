@@ -3,6 +3,7 @@ use crate::game::save_file::{SavedSaveFiles, SkipDatArr};
 use crate::system::printf;
 use core::ffi::{c_char, c_void};
 use core::mem::size_of;
+use alloc::vec;
 // #[repr(C)]
 // pub struct DVD_Command {
 // pub vtable:           u32,
@@ -100,8 +101,8 @@ fn soft_reset() {
 #[no_mangle]
 pub fn load_practice_save(dir: &str) {
     unsafe {
-        let mut info: arrayvec::ArrayVec<u8, 60> = Default::default();
-        let info_ptr = info.as_mut_ptr() as *mut c_void;
+        let mut dvd_info = vec![0u8; 60usize];
+        let info_ptr = dvd_info.as_mut_ptr() as *mut c_void;
         let sav_path = format!("{dir}/wiiking2.sav\0");
         let skip_path = format!("{dir}/skip.dat\0");
         if DVDOpen(sav_path.as_ptr() as *const c_char, info_ptr) {
