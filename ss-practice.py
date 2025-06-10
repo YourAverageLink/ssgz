@@ -175,7 +175,7 @@ if __name__ == "__main__":
         extract = ExtractManager(Path(".").resolve(), japanese)
         if not extract.actual_extract_already_exists():
             print(
-                f"To create a practice rom for the {"JP" if japanese else "NTSC US"} version, a clean copy of the {"JP" if japanese else "NTSC US"} version is needed."
+                f"To create a practice rom for the {'JP' if japanese else 'NTSC US'} version, a clean copy of the {'JP' if japanese else 'NTSC US'} version is needed."
             )
             root = tk.Tk()
             root.withdraw()
