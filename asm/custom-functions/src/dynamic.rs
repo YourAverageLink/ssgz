@@ -4,6 +4,21 @@ mod menus;
 mod system;
 mod utils;
 
+use alloc::boxed::Box;
+use crate::utils::menu::SimpleMenu;
+use core::option::Option;
+
+#[no_mangle]
+#[link_section = "data"]
+static mut SHARED_MENU: Option<SimpleMenu> = Option::None;
+
+pub fn reset_menu() -> &'static mut SimpleMenu {
+    unsafe {
+        SHARED_MENU = Some(SimpleMenu::new());
+        SHARED_MENU.as_mut().unwrap_unchecked()
+    }
+}
+
 // Update menus each frame
 #[no_mangle]
 pub fn dyn_hook() -> u32 {

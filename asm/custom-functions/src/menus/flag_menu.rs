@@ -160,7 +160,7 @@ impl super::Menu for FlagMenu {
     fn display() {
         let flag_menu: &mut FlagMenu = unsafe { &mut FLAG_MENU };
 
-        let mut menu = SimpleMenu::new();
+        let menu = crate::reset_menu();
         menu.set_heading("Set/Unset Relevant Flags");
         for flag_entry in unsafe { &RELEVANT_FLAGS } {
             menu.add_entry_fmt(format_args!(

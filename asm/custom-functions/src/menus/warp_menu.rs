@@ -209,7 +209,7 @@ impl Menu for WarpMenu {
         match warp_menu.state {
             WarpState::Off => {},
             WarpState::Main => {
-                let mut menu: SimpleMenu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading("Warp Menu");
                 for stage in STAGES {
                     menu.add_entry(stage.name);
@@ -221,7 +221,7 @@ impl Menu for WarpMenu {
             },
             WarpState::Stage => {
                 let stage_ref = STAGES[warp_menu.main_cursor as usize];
-                let mut menu: SimpleMenu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading(stage_ref.name);
                 for stage in stage_ref.stages {
                     menu.add_entry(stage.pretty_name);
@@ -232,7 +232,7 @@ impl Menu for WarpMenu {
                 warp_menu.stage_cursor = menu.move_cursor();
             },
             WarpState::Details => {
-                let mut menu: SimpleMenu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading(warp_menu.get_stage().name);
                 let (room, layer, entrance) = (
                     warp_menu.get_room(),

@@ -124,7 +124,7 @@ impl super::Menu for MainMenu {
         match main_menu.state {
             MenuState::Off => {},
             MenuState::MenuSelect => {
-                let mut menu: SimpleMenu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading("Main Menu Select");
                 menu.add_entry("Display Menu");
                 menu.add_entry("Warp Menu");

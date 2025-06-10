@@ -98,7 +98,7 @@ impl super::Menu for CheatsMenu {
     fn display() {
         let cheats_menu: &mut CheatsMenu = unsafe { &mut CHEAT_MENU };
 
-        let mut menu = SimpleMenu::new();
+        let menu = crate::reset_menu();
         menu.set_heading("Cheats");
         for cheat in unsafe { &CHEATS } {
             menu.add_entry_fmt(format_args!(

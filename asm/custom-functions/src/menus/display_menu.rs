@@ -60,7 +60,7 @@ impl super::Menu for DisplayMenu {
 
     fn display() {
         let disp_menu = unsafe { &mut DISPLAY_MENU };
-        let mut menu: SimpleMenu = SimpleMenu::new();
+        let menu = crate::reset_menu();
         menu.set_heading("Display Menu");
         menu.add_entry_fmt(format_args!(
             "Input Viewer [{}]",

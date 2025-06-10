@@ -261,7 +261,7 @@ impl super::Menu for ActionMenu {
         match action_menu.state {
             ActionMenuState::Off => {},
             ActionMenuState::Main => {
-                let mut menu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading("Action Menu");
                 menu.add_entry("Save File");
                 menu.add_entry("Load File");
@@ -274,13 +274,13 @@ impl super::Menu for ActionMenu {
                 action_menu.cursor = menu.move_cursor();
             },
             ActionMenuState::Item => {
-                let mut menu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 menu.set_heading("Give Item");
                 menu.add_entry_fmt(format_args!("Id: {}", action_menu.item_cursor));
                 menu.draw();
             },
             ActionMenuState::SceneFlag => {
-                let mut menu: SimpleMenu = SimpleMenu::new();
+                let menu = crate::reset_menu();
                 let flag_cursor = &mut action_menu.flag_cursor;
                 let byte_str = BYTESTRS[flag_cursor.byte_cursor as usize];
                 let bit_str = BITSTRS[flag_cursor.bit_cursor as usize];
