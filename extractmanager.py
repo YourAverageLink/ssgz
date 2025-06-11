@@ -61,6 +61,14 @@ class ExtractManager:
                     raise WrongChecksumException(
                         f"Unrecognized DOL hash, probably bad dump or invalid version: {checksum}",
                     )
+            if self.japanese and checksum == CLEAN_NTSC_U_1_00_DOL_HASH:
+                raise WrongChecksumException(
+                    f"This ISO is the NTSC-U version, but you specified the Japanese version as an argument. Please choose a Japanese copy or run with the `us` argument.",
+                )
+            elif (not self.japanese) and checksum == CLEAN_NTSC_J_1_00_DOL_HASH:
+                raise WrongChecksumException(
+                    f"This ISO is the Japanese version, but you specified the NTSC-U version as an argument. Please choose a North American copy or run with the `jp` argument.",
+                )
             extractor.extract_to(
                 dest_path, lambda x: progress_cb("Extracting files...", x)
             )
