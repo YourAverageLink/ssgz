@@ -273,39 +273,6 @@ files = [
 ]
 
 [[package]]
-name = "nlzss11"
-version = "1.8"
-description = "Library for data (de)compression using Nintendo's lzss11 algorithm"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "nlzss11-1.8-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:f4a51a010937588567d6d99c2c636281ab99dcc2005d9534fd23fb68557ea788"},
-    {file = "nlzss11-1.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:76792e1df86a2e5c8ec188cea1655c68ca554219dde581d86a336af5fdc119ba"},
-    {file = "nlzss11-1.8-cp310-cp310-win_amd64.whl", hash = "sha256:43925a17fa3f14131e71e86f86881d36fefb731719aedc5a6ac1eafb976c5471"},
-    {file = "nlzss11-1.8-cp311-cp311-macosx_10_14_universal2.whl", hash = "sha256:95df1a2f990f92c691301160d3344022ea79117e9fa61dfeb3a33f52adb22b0e"},
-    {file = "nlzss11-1.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c6c0e0c4dc91763cffd60cc670bc82761726bdfd72d452d30a40c492643ab32"},
-    {file = "nlzss11-1.8-cp311-cp311-win_amd64.whl", hash = "sha256:4f3c7f7de2ff67c67051a34b6c763bbf315c586a16a4f4d5cf3d6c52e5e30cac"},
-    {file = "nlzss11-1.8-cp312-cp312-macosx_10_14_universal2.whl", hash = "sha256:023053f4b3151e963db62f344b39e0d3e0575df83342c45e016dd0fe82b5188b"},
-    {file = "nlzss11-1.8-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:00cb61f14fdb07b55601164bb34c3333dd4725cd926cedf263888e26986b2406"},
-    {file = "nlzss11-1.8-cp312-cp312-win_amd64.whl", hash = "sha256:9bbc8a25c2d29c6f1a42e0ef78c623db84dd7f0c39122f94e74a8765d2c43930"},
-    {file = "nlzss11-1.8-cp313-cp313-macosx_10_14_universal2.whl", hash = "sha256:f8d5b082493f27b3b235e70a217d27075c16a0b06cabcd1af455d93f3ee310f8"},
-    {file = "nlzss11-1.8-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9a58d70ab923c29343055f33a2b0961a3f481597793bd6b91b46f95d121470a8"},
-    {file = "nlzss11-1.8-cp313-cp313-win_amd64.whl", hash = "sha256:9ae8348d6828781d75657ca4550fcc5dc0fe6dafbdefa51fccca2bdca247d0f3"},
-    {file = "nlzss11-1.8-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ca7c6b6213b0a880677d9bab568df6046968c29ccb90aea1c3067a2511328574"},
-    {file = "nlzss11-1.8-cp36-cp36m-win_amd64.whl", hash = "sha256:87e6193de1a0a08bad72a864c694084809691ac78d05cbd1857a5fd8c4af1186"},
-    {file = "nlzss11-1.8-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4398904dbaeff2b99d0001f1d16664b0ee3ad98145f00fc23e8c68a1e3617d91"},
-    {file = "nlzss11-1.8-cp37-cp37m-win_amd64.whl", hash = "sha256:b22793a63345f1b003a4afcf17289a2dbafb6fa346e74452bceec773f56417e1"},
-    {file = "nlzss11-1.8-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:dbccd7d8e05a0531f62dc2b76d63e545f77977200f27bf058d2a3ec594bf6b00"},
-    {file = "nlzss11-1.8-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ab2cc945cc02fcc35817ae878c270fce76d4540ea6d3f897e16c7e4aa8834ef5"},
-    {file = "nlzss11-1.8-cp38-cp38-win_amd64.whl", hash = "sha256:36d209d79eeab670732b37ff86a44a7d37d37d4e6991f1d6ba1624522a5c2f51"},
-    {file = "nlzss11-1.8-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:dfab269da4826e994e67da90978ccb17bb8fc6ba4c237557d0842091e47352ee"},
-    {file = "nlzss11-1.8-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d2ca1033f876d63594a8b6647be34f9065848107b5f7998cd9480916ddf55b25"},
-    {file = "nlzss11-1.8-cp39-cp39-win_amd64.whl", hash = "sha256:34fe350f9ad9ca5f6d3b24c4efc2cff75f67594d900ebd43ceca14bb763f3d6a"},
-    {file = "nlzss11-1.8.tar.gz", hash = "sha256:03710ab4330b25ab2ca8a44bd7fabd1b9d93ba25830f1c404a77c8e3eca1d382"},
-]
-
-[[package]]
 name = "numpy"
 version = "1.26.4"
 description = "Fundamental package for array computing in Python"
@@ -790,4 +757,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "f8b80c3be11bffeccd3cf87811dd72cdbeee20fa40ac80e0bcb72e3a2db4a992"
+content-hash = "8d4289f0ec6bb3d0449907e2676a1a771f0e912a3694f15c665fdb055fc4ac7a"
