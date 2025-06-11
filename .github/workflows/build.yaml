@@ -5,11 +5,30 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-13, macos-14]
-        python-version: [3.11]
+        include:
+          - name: Windows Build
+            os: windows-latest
+            architecture: x64
+            artifact: windows
+            artifact_suffix: ""
+          - name: MacOS Build x64
+            os: macos-13
+            architecture: x64
+            artifact: macos
+            artifact_suffix: _intel
+          - name: MacOS Build arm64
+            os: macos-14
+            architecture: arm64
+            artifact: macos
+            artifact_suffix: _apple_silicon
+          - name: Linux Build
+            os: ubuntu-latest
+            architecture: x64
+            artifact: linux
+            artifact_suffix: ""
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -43,5 +62,5 @@ jobs:
           field: "tool.poetry.version"
       - uses: actions/upload-artifact@v4
         with:
-          name: SSGZ ${{ steps.read_toml.outputs.value }} ${{ matrix.os }}
+          name: SSGZ ${{ steps.read_toml.outputs.value }} (${{ matrix.artifact }}${{ matrix.artifact_suffix }})
           path: dist
