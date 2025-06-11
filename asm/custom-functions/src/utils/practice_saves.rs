@@ -111,7 +111,7 @@ pub fn load_practice_save(dir: &str) {
             DVDReadPrio(info_ptr, save_buf as *mut c_void, save_size as i32, 0, 2);
             DVDClose(info_ptr);
             initialize_write_save();
-            printf("Successfully loaded wii2king.sav!\n\0".as_ptr() as *const i8);
+            printf("Successfully loaded wiiking2.sav!\n\0".as_ptr() as *const i8);
         } else {
             return;
         }

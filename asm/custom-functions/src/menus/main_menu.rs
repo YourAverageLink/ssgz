@@ -5,8 +5,9 @@ use super::practice_saves_menu::PracticeSavesMenu;
 use super::flag_menu::FlagMenu;
 use super::warp_menu::WarpMenu;
 use super::inventory_menu::InventoryMenu;
+use core::fmt::Write;
 use crate::system::button::*;
-use crate::utils::char_writer::TextWriterBase;
+use crate::utils::char_writer::{TextWriterBase, CharWriter};
 use crate::utils::graphics::draw_rect;
 use crate::utils::menu::SimpleMenu;
 
@@ -48,6 +49,7 @@ pub struct MainMenu {
     state:       MenuState,
     cursor:      u32,
     force_close: bool,
+    description: &'static str,
 }
 
 #[link_section = "data"]
@@ -56,6 +58,7 @@ pub static mut MAIN_MENU: MainMenu = MainMenu {
     state:       MenuState::Off,
     cursor:      0,
     force_close: false,
+    description: "",
 };
 
 impl super::Menu for MainMenu {
@@ -110,10 +113,11 @@ impl super::Menu for MainMenu {
     fn display() {
         let main_menu = unsafe { &mut MAIN_MENU };
 
+        let mut writer = TextWriterBase::new();
+
         // Draw the input Guide
         if MainMenu::is_active() {
             draw_rect(0f32, 0f32, 640f32, 480f32, 0.0f32, 0x000000C0);
-            let mut writer = TextWriterBase::new();
             writer.set_font_color(0xFFFFFFFF, 0xFFFFFFFF);
             writer.set_position(10f32, 420f32);
             writer.print_symbol(wchz!(u16, "\x20"));
@@ -127,18 +131,20 @@ impl super::Menu for MainMenu {
         }
 
         match main_menu.state {
-            MenuState::Off => {},
+            MenuState::Off => {
+                write_description("");
+            },
             MenuState::MenuSelect => {
                 let menu = crate::reset_menu();
                 menu.set_heading("Main Menu Select");
-                menu.add_entry("Display Menu");
-                menu.add_entry("Warp Menu");
+                menu.add_entry("Display Menu", "Passively display info on-screen.");
+                menu.add_entry("Warp Menu", "Warp to a given stage, room, layer, and entrance.");
                 // menu.add_entry("Heap Menu");
-                menu.add_entry("Action Menu");
-                menu.add_entry("Cheats Menu");
-                menu.add_entry("Practice Saves Menu");
-                menu.add_entry("Flag Menu");
-                menu.add_entry("Inventory Menu");
+                menu.add_entry("Action Menu", "Perform miscellaneous actions.");
+                menu.add_entry("Cheats Menu", "Activate useful cheats.");
+                menu.add_entry("Practice Saves Menu", "Load speedrun practice saves.");
+                menu.add_entry("Flag Menu", "Set/unset relevant progress flags.");
+                menu.add_entry("Inventory Menu", "Set/unset notable items in inventory.");
                 menu.set_cursor(main_menu.cursor);
                 menu.draw();
 
@@ -193,6 +199,14 @@ impl super::Menu for MainMenu {
                 }
             }
         }
+
+        if MainMenu::is_active() && !main_menu.description.is_empty() {
+            writer.set_position(10f32, 400f32);
+            let mut line = CharWriter::new();
+            let _ = line.write_str(main_menu.description);
+            line.draw(&mut writer);
+        }
+
         if main_menu.force_close {
             main_menu.force_close = false;
             main_menu.state = MenuState::Off;
@@ -201,4 +215,8 @@ impl super::Menu for MainMenu {
     fn is_active() -> bool {
         unsafe { MAIN_MENU.state != MenuState::Off }
     }
+}
+
+pub fn write_description(text: &'static str) {
+    unsafe { MAIN_MENU.description = text; }
 }

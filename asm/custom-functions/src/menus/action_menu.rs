@@ -154,14 +154,18 @@ impl super::Menu for ActionMenu {
                             main_menu::MainMenu::disable();
                         },
                         LOAD_FILE => {
-                            load_file(false);
-                            action_menu.state = ActionMenuState::Off;
-                            main_menu::MainMenu::disable();
+                            if unsafe { SAVE_INFO.saved_data } {
+                                load_file(false);
+                                action_menu.state = ActionMenuState::Off;
+                                main_menu::MainMenu::disable();
+                            }
                         },
                         LOAD_FILE_DIRECT => {
-                            load_file(true);
-                            action_menu.state = ActionMenuState::Off;
-                            main_menu::MainMenu::disable();
+                            if unsafe { SAVE_INFO.saved_data } {
+                                load_file(true);
+                                action_menu.state = ActionMenuState::Off;
+                                main_menu::MainMenu::disable();
+                            }
                         },
                         GIVE_ITEM => {
                             action_menu.state = ActionMenuState::Item;
@@ -257,18 +261,25 @@ impl super::Menu for ActionMenu {
     }
     fn display() {
         let action_menu = unsafe { &mut ACTION_MENU };
+        main_menu::write_description("Test");
 
         match action_menu.state {
             ActionMenuState::Off => {},
             ActionMenuState::Main => {
                 let menu = crate::reset_menu();
+                let can_load = unsafe { SAVE_INFO.saved_data };
                 menu.set_heading("Action Menu");
-                menu.add_entry("Save File");
-                menu.add_entry("Load File");
-                menu.add_entry("Direct Load File");
-                menu.add_entry("Give Item");
-                menu.add_entry("Kill Link");
-                menu.add_entry("RBM Scene Flag");
+                menu.add_entry("Save File", "Save Link's current map, position, and status.");
+                if can_load {
+                    menu.add_entry("Load File", "Load saved file at saved entrance.");
+                    menu.add_entry("Direct Load File", "Load saved file at saved position.");
+                } else {
+                    menu.add_entry("Load File", "You must save a file in this menu first to use this.");
+                    menu.add_entry("Direct Load File", "You must save a file in this menu first to use this.");
+                }
+                menu.add_entry("Give Item", "Trigger an item get for an item id (risky, may cause crashes).");
+                menu.add_entry("Kill Link", "Kills Link (even with Infinite Health enabled).");
+                menu.add_entry("RBM Scene Flag", "RBMs and commits a chosen scene flag in this area.");
                 menu.set_cursor(action_menu.cursor);
                 menu.draw();
                 action_menu.cursor = menu.move_cursor();
@@ -276,7 +287,7 @@ impl super::Menu for ActionMenu {
             ActionMenuState::Item => {
                 let menu = crate::reset_menu();
                 menu.set_heading("Give Item");
-                menu.add_entry_fmt(format_args!("Id: {}", action_menu.item_cursor));
+                menu.add_entry_fmt(format_args!("Id: {}", action_menu.item_cursor), "Give this item.");
                 menu.draw();
             },
             ActionMenuState::SceneFlag => {
@@ -285,8 +296,8 @@ impl super::Menu for ActionMenu {
                 let byte_str = BYTESTRS[flag_cursor.byte_cursor as usize];
                 let bit_str = BITSTRS[flag_cursor.bit_cursor as usize];
                 menu.set_heading_fmt(format_args!("RBM Scene Flag ({}x{})", byte_str, bit_str,));
-                menu.add_entry_fmt(format_args!("Byte: {}", byte_str));
-                menu.add_entry_fmt(format_args!("Bit: {}", bit_str));
+                menu.add_entry_fmt(format_args!("Byte: {}", byte_str), "Which byte (0x0 through 0xF) in the flag sheet.");
+                menu.add_entry_fmt(format_args!("Bit: {}", bit_str), "Which bit (0x01 through 0x80) in the flag sheet.");
                 menu.set_cursor(flag_cursor.menu_cursor);
                 menu.draw();
                 flag_cursor.menu_cursor = menu.move_cursor();

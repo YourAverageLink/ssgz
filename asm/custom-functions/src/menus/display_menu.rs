@@ -69,7 +69,12 @@ impl super::Menu for DisplayMenu {
             } else {
                 " "
             }
-        ));
+        ),  if unsafe { live_info::INPUT_VIEWER } {
+                "Inputs are currently shown."
+            } else {
+                "Inputs are currently hidden."
+            }
+        );
         menu.add_entry_fmt(format_args!(
             "Link Pos Viewer [{}]",
             if unsafe { live_info::LINK_POS_VIEWER } {
@@ -77,7 +82,12 @@ impl super::Menu for DisplayMenu {
             } else {
                 " "
             }
-        ));
+        ),  if unsafe { live_info::LINK_POS_VIEWER } {
+                "Link's position is currently shown."
+            } else {
+                "Link's position is currently hidden."
+            }
+        );
         menu.add_entry_fmt(format_args!(
             "Scene Flag Viewer [{}]",
             if unsafe { live_info::SCENE_FLAG_VIEWER } {
@@ -85,7 +95,12 @@ impl super::Menu for DisplayMenu {
             } else {
                 " "
             }
-        ));
+        ),  if unsafe { live_info::SCENE_FLAG_VIEWER } {
+                "Scene flags and temporary flags are currently shown."
+            } else {
+                "Scene flags and temporary flags are currently hidden."
+            }
+        );
         menu.set_cursor(disp_menu.cursor);
         menu.draw();
         disp_menu.cursor = menu.move_cursor();

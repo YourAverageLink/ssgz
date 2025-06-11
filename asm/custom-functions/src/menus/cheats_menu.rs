@@ -103,7 +103,7 @@ impl super::Menu for CheatsMenu {
                 "{} [{}]",
                 cheat.name,
                 if cheat.active { "x" } else { "" }
-            ))
+            ), if cheat.active { "This cheat is currently active."} else { "This cheat is currently inactive." })
         }
         menu.set_cursor(cheats_menu.cursor);
         menu.draw();

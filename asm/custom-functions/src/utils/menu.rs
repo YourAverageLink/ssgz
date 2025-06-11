@@ -17,6 +17,7 @@ pub struct SimpleMenu {
     cursor:         u32,
     heading:        CharWriter,
     pub lines:      Vec<CharWriter>,
+    pub descriptions: Vec<&'static str>,
 }
 
 impl SimpleMenu {
@@ -28,7 +29,8 @@ impl SimpleMenu {
             max_view_lines: 10,
             cursor:         0,
             heading:        CharWriter::new(),
-            lines:          Vec::<CharWriter>::new(),
+            lines:          Vec::new(),
+            descriptions:   Vec::new(),
         }
     }
 
@@ -60,20 +62,22 @@ impl SimpleMenu {
         self.cursor = cursor % self.lines.len() as u32;
     }
 
-    pub fn add_entry(&mut self, str: &str) {
+    pub fn add_entry(&mut self, str: &str, desc: &'static str) {
         let mut writer_entry = CharWriter::new();
         writer_entry.set_bg_color(self.bg_color.as_u32());
         writer_entry.set_font_color(self.font_color.as_u32());
         let _ = writer_entry.write_str(str);
         self.lines.push(writer_entry);
+        self.descriptions.push(desc);
     }
 
-    pub fn add_entry_fmt(&mut self, args: Arguments<'_>) {
+    pub fn add_entry_fmt(&mut self, args: Arguments<'_>, desc: &'static str) {
         let mut writer_entry = CharWriter::new();
         writer_entry.set_bg_color(self.bg_color.as_u32());
         writer_entry.set_font_color(self.font_color.as_u32());
         let _ = writer_entry.write_fmt(args);
         self.lines.push(writer_entry);
+        self.descriptions.push(desc);
     }
 
     pub fn move_cursor(&self) -> u32 {
@@ -139,6 +143,7 @@ impl SimpleMenu {
             if n == self.cursor as _ {
                 line.set_font_color(0x00FF00FF);
                 line.set_bg_color(self.bg_color.as_u32());
+                crate::menus::main_menu::write_description(self.descriptions[n as usize]);
                 // writer.print_symbol(wchz!(u16, "\n6")); // right arrow
             } else {
                 line.set_font_color(self.font_color.as_u32());

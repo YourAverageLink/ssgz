@@ -212,7 +212,7 @@ impl Menu for WarpMenu {
                 let menu = crate::reset_menu();
                 menu.set_heading("Warp Menu");
                 for stage in STAGES {
-                    menu.add_entry(stage.name);
+                    menu.add_entry(stage.name, "Choose a stage in this area.");
                 }
 
                 menu.set_cursor(warp_menu.main_cursor);
@@ -224,7 +224,7 @@ impl Menu for WarpMenu {
                 let menu = crate::reset_menu();
                 menu.set_heading(stage_ref.name);
                 for stage in stage_ref.stages {
-                    menu.add_entry(stage.pretty_name);
+                    menu.add_entry(stage.pretty_name, "Warp to this stage.");
                 }
 
                 menu.set_cursor(warp_menu.stage_cursor);
@@ -239,9 +239,9 @@ impl Menu for WarpMenu {
                     warp_menu.get_layer(),
                     warp_menu.get_entrance(),
                 );
-                menu.add_entry_fmt(format_args!("Room: {room}"));
-                menu.add_entry_fmt(format_args!("Layer: {layer}"));
-                menu.add_entry_fmt(format_args!("Entrance: {entrance}"));
+                menu.add_entry_fmt(format_args!("Room: {room}"), "Choose which Room to warp to.");
+                menu.add_entry_fmt(format_args!("Layer: {layer}"), "Choose which layer to warp to.");
+                menu.add_entry_fmt(format_args!("Entrance: {entrance}"), "Choose which entrance to warp to.");
 
                 menu.set_cursor(warp_menu.detail_cursor);
                 menu.draw();
