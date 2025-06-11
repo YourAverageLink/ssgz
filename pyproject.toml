@@ -2,15 +2,15 @@
 include = '\.pyi?$'
 
 [tool.poetry]
+package-mode = false
 name = "ss-practice"
 version = "0.1.2"
 description = "Skyward Sword Practice"
 authors = []
-package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
-nlzss11 = "^1.5"
+nlzss11 = "^1.8"
 PyYAML = "^6.0"
 lark = "^1.1.5"
 toml = "^0.10.2"

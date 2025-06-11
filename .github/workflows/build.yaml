@@ -1,13 +1,14 @@
 on:
   - push
   - pull_request
+  - workflow_dispatch
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-13]
         python-version: [3.11]
     steps:
       - uses: actions/checkout@v2
@@ -18,13 +19,20 @@ jobs:
       - name: Setup poetry
         run: python -mpip install poetry
       - name: Install dependencies
-        run: poetry install
-        env:
-          POETRY_VIRTUALENVS_CREATE: false
+        run: poetry install --with build --with dev
+        #env:
+        #  POETRY_VIRTUALENVS_CREATE: false
+      #- name: Install dependencies
+      #  run: poetry install
+      #  env:
+      #    POETRY_VIRTUALENVS_CREATE: false
       - name: Test if the formatting is correct
-        run: black . --check
+        run: poetry run black . --check
       - name: Build distribution
-        run: python -mPyInstaller ss-practice.spec --log-level=WARN
+        run: poetry run python -mPyInstaller ss-practice.spec --log-level=WARN
+      #- name: Build distribution (macOS)
+      #  if: runner.os == 'macOS'
+      #  run: python -mPyInstaller ss-practice.spec --log-level=WARN
       - name: Copy Readme
         run: cp README.md dist
         shell: bash
