@@ -16,7 +16,7 @@ Running from source (ensure you have Python installed):
 Running an executable:
 - Windows:
   - In the command line, navigate to the directory `ss-practice` is installed, and run `ss-practice.exe [us | jp]`
-- MacOS (currently Apple Silicon only) / Linux:
+- MacOS / Linux:
   - In the terminal, navigate to the directory `ss-practice` is installed, and run `ss-practice.exe [us | jp]`
 
 
