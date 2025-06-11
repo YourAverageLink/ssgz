@@ -16,6 +16,7 @@ main.dol:
     FILE_MANAGER: 0x8057825c
     SAVE_MANAGER: 0x80578260
     SaveManager__initializeWriteSave: 0x80013af0
+    SaveManager__save: 0x800127f0
     # --------------- PLAYER STUFF ----------------------------
     checkXZDistanceFromLink: 0x8002d530
     isPlayingHarp: 0x80381650

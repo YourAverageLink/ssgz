@@ -19,3 +19,6 @@ include!("dynamic.rs");
 core::compile_error!(
     "Must build with either 'static' (for main.dol code) or 'dynamic' (for rel code) feature."
 );
+
+#[cfg(all(feature = "static", feature = "dynamic"))]
+core::compile_error!("Cannot build both `static` and `dynamic` at the same time.");

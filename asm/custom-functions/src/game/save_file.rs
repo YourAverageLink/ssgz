@@ -82,16 +82,16 @@ pub struct SaveFile {
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct SkipData {
+pub struct SkipFlags {
     pub data: [u16; 16usize],
     pub crc:  u32,
 }
 
-// TODO figure out -- this is 128 bytes somehow???
 #[repr(C, align(32))]
 #[derive(Copy, Clone)]
-pub struct SkipDatArr {
-    pub data: [u8; 128usize], // TODO
+pub struct SkipData {
+    pub skipData: [SkipFlags; 3usize],
+    pub unk: [u8; 128 - 108],
 }
 
 #[repr(C, align(32))]
@@ -101,8 +101,7 @@ pub struct SavedSaveFiles {
     pub unk1:       [u8; 0x1C - 0x04],
     pub m_0x1C:     u32,
     pub saveFiles:  [SaveFile; 3usize],
-    pub skipData:   [SkipData; 3usize],
-    pub unk2:       [u8; 0xFBE0 - 0xFBCC],
+    pub skipData:   SkipData,
 }
 
 #[repr(u8)] // bindgen got this wrong

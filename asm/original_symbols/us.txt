@@ -20,6 +20,7 @@ main.dol:
     FILE_MANAGER: 0x80574ffc
     SAVE_MANAGER: 0x80575000
     SaveManager__initializeWriteSave: 0x800139A0
+    SaveManager__save: 0x800126A0
     # --------------- PLAYER STUFF ----------------------------
     checkXZDistanceFromLink: 0x8002d3e0
     updateCurrentSword: 0x8005c110

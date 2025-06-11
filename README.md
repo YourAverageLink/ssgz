@@ -48,8 +48,6 @@ The Action Menu contains some useful miscellaneous functions.
 - **Save File** acts like pressing D-Pad Right in the old practice Gecko codes -- it saves your stage, position, flags, etc., which may be loaded by the two following options
 - **Load File** will reload the area you saved in with **Save File**, at the last entrance you took on that file.
 - **Direct Load File** will reload the file you saved with **Save File** with the coordinates you saved at as well.
-- **Give Item** pulls up a submenu where you may select an item ID and trigger an item get for that item. Not all items work,
-and some have cutscenes associated with them that may cause crashes, so use at your own risk. It is recommended to use the **Inventory Menu** instead.
 - **Kill Link** kills Link (even if you have the **Infinite Health** cheat enabled).
 - **RBM Scene Flag** pulls up a submenu where you may select a scene flag to RBM (& commit) in the current area.
 
@@ -80,3 +78,16 @@ Each entry will display `[x]` if it is currently set, and `[]` if it is not. You
 
 The Inventory Menu contains a list of notable items. Each entry displays the current level of the item you have (for instance, "Goddess Sword" on the Sword row if that's what you have).
 For each item, you may use D-Pad left / right to increase / decrease how many upgrades of that item you have.
+
+## Debug / Extra Features
+
+If you're running from source, you may enable certain experimental / extra features. Run `asm_debug.sh` or manually run
+`assemble_us.py` or `assemble_jp.py` with the `debug` argument to build the custom REL with extra features. Extra features currently are...
+
+In the Action Menu:
+- **Give Item** pulls up a submenu where you may select an item ID and trigger an item get for that item. Not all items work,
+and some have cutscenes associated with them that may cause crashes, so use at your own risk. It is recommended to use the **Inventory Menu** instead.
+- **Create Save** saves your currently selected file as though you saved at a Bird Statue, and saves save data. This is useful for making hacked practice saves.
+- **Enter BiT** is intended to load into BiT on Skyloft, but currently only works if you're already on the Title Screen.
+
+Once you've built the custom rel, just run `ss-practice.py` like normal, and the custom REL will be copied into `modified-extract`. You may revert to normal features by just running the normal assemble scripts.

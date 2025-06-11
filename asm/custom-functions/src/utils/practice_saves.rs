@@ -1,5 +1,5 @@
 use crate::game::file_manager::{get_saved_save_files, get_skip_dat, initialize_write_save};
-use crate::game::save_file::{SavedSaveFiles, SkipDatArr};
+use crate::game::save_file::{SavedSaveFiles, SkipData};
 use crate::system::printf;
 use core::ffi::{c_char, c_void};
 use core::mem::size_of;
@@ -88,7 +88,7 @@ pub struct ReloadColorFader {
     pub other_state:    u8,
 }
 
-fn soft_reset() {
+pub fn soft_reset() {
     unsafe {
         (*reload_color_fader).other_state = 1;
         (*reload_color_fader).previous_state = (*reload_color_fader).current_state;
@@ -116,7 +116,7 @@ pub fn load_practice_save(dir: &str) {
             return;
         }
         if DVDOpen(skip_path.as_ptr() as *const c_char, info_ptr) {
-            let skip_size = size_of::<SkipDatArr>();
+            let skip_size = size_of::<SkipData>();
             let skip_buf = get_skip_dat();
             DVDReadPrio(info_ptr, skip_buf as *mut c_void, skip_size as i32, 0, 2);
             DVDClose(info_ptr);

@@ -6,13 +6,13 @@
 
 use core::ffi::{c_char, c_int, c_short, c_uchar, c_uint, c_ushort, c_void};
 
-use super::save_file::{SaveFile, SavedSaveFiles, SkipDatArr};
+use super::save_file::{SaveFile, SavedSaveFiles, SkipData};
 
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct FileManager {
     pub saveFiles:        *mut SavedSaveFiles,
-    pub skipData:         *mut SkipDatArr,
+    pub skipData:         *mut SkipData, // Why is this saved here and in SavedSaveFiles?
     pub FA:               SaveFile,
     pub FB:               SaveFile,
     pub skipFlags:        [c_ushort; 16usize],
@@ -73,6 +73,7 @@ extern "C" {
     fn FileManager__GetCurrentHealth(_: *mut FileManager) -> u16;
     fn FileManager__GetCurrentFile(_: *const FileManager) -> *mut SaveFile;
     fn SaveManager__initializeWriteSave(_: *mut SaveManager);
+    fn SaveManager__save(_: *mut SaveManager, entranceT1LoadFlag: bool, full: bool);
 }
 
 pub fn get_ptr() -> *mut FileManager {
@@ -83,7 +84,7 @@ pub fn get_saved_save_files() -> *mut SavedSaveFiles {
     unsafe { (*FILE_MANAGER).saveFiles }
 }
 
-pub fn get_skip_dat() -> *mut SkipDatArr {
+pub fn get_skip_dat() -> *mut SkipData {
     unsafe { (*FILE_MANAGER).skipData }
 }
 
@@ -110,8 +111,15 @@ pub fn get_current_health() -> u16 {
 pub fn get_current_file() -> *mut SaveFile {
     unsafe { FileManager__GetCurrentFile(FILE_MANAGER) }
 }
+// Write save data without saving current file
 pub fn initialize_write_save() {
     unsafe {
         SaveManager__initializeWriteSave(SAVE_MANAGER);
+    }
+}
+// Save current file then write save data
+pub fn trigger_save() {
+    unsafe {
+        SaveManager__save(SAVE_MANAGER, false, true);
     }
 }

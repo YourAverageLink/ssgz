@@ -564,9 +564,13 @@ try:
             )
         )
 
+    feature = "dynamic"
+    if len(sys.argv) > 1 and sys.argv[1] == "debug":
+        feature = "debug_dyn"
+
     # Build dynamic rust code (for a custom rel)
     if result := call(
-        ["cargo", "build", "--features", "dynamic", "--release"],
+        ["cargo", "build", "--features", feature, "--release"],
         cwd="./custom-functions",
     ):
         raise Exception("Building rust rel functions failed.")
