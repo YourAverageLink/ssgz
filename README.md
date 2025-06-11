@@ -28,7 +28,7 @@ Once patching is done, it will ask if you wish to create a new patched iso, and 
 
 ## Features / In-Game Usage
 
-While in gz, pressing Z and C simultaneously on the Nunchuck will open up a Practice Menu, with some submenus:
+While in gz, pressing Z and C simultaneously on the Nunchuck will open up a Practice Menu, with some submenus. A description of each menu item is visible on the bottom of the screen, along with basic control info.
 
 ### Display Menu
 
@@ -69,6 +69,7 @@ The Cheats Menu contains some useful cheats that will remain active as long as t
 The Practice Saves Menu allows you to load practice saves for certain speedrun categories, useful for practicing certain parts of the run. Saves are included for...
 - Any% (on the Ghirahim 3 Escape + Fast Faron BiT route, the recommended route at the time of writing)
 - All Dungeons (on the Fast Faron BiT CSWW route, the recommended route at the time of writing)
+- 100% (on the Imp1 Skip + Fast Faron BiT route, the recommended route at the time of writing)
 
 ### Flag Menu
 
