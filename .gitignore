@@ -164,31 +164,8 @@ wit-v3.03a-r8245-*
 # more game files
 actual-extract*
 modified-extract*
-
-# rando generated
-spoiler.txt
-*Spoiler Log.txt
-*Spoiler Log.json
-placement_file_*.json
-
-# files generated for build
-version-with-git.txt
-
-# settings save file
-settings.txt
-
-# presets save file
-presets.txt
-
-# custom theme file
-/custom_*.*
-
-custom-music/
-
-models/*
-!models/README.md
-
-assets/default-link-data/*/metadata.json
+extract*
+original-dol*
 
 # temp asm
 *.s

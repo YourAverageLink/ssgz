@@ -18,24 +18,25 @@ from sslib.utils import write_bytes_create_dirs
 from sslib.dol import DOL
 from sslib.rel import REL
 
-from asm.patcher import apply_dol_patch, apply_rel_patch
+from asm.patcher import apply_dol_patch
 
 
 class GamePatcher:
     def __init__(
         self,
-        actual_extract_path,
-        modified_extract_path,
+        extract_path,
+        original_dol_path,
         is_japanese,
     ):
-        self.actual_extract_path = actual_extract_path
-        self.modified_extract_path = modified_extract_path
+        self.extract_path = extract_path
+        self.dol_path = original_dol_path
         self.is_japanese = is_japanese
 
     def do_all_gamepatches(self):
+        # Currently, only main.dol is patched directly
         self.load_base_patches()
         self.do_dol_patch()
-        self.do_rel_patch()
+        # self.do_rel_patch()
 
     def load_base_patches(self):
         # assembly patches
@@ -84,46 +85,44 @@ class GamePatcher:
     def do_dol_patch(self):
         # patch main.dol
         print("Patching main.dol...")
-        dol_bytes = BytesIO(
-            (self.actual_extract_path / "DATA" / "sys" / "main.dol").read_bytes()
-        )
+        dol_bytes = BytesIO((self.dol_path / "main.dol").read_bytes())
         dol = DOL()
         dol.read(dol_bytes)
         apply_dol_patch(self, dol, self.all_asm_patches["main.dol"], self.is_japanese)
 
         dol.save_changes()
         write_bytes_create_dirs(
-            self.modified_extract_path / "DATA" / "sys" / "main.dol",
+            self.extract_path / "DATA" / "sys" / "main.dol",
             dol_bytes.getbuffer(),
         )
 
-    def do_rel_patch(self):
-        rel_arc = U8File.parse_u8(
-            BytesIO(
-                (self.actual_extract_path / "DATA" / "files" / "rels.arc").read_bytes()
-            )
-        )
-        rel_modified = False
-        for file, codepatches in self.all_asm_patches.items():
-            if file == "main.dol":  # main.dol
-                continue
-            rel_data = BytesIO(rel_arc.get_file_data(f"rels/{file}"))
-            if rel_data is None:
-                print(f"ERROR: rel {file} not found!")
-                continue
-            rel = REL()
-            rel.read(rel_data)
-            apply_rel_patch(self, rel, file, codepatches)
-            rel.save_changes()
-            rel_arc.set_file_data(f"rels/{file}", rel_data.getbuffer())
-            rel_modified = True
-        if rel_modified:
-            print("Patching rels...")
-            rel_data = rel_arc.to_buffer()
-            write_bytes_create_dirs(
-                self.modified_extract_path / "DATA" / "files" / "rels.arc",
-                rel_data,
-            )
+    # def do_rel_patch(self):
+    #     rel_arc = U8File.parse_u8(
+    #         BytesIO(
+    #             (self.extract_path / "DATA" / "files" / "rels.arc").read_bytes()
+    #         )
+    #     )
+    #     rel_modified = False
+    #     for file, codepatches in self.all_asm_patches.items():
+    #         if file == "main.dol":  # main.dol
+    #             continue
+    #         rel_data = BytesIO(rel_arc.get_file_data(f"rels/{file}"))
+    #         if rel_data is None:
+    #             print(f"ERROR: rel {file} not found!")
+    #             continue
+    #         rel = REL()
+    #         rel.read(rel_data)
+    #         apply_rel_patch(self, rel, file, codepatches)
+    #         rel.save_changes()
+    #         rel_arc.set_file_data(f"rels/{file}", rel_data.getbuffer())
+    #         rel_modified = True
+    #     if rel_modified:
+    #         print("Patching rels...")
+    #         rel_data = rel_arc.to_buffer()
+    #         write_bytes_create_dirs(
+    #             self.modified_extract_path / "DATA" / "files" / "rels.arc",
+    #             rel_data,
+    #         )
 
     def copy_practice_saves(self):
         print("Copying practice saves...")
@@ -133,7 +132,7 @@ class GamePatcher:
             / ("JP" if self.is_japanese else "US")
             / "saves"
         )
-        dest_path = self.modified_extract_path / "DATA" / "files" / "saves"
+        dest_path = self.extract_path / "DATA" / "files" / "saves"
         if dest_path.is_dir():
             shutil.rmtree(dest_path)
         shutil.copytree(src_path, dest_path)
@@ -146,9 +145,7 @@ class GamePatcher:
             / ("JP" if self.is_japanese else "US")
             / "customNP.rel"
         )
-        dest_path = (
-            self.modified_extract_path / "DATA" / "files" / "rels" / "customNP.rel"
-        )
+        dest_path = self.extract_path / "DATA" / "files" / "rels" / "customNP.rel"
         shutil.copyfile(src_path, dest_path)
 
 
@@ -173,10 +170,17 @@ if __name__ == "__main__":
     else:
         japanese = version == "jp"
         extract = ExtractManager(Path(".").resolve(), japanese)
-        if not extract.actual_extract_already_exists():
-            print(
-                f"To create a practice rom for the {'JP' if japanese else 'NTSC US'} version, a clean copy of the {'JP' if japanese else 'NTSC US'} version is needed."
-            )
+        extract_exists = extract.extract_already_exists()
+        dol_exists = extract.original_dol_already_exists()
+        if not (extract_exists and dol_exists):
+            if not extract_exists:
+                print(
+                    f"To create a practice rom for the {'JP' if japanese else 'NTSC US'} version, a clean copy of the {'JP' if japanese else 'NTSC US'} version is needed."
+                )
+            elif not dol_exists:
+                print(
+                    "The original copy of `main.dol` is missing. It is recommended to redo an extract of your copy of Skyward Sword for patches to work properly."
+                )
             root = tk.Tk()
             root.withdraw()
             file_path = filedialog.askopenfilename(
@@ -189,17 +193,14 @@ if __name__ == "__main__":
             extract.extract_game(file_path)
             print("Extracting done")
 
-        if not extract.modified_extract_already_exists():
-            print("Making a copy to modified-extract...")
-            extract.copy_to_modified()
-
-        if extract.actual_extract_already_exists():
+        # Ensure the extract worked properly
+        if extract.extract_is_good():
             if japanese := extract.is_japanese():
                 print("Patching Japanese version")
             else:
                 print("Patching North American Version")
             patcher = GamePatcher(
-                extract.actual_extract_path(), extract.modified_extract_path(), japanese
+                extract.extract_path(), extract.original_dol_path(), japanese
             )
             patcher.do_all_gamepatches()
             patcher.copy_practice_saves()
