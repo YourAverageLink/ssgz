@@ -120,21 +120,8 @@ fn load_file(direct: bool) {
 }
 
 fn enter_bit() {
-    // crate::utils::practice_saves::soft_reset();
-    let current_file = file_manager::get_file_A();
-    current_file.pos_t1 = crate::system::math::Vec3f {x: 0f32, y: 0f32, z: 0f32};
-    current_file.angle_t1 = 0;
-    let spawn_master = reloader::get_spawn_master();
-
-    spawn_master.name = *b"F000\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-    spawn_master.room = 0;
-    spawn_master.layer = 28;
-    spawn_master.entrance = 63;
-    spawn_master.night = 0;
-    spawn_master.trial = 0;
-
-    reloader::set_reloader_type(1);
-    reloader::set_reload_trigger(5);
+    reloader::set_reloader_type(3);
+    crate::utils::practice_saves::soft_reset();
 }
 
 fn give_item() {}
@@ -157,13 +144,12 @@ impl super::Menu for ActionMenu {
         const LOAD_FILE_DIRECT: u32 = 2;
         const KILL_LINK: u32 = 3;
         const SCENE_FLAG: u32 = 4;
+        const ENTER_BIT: u32 = 5;
 
         #[cfg(feature = "debug_dyn")]
-        const GIVE_ITEM: u32 = 5;
+        const GIVE_ITEM: u32 = 6;
         #[cfg(feature = "debug_dyn")]
-        const DEBUG_SAVE: u32 = 6;
-        #[cfg(feature = "debug_dyn")]
-        const ENTER_BIT: u32 = 7;
+        const DEBUG_SAVE: u32 = 7;
 
         match action_menu.state {
             ActionMenuState::Off => {},
@@ -204,6 +190,11 @@ impl super::Menu for ActionMenu {
                         SCENE_FLAG => {
                             action_menu.state = ActionMenuState::SceneFlag;
                         },
+                        ENTER_BIT => {
+                            enter_bit();
+                            action_menu.state = ActionMenuState::Off;
+                            main_menu::MainMenu::disable();
+                        }
                         #[cfg(feature = "debug_dyn")]
                         GIVE_ITEM => {
                             action_menu.state = ActionMenuState::Item;
@@ -214,13 +205,6 @@ impl super::Menu for ActionMenu {
                             action_menu.state = ActionMenuState::Off;
                             main_menu::MainMenu::disable();
                         }
-                        #[cfg(feature = "debug_dyn")]
-                        ENTER_BIT => {
-                            enter_bit();
-                            action_menu.state = ActionMenuState::Off;
-                            main_menu::MainMenu::disable();
-                        }
-
                         _ => {},
                     }
                 }
@@ -316,13 +300,12 @@ impl super::Menu for ActionMenu {
                 }
                 menu.add_entry("Kill Link", "Kills Link (even with Infinite Health enabled).");
                 menu.add_entry("RBM Scene Flag", "RBMs and commits a chosen scene flag in this area.");
+                menu.add_entry("Enter BiT", "Enter into Back in Time on Skyloft.");
 
                 #[cfg(feature = "debug_dyn")]
                 menu.add_entry("Debug: Give Item", "Trigger an item get for an item id (risky, may cause crashes).");
                 #[cfg(feature = "debug_dyn")]
                 menu.add_entry("Debug: Create Save", "Initiates a save as though you saved at a statue.");
-                #[cfg(feature = "debug_dyn")]
-                menu.add_entry("Debug: Enter BiT", "Enter into BiT on Skyloft. (Currently doesn't work properly)");
 
                 menu.set_cursor(action_menu.cursor);
                 menu.draw();

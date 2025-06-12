@@ -17,7 +17,7 @@ Running an executable:
 - Windows:
   - In the command line, navigate to the directory `ss-practice` is installed, and run `ss-practice.exe [us | jp]`
 - MacOS / Linux:
-  - In the terminal, navigate to the directory `ss-practice` is installed, and run `ss-practice.exe [us | jp]`
+  - In the terminal, navigate to the directory `ss-practice` is installed, and run `./ss-practice [us | jp]`
 
 
 The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `actual-extract/[version]`.
@@ -50,6 +50,8 @@ The Action Menu contains some useful miscellaneous functions.
 - **Direct Load File** will reload the file you saved with **Save File** with the coordinates you saved at as well.
 - **Kill Link** kills Link (even if you have the **Infinite Health** cheat enabled).
 - **RBM Scene Flag** pulls up a submenu where you may select a scene flag to RBM (& commit) in the current area.
+(The following option is only available on latest main, not 0.1.2)
+- **Enter BiT** will load into Back in Time on Skyloft.
 
 ### Cheats Menu
 
