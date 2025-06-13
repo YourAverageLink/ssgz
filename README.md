@@ -20,9 +20,9 @@ Running an executable:
   - In the terminal, navigate to the directory `ss-practice` is installed, and run `./ss-practice [us | jp]`
 
 
-The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `actual-extract/[version]`.
-It will then copy `actual-extract` to `modified-extract` and apply the patches. **Though some large files (namely hint videos / credits videos) are removed to save on space,
-note that actual & modified extract combined will still take up more than 4 GB of space.**
+The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `extract/[version]`, while copying the original `main.dol` file to `original-dol/[version]`.
+It will then copy a patched dol file over `main.dol` in the extract, copy practice saves, and copy the custom REL file. **Though some large files (namely hint videos / credits videos) are removed to save on space,
+note that the extract will still take up more than 2 GB of space.**
 
 Once patching is done, it will ask if you wish to create a new patched iso, and if so, where to put it. You may play this iso through Dolphin or on console with a USB loader.
 

@@ -40,6 +40,12 @@ class ExtractManager:
     def extract_already_exists(self):
         return (self.extract_path() / "DATA" / "sys" / "main.dol").is_file()
 
+    def legacy_actual_extract_path(self):
+        return self.rootpath / "actual-extract" / ("JP" if self.japanese else "US")
+
+    def legacy_actual_extract_exists(self):
+        return (self.legacy_actual_extract_path() / "DATA" / "sys" / "main.dol").is_file()
+
     def extract_path(self):
         return self.rootpath / "extract" / ("JP" if self.japanese else "US")
 
@@ -48,6 +54,10 @@ class ExtractManager:
 
     def is_japanese(self):
         return self.japanese
+    
+    def copy_dol(self):
+        os.makedirs(self.original_dol_path(), exist_ok=True)
+        shutil.copy(self.extract_path() / "DATA" / "sys" / "main.dol", self.original_dol_path() / "main.dol")
 
     def extract_game(self, iso_path, progress_cb=NOP):
         if not self.extract_is_good():
@@ -78,9 +88,8 @@ class ExtractManager:
             # delete all videos, they take up way too much space
             for hint_vid in (dest_path / "DATA" / "files" / "THP").glob("*.thp"):
                 os.remove(str(hint_vid))
-
-            os.makedirs(self.original_dol_path(), exist_ok=True)
-            shutil.copy(dest_path / "DATA" / "sys" / "main.dol", self.original_dol_path() / "main.dol")
+            
+            self.copy_dol()
 
             if self.is_japanese():
                 print("Successfully extracted JP Skyward Sword")

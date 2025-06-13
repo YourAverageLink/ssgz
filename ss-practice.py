@@ -7,16 +7,15 @@ import sys
 from io import BytesIO
 import shutil
 from extractmanager import ExtractManager
+import os
 
 import tkinter as tk
 from tkinter import filedialog
 
 from paths import ROOT_PATH
 
-from sslib import U8File
 from sslib.utils import write_bytes_create_dirs
 from sslib.dol import DOL
-from sslib.rel import REL
 
 from asm.patcher import apply_dol_patch
 
@@ -152,7 +151,7 @@ class GamePatcher:
 parser = argparse.ArgumentParser(
     prog=sys.argv[0],
     description="Patches a US or JP copy of Skyward Sword with useful speedrunning practice features",
-    epilog="Text at the bottom of help",
+    epilog="See README for more info",
 )
 
 parser.add_argument(
@@ -169,9 +168,24 @@ if __name__ == "__main__":
         print("Version must be 'us' or 'jp'")
     else:
         japanese = version == "jp"
-        extract = ExtractManager(Path(".").resolve(), japanese)
+        root_path = Path(".").resolve()
+        extract = ExtractManager(root_path, japanese)
         extract_exists = extract.extract_already_exists()
         dol_exists = extract.original_dol_already_exists()
+        if extract.legacy_actual_extract_exists() and not (
+            extract_exists and dol_exists
+        ):
+            redo_extract = input(
+                "It seems you're coming from version 0.1.2 or earlier, and already have an extract at `actual-extract`. Would you like to rename `actual-extract` to `extract` and continue? (y/n): "
+            )
+            if redo_extract.strip().lower() == "y":
+                os.rename(root_path / "actual-extract", root_path / "extract")
+                extract.copy_dol()
+                extract_exists = extract.extract_already_exists()
+                dol_exists = extract.original_dol_already_exists()
+                if extract_exists and dol_exists:
+                    print("Done, you may now delete modified-extract.")
+
         if not (extract_exists and dol_exists):
             if not extract_exists:
                 print(

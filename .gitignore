@@ -162,8 +162,10 @@ temp
 wit-v3.03a-r8245-*
 
 # more game files
+# legacy extracts
 actual-extract*
 modified-extract*
+# new extracts
 extract*
 original-dol*
 
