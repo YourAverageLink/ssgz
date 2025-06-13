@@ -85,7 +85,8 @@ For each item, you may use D-Pad left / right to increase / decrease how many up
 
 The Tricks Menu contains some specific functionality to help practice tricks. Currently, the only trick supported is Wing Ceremony Cutscene Skip.
 
-- When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. Pressing D-Pad Left will reload the area to retry. This also kills Link, to make the reload much faster if you succeed.
+- **Wing Ceremony Cutscene Skip** - When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. Pressing D-Pad Left will reload the area to retry. This also kills Link, to make the reload much faster if you succeed.
+- **Guay Deathwarp** - When activated, you will be loaded into the Sky as though you just performed the Sky RBW in most early game Skyloft routes, your health will be set to 6 hearts, and the flag for the Fi text near the Faron Pillar will be unset, allowing you to practice the deathwarp with the guay. Pressing D-Pad Left will reload the area to retry.
 
 ## Debug / Extra Features
 

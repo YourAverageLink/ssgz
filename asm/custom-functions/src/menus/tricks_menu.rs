@@ -1,5 +1,5 @@
 use crate::{
-    game::file_manager, game::flag_managers::ItemflagManager, game::player, game::reloader, system::button::*,
+    game::file_manager, game::flag_managers::StoryflagManager, game::player, game::reloader, system::button::*,
     utils::menu::SimpleMenu, utils::console::Console, menus::main_menu,
 };
 
@@ -13,12 +13,18 @@ pub struct Trick {
     on_select: Option<fn()>,
 }
 
-const TRICKS: [Trick; 1] = [
+const TRICKS: [Trick; 2] = [
     Trick {
         name:   "Wing Ceremony Cutscene Skip",
         description: "Reload WCCS Save Prompt with D-Pad Left. (Kills Link for faster reloads).",
         associated_enum: ActiveTrick::WCCS,
-        on_select: Some(reload_prompt),
+        on_select: Some(reload_wccs_prompt),
+    },
+    Trick {
+        name:   "Guay Deathwarp",
+        description: "Reload the guay deathwarp after Sky RBW with D-Pad Left.",
+        associated_enum: ActiveTrick::Guay,
+        on_select: Some(reload_guay),
     },
 ];
 
@@ -32,6 +38,7 @@ enum MenuState {
 enum ActiveTrick {
     None,
     WCCS,
+    Guay,
 }
 
 pub struct TricksMenu {
@@ -183,7 +190,7 @@ fn eval_wccs(buffer: u8) {
     console.draw(false);
 }
 
-pub fn check_wccs() {
+fn check_wccs() {
     let count = unsafe {FRAME_COUNT};
     if count < THREE_FRAMES_LATE {
         update_buffer();
@@ -195,14 +202,14 @@ pub fn check_wccs() {
     }
 }
 
-pub fn reload_prompt() {
+fn reload_wccs_prompt() {
     // kinda hacky but prevents eye-blinding reloads from the display
     unsafe { FRAME_COUNT = 0x80000000; }
     reloader::set_save_prompt_flag();
     reloader::trigger_entrance(
         b"F000\0".as_ptr(),
         0,
-        3,
+        3, // Layer 3
         0,
         2,
         2,
@@ -219,6 +226,30 @@ pub fn reload_prompt() {
     }
 }
 
+fn reload_guay() {
+    // Flag 24 is having seen the Fi text near Faron Pillar, must be unset
+    StoryflagManager::set_to_value(24, 0);
+    StoryflagManager::do_commit();
+    reloader::trigger_entrance(
+        b"F020\0".as_ptr(),
+        0,
+        2, // Layer 2
+        20, // Entrance 20
+        2,
+        2,
+        1,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    unsafe {
+        file_manager::get_current_file()
+            .as_mut()
+            .unwrap()
+            .current_health = 24;
+    }
+}
+
 pub fn update_tricks() {
     let tricks_menu: &mut TricksMenu = unsafe { &mut TRICKS_MENU };
 
@@ -227,7 +258,12 @@ pub fn update_tricks() {
         ActiveTrick::WCCS => {
             check_wccs();
             if is_pressed(DPAD_LEFT) {
-                reload_prompt();
+                reload_wccs_prompt();
+            }
+        },
+        ActiveTrick::Guay => {
+            if is_pressed(DPAD_LEFT) {
+                reload_guay();
             }
         }
     }

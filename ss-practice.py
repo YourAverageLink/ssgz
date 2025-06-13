@@ -179,8 +179,13 @@ if __name__ == "__main__":
                 "It seems you're coming from version 0.1.2 or earlier, and already have an extract at `actual-extract`. Would you like to rename `actual-extract` to `extract` and continue? (y/n): "
             )
             if redo_extract.strip().lower() == "y":
+                # Copy over the dol from the other version if they have it, too
+                other_version = ExtractManager(root_path, not japanese)
+                other_version_exists = other_version.legacy_actual_extract_exists()
                 os.rename(root_path / "actual-extract", root_path / "extract")
                 extract.copy_dol()
+                if other_version_exists:
+                    other_version.copy_dol()
                 extract_exists = extract.extract_already_exists()
                 dol_exists = extract.original_dol_already_exists()
                 if extract_exists and dol_exists:
