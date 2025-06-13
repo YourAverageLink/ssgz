@@ -27,7 +27,7 @@ pub fn dyn_hook() -> u32 {
         return 0;
     }
     live_info::display();
-    menus::do_cheats();
+    menus::do_global_updates();
 
     return 1;
 }

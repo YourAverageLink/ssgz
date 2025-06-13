@@ -20,9 +20,9 @@ Running an executable:
   - In the terminal, navigate to the directory `ss-practice` is installed, and run `./ss-practice [us | jp]`
 
 
-The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `actual-extract/[version]`.
-It will then copy `actual-extract` to `modified-extract` and apply the patches. **Though some large files (namely hint videos / credits videos) are removed to save on space,
-note that actual & modified extract combined will still take up more than 4 GB of space.**
+The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `extract/[version]`, while copying the original `main.dol` file to `original-dol/[version]`.
+It will then copy a patched dol file over `main.dol` in the extract, copy practice saves, and copy the custom REL file. **Though some large files (namely hint videos / credits videos) are removed to save on space,
+note that the extract will still take up more than 2 GB of space.**
 
 Once patching is done, it will ask if you wish to create a new patched iso, and if so, where to put it. You may play this iso through Dolphin or on console with a USB loader.
 
@@ -36,6 +36,7 @@ In the Display Menu, you may toggle whether or not certain information should be
 - **Input Viewer** will show any buttons currently pressed, and the directions registered on the Joystick and D-Pad. Note that this display is currently cut off on 4:3 Aspect Ratio
 - **Link Pos Viewer** will show Link's x, y, and z coordinates, along with his facing angle.
 - **Scene Flag Viewer** will display the scene flags and temporary flags active in the current scene.
+- **Frame Count Viewer** will display the number of in-game frames that have passed since the last load.
 
 ### Warp Menu
 
@@ -50,7 +51,6 @@ The Action Menu contains some useful miscellaneous functions.
 - **Direct Load File** will reload the file you saved with **Save File** with the coordinates you saved at as well.
 - **Kill Link** kills Link (even if you have the **Infinite Health** cheat enabled).
 - **RBM Scene Flag** pulls up a submenu where you may select a scene flag to RBM (& commit) in the current area.
-(The following option is only available on latest main, not 0.1.2)
 - **Enter BiT** will load into Back in Time on Skyloft.
 
 ### Cheats Menu
@@ -81,6 +81,12 @@ Each entry will display `[x]` if it is currently set, and `[]` if it is not. You
 The Inventory Menu contains a list of notable items. Each entry displays the current level of the item you have (for instance, "Goddess Sword" on the Sword row if that's what you have).
 For each item, you may use D-Pad left / right to increase / decrease how many upgrades of that item you have.
 
+### Tricks Menu
+
+The Tricks Menu contains some specific functionality to help practice tricks. Currently, the only trick supported is Wing Ceremony Cutscene Skip.
+
+- When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. Pressing D-Pad Left will reload the area to retry. This also kills Link, to make the reload much faster if you succeed.
+
 ## Debug / Extra Features
 
 If you're running from source, you may enable certain experimental / extra features. Run `asm_debug.sh` or manually run
@@ -90,6 +96,5 @@ In the Action Menu:
 - **Give Item** pulls up a submenu where you may select an item ID and trigger an item get for that item. Not all items work,
 and some have cutscenes associated with them that may cause crashes, so use at your own risk. It is recommended to use the **Inventory Menu** instead.
 - **Create Save** saves your currently selected file as though you saved at a Bird Statue, and saves save data. This is useful for making hacked practice saves.
-- **Enter BiT** is intended to load into BiT on Skyloft, but currently only works if you're already on the Title Screen.
 
 Once you've built the custom rel, just run `ss-practice.py` like normal, and the custom REL will be copied into `modified-extract`. You may revert to normal features by just running the normal assemble scripts.

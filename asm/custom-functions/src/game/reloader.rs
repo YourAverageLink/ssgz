@@ -72,6 +72,10 @@ pub fn set_reloader_type(val: u8) {
     unsafe { RELOADER_TYPE = val };
 }
 
+pub fn set_save_prompt_flag() {
+    unsafe { (*get_ptr()).save_prompt_flag = 1; }
+}
+
 pub fn trigger_entrance(
     stage_name: *const u8,
     room: u8,

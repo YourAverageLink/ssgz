@@ -14,6 +14,6 @@ pub fn display_pos() {
         console.set_dynamic_size(true);
         let _ = console.write_fmt(format_args!("pos:\nx:{x:>9.2}\ny:{y:>9.2}\nz:{z:>9.2}\n"));
         let _ = console.write_fmt(format_args!("angle: {angle}"));
-        console.draw();
+        console.draw(true);
     }
 }

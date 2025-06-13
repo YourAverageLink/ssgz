@@ -29,6 +29,7 @@ main.dol:
     ActorLink__setPosRot: 0x802416d0
     LINK_PTR: 0x8057578C
     EQUIPPED_SWORD: 0x80571C74
+    isInEvent: 0x8005B750
     # --------------- MISC   STUFF ----------------------------
     FontMgr__GetFont: 0x80053f30
     allocOnCurrentHeap: 0x80054ec0
@@ -79,6 +80,9 @@ main.dol:
     DVDClose: 0x803C3530
     DVDReadPrio: 0x803C3770
     doSoftResetMaybe: 0x80068360
+    FRAME_COUNT: 0x80575798
+    GAME_FRAME: 0x80575b78
+    EXE_FRAME: 0x80575b7c
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800bdeb0
     SceneflagManager__checkFlagGlobal: 0x800bdf20

@@ -5,6 +5,7 @@ use super::practice_saves_menu::PracticeSavesMenu;
 use super::flag_menu::FlagMenu;
 use super::warp_menu::WarpMenu;
 use super::inventory_menu::InventoryMenu;
+use super::tricks_menu::TricksMenu;
 use core::fmt::Write;
 use crate::system::button::*;
 use crate::utils::char_writer::{TextWriterBase, CharWriter};
@@ -25,6 +26,7 @@ enum MenuState {
     PracticeSavesMenu,
     FlagMenu,
     InventoryMenu,
+    TricksMenu,
 }
 
 const NUM_MENUS: usize = 6;
@@ -40,6 +42,7 @@ impl MenuState {
             4 => MenuState::PracticeSavesMenu,
             5 => MenuState::FlagMenu,
             6 => MenuState::InventoryMenu,
+            7 => MenuState::TricksMenu,
             _ => MenuState::MenuSelect,
         }
     }
@@ -95,6 +98,7 @@ impl super::Menu for MainMenu {
                         MenuState::PracticeSavesMenu => PracticeSavesMenu::enable(),
                         MenuState::FlagMenu => FlagMenu::enable(),
                         MenuState::InventoryMenu => InventoryMenu::enable(),
+                        MenuState::TricksMenu => TricksMenu::enable(),
                         _ => {},
                     };
                 }
@@ -107,6 +111,7 @@ impl super::Menu for MainMenu {
             MenuState::PracticeSavesMenu => PracticeSavesMenu::input(),
             MenuState::FlagMenu => FlagMenu::input(),
             MenuState::InventoryMenu => InventoryMenu::input(),
+            MenuState::TricksMenu => TricksMenu::input(),
             _ => {},
         }
     }
@@ -136,7 +141,8 @@ impl super::Menu for MainMenu {
             },
             MenuState::MenuSelect => {
                 let menu = crate::reset_menu();
-                menu.set_heading("Main Menu Select");
+                // TODO - automate versioning here
+                menu.set_heading("SSGZ 0.1.3 - Select a Menu");
                 menu.add_entry("Display Menu", "Passively display info on-screen.");
                 menu.add_entry("Warp Menu", "Warp to a given stage, room, layer, and entrance.");
                 // menu.add_entry("Heap Menu");
@@ -145,6 +151,7 @@ impl super::Menu for MainMenu {
                 menu.add_entry("Practice Saves Menu", "Load speedrun practice saves.");
                 menu.add_entry("Flag Menu", "Set/unset relevant progress flags.");
                 menu.add_entry("Inventory Menu", "Set/unset notable items in inventory.");
+                menu.add_entry("Tricks Menu", "Practice certain specific tricks.");
                 menu.set_cursor(main_menu.cursor);
                 menu.draw();
 
@@ -195,6 +202,12 @@ impl super::Menu for MainMenu {
             MenuState::InventoryMenu => {
                 InventoryMenu::display();
                 if !InventoryMenu::is_active() {
+                    main_menu.state = MenuState::MenuSelect;
+                }
+            }
+            MenuState::TricksMenu => {
+                TricksMenu::display();
+                if !TricksMenu::is_active() {
                     main_menu.state = MenuState::MenuSelect;
                 }
             }

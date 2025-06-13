@@ -9,6 +9,7 @@ mod practice_saves_menu;
 mod warp_menu;
 mod flag_menu;
 mod inventory_menu;
+mod tricks_menu;
 
 pub trait Menu {
     fn enable();
@@ -30,8 +31,9 @@ pub fn is_active() -> bool {
     MainMenu::is_active()
 }
 
-pub fn do_cheats() {
+pub fn do_global_updates() {
     cheats_menu::update_cheats();
+    tricks_menu::update_tricks();
 }
 
 pub fn initialize() {

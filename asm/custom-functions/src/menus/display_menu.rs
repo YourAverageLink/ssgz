@@ -42,13 +42,16 @@ impl super::Menu for DisplayMenu {
                     unsafe {
                         match disp_menu.cursor {
                             0 => {
-                                live_info::INPUT_VIEWER = !live_info::INPUT_VIEWER;
+                                live_info::INPUT_VIEWER ^= true;
                             },
                             1 => {
-                                live_info::LINK_POS_VIEWER = !live_info::LINK_POS_VIEWER;
+                                live_info::LINK_POS_VIEWER ^= true;
                             },
                             2 => {
-                                live_info::SCENE_FLAG_VIEWER = !live_info::SCENE_FLAG_VIEWER;
+                                live_info::SCENE_FLAG_VIEWER ^= true;
+                            },
+                            3 => {
+                                live_info::FRAME_VIEWER ^= true;
                             },
                             _ => {},
                         }
@@ -99,6 +102,19 @@ impl super::Menu for DisplayMenu {
                 "Scene flags and temporary flags are currently shown."
             } else {
                 "Scene flags and temporary flags are currently hidden."
+            }
+        );
+        menu.add_entry_fmt(format_args!(
+            "Frame Count Viewer [{}]",
+            if unsafe { live_info::FRAME_VIEWER } {
+                "x"
+            } else {
+                " "
+            }
+        ),  if unsafe { live_info::FRAME_VIEWER } {
+                "The game's frame count is currently shown."
+            } else {
+                "The game's frame count is currently hidden."
             }
         );
         menu.set_cursor(disp_menu.cursor);

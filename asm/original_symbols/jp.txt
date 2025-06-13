@@ -57,6 +57,7 @@ main.dol:
     DVDClose: 0x803c3e80
     DVDReadPrio: 0x803c40c0
     doSoftResetMaybe: 0x80068440
+    FRAME_COUNT: 0x805789f8
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800be400
     SceneflagManager__checkFlagGlobal: 0x800be470

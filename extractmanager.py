@@ -33,22 +33,35 @@ class ExtractManager:
     def __init__(self, rootpath: Path, japanese: bool):
         self.rootpath = rootpath
         self.japanese = japanese
+    
+    def extract_is_good(self):
+        return self.extract_already_exists() and self.original_dol_already_exists()
 
-    def actual_extract_already_exists(self):
-        return (self.actual_extract_path() / "DATA" / "sys" / "main.dol").is_file()
+    def extract_already_exists(self):
+        return (self.extract_path() / "DATA" / "sys" / "main.dol").is_file()
 
-    def actual_extract_path(self):
+    def legacy_actual_extract_path(self):
         return self.rootpath / "actual-extract" / ("JP" if self.japanese else "US")
 
-    def modified_extract_path(self):
-        return self.rootpath / "modified-extract" / ("JP" if self.japanese else "US")
+    def legacy_actual_extract_exists(self):
+        return (self.legacy_actual_extract_path() / "DATA" / "sys" / "main.dol").is_file()
+
+    def extract_path(self):
+        return self.rootpath / "extract" / ("JP" if self.japanese else "US")
+
+    def original_dol_path(self):
+        return self.rootpath / "original-dol" / ("JP" if self.japanese else "US")
 
     def is_japanese(self):
         return self.japanese
+    
+    def copy_dol(self):
+        os.makedirs(self.original_dol_path(), exist_ok=True)
+        shutil.copy(self.extract_path() / "DATA" / "sys" / "main.dol", self.original_dol_path() / "main.dol")
 
     def extract_game(self, iso_path, progress_cb=NOP):
-        if not self.actual_extract_already_exists():
-            dest_path = self.actual_extract_path()
+        if not self.extract_is_good():
+            dest_path = self.extract_path()
             extractor = disc_riider_py.WiiIsoExtractor(iso_path)
             extractor.prepare_extract_section("DATA")
             checksum = bytes(extractor.get_dol_hash("DATA")).hex()
@@ -75,42 +88,16 @@ class ExtractManager:
             # delete all videos, they take up way too much space
             for hint_vid in (dest_path / "DATA" / "files" / "THP").glob("*.thp"):
                 os.remove(str(hint_vid))
+            
+            self.copy_dol()
 
             if self.is_japanese():
                 print("Successfully extracted JP Skyward Sword")
             else:
                 print("Successfully extracted US Skyward Sword")
 
-    def modified_extract_already_exists(self):
-        return (self.modified_extract_path() / "DATA" / "sys" / "main.dol").is_file()
-
-    def copy_to_modified(self, progress_cb=NOP):
-        # check if it already exists
-        if not self.modified_extract_already_exists():
-            progress_cb("copy to modified...", 0)
-            src = str(self.actual_extract_path())
-            dest = str(self.modified_extract_path())
-            file_count = 0
-            for path, dirs, filenames in os.walk(src):
-                file_count += len(filenames)
-
-            def makedirs(dest):
-                if not os.path.exists(dest):
-                    os.makedirs(dest)
-
-            makedirs(dest)
-            num_copied = 0
-            # manual copy of each file to show progress
-            for path, dirs, filenames in os.walk(src):
-                for directory in dirs:
-                    destDir = path.replace(src, dest)
-                    makedirs(os.path.join(destDir, directory))
-                for sfile in filenames:
-                    srcFile = os.path.join(path, sfile)
-                    destFile = os.path.join(path.replace(src, dest), sfile)
-                    shutil.copy(srcFile, destFile)
-                    num_copied += 1
-                    progress_cb("copy to modified...", (num_copied / file_count) * 100)
+    def original_dol_already_exists(self):
+        return (self.original_dol_path() / "main.dol").is_file()
 
     def repack_game(self, modified_iso_dir: Path, progress_cb=NOP):
         modified_iso_path = modified_iso_dir / (
@@ -119,7 +106,7 @@ class ExtractManager:
         if modified_iso_path.is_file():
             modified_iso_path.unlink()
         disc_riider_py.rebuild_from_directory(
-            self.modified_extract_path(),
+            self.extract_path(),
             modified_iso_path,
             lambda x: progress_cb("Writing patched game...", x),
         )

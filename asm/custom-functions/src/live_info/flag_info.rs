@@ -30,5 +30,5 @@ pub fn disp_scene_flags() {
     //     let val_lo = (*flag_bytes >> 0) as u8;
     //     let _ = console.write_fmt(format_args!(" {val_hi:02X} {val_lo:02X}"));
     // }
-    console.draw();
+    console.draw(true);
 }
