@@ -22,7 +22,7 @@ const TRICKS: [Trick; 2] = [
     },
     Trick {
         name:   "Guay Deathwarp",
-        description: "Reload the guay deathwarp after Sky RBW with D-Pad Left.",
+        description: "Reload the guay deathwarp after Sky RBW with D-Pad Left or by dying.",
         associated_enum: ActiveTrick::Guay,
         on_select: Some(reload_guay),
     },
@@ -262,7 +262,13 @@ pub fn update_tricks() {
             }
         },
         ActiveTrick::Guay => {
-            if is_pressed(DPAD_LEFT) {
+            let health = unsafe {
+                file_manager::get_current_file()
+                    .as_mut()
+                    .unwrap()
+                    .current_health
+            };
+            if is_pressed(DPAD_LEFT) || health == 0 {
                 reload_guay();
             }
         }

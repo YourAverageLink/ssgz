@@ -62,7 +62,7 @@ impl Console {
 
     pub fn draw(&mut self, use_fixed_width: bool) {
         let mut writer = TextWriterBase::new();
-        writer.set_font_color(self.font_color, self.font_color);
+        self.buffer.set_font_color(self.font_color);
         writer.set_scale(self.font_size);
         if use_fixed_width {
             writer.set_fixed_width();
