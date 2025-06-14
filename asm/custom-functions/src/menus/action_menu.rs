@@ -178,12 +178,7 @@ impl super::Menu for ActionMenu {
                             }
                         },
                         KILL_LINK => {
-                            unsafe {
-                                file_manager::get_current_file()
-                                    .as_mut()
-                                    .unwrap()
-                                    .current_health = 0;
-                            }
+                            file_manager::set_current_health(0);
                             action_menu.state = ActionMenuState::Off;
                             main_menu::MainMenu::disable();
                         },

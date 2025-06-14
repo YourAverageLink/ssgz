@@ -16,7 +16,7 @@ enum PracticeSavesMenuState {
 pub struct PracticeSavesMenu {
     state:       PracticeSavesMenuState,
     cursor:      u32,
-    save_cursor: u8,
+    save_cursor: u32,
     categories:  Vec<SpeedrunCategory>,
 }
 
@@ -37,17 +37,10 @@ struct SpeedrunCategory {
 }
 
 impl SpeedrunCategory {
-    fn num_saves(&self) -> u8 {
-        self.saves.len() as u8
+    fn num_saves(&self) -> u32 {
+        self.saves.len() as u32
     }
 }
-
-// const HUNDO: SpeedrunCategory = SpeedrunCategory {
-// name:      "100%",
-// base_path: "/saves/100",
-// saves:     [""],
-// num_saves: 1,
-// };
 
 impl super::Menu for PracticeSavesMenu {
     fn enable() {
@@ -91,18 +84,6 @@ impl super::Menu for PracticeSavesMenu {
                     load_practice_save(format!("{0}/{save}", category.base_path).as_str());
                     ps_menu.state = PracticeSavesMenuState::Off;
                     main_menu::MainMenu::disable();
-                } else if is_pressed(DPAD_RIGHT) {
-                    ps_menu.save_cursor = if ps_menu.save_cursor == category.num_saves() - 1 {
-                        0
-                    } else {
-                        ps_menu.save_cursor + 1
-                    };
-                } else if is_pressed(DPAD_LEFT) {
-                    ps_menu.save_cursor = if ps_menu.save_cursor == 0 {
-                        category.num_saves() - 1
-                    } else {
-                        ps_menu.save_cursor - 1
-                    };
                 }
             },
         }
@@ -125,14 +106,14 @@ impl super::Menu for PracticeSavesMenu {
             },
             PracticeSavesMenuState::Category => {
                 let category = &ps_menu.categories[ps_menu.cursor as usize];
-                let save = &category.saves[ps_menu.save_cursor as usize];
                 let menu = crate::reset_menu();
-                menu.set_heading("Choose a Practice Save (use D-Pad Left/Right)");
-                menu.add_entry_fmt(format_args!(
-                    "{}: {}",
-                    ps_menu.save_cursor, save.0
-                ), save.1);
+                menu.set_heading("Choose a Practice Save");
+                for (idx, save) in category.saves.iter().enumerate() {
+                    menu.add_entry_fmt(format_args!("{}: {}", idx, save.0), save.1);
+                }
+                menu.set_cursor(ps_menu.save_cursor);
                 menu.draw();
+                ps_menu.save_cursor = menu.move_cursor();
             },
         }
     }

@@ -119,16 +119,8 @@ pub fn update_cheats() {
     unsafe {
         if CHEATS[0].active {
             // Don't overwrite 0 health (so the Kill Link action still works)
-            if file_manager::get_current_file()
-                .as_mut()
-                .unwrap()
-                .current_health
-                != 0
-            {
-                file_manager::get_current_file()
-                    .as_mut()
-                    .unwrap()
-                    .current_health = 80;
+            if file_manager::get_current_health() != 0 {
+                file_manager::set_current_health(80);
             }
         }
         if CHEATS[1].active {

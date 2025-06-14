@@ -199,6 +199,8 @@ fn check_wccs() {
     // kinda hacky but prevents eye-blinding reloads from the display
     if count >= THREE_FRAMES_LATE && count & 0x80000000 == 0 {
         eval_wccs(buf);
+        // Kill Link for faster reloads
+        file_manager::set_current_health(0);
     }
 }
 
@@ -218,12 +220,7 @@ fn reload_wccs_prompt() {
         0xFF,
     );
     reloader::set_reload_trigger(5);
-    unsafe {
-        file_manager::get_current_file()
-            .as_mut()
-            .unwrap()
-            .current_health = 0;
-    }
+    file_manager::set_current_health(8);
 }
 
 fn reload_guay() {
@@ -242,12 +239,7 @@ fn reload_guay() {
         0xFF,
     );
     reloader::set_reload_trigger(5);
-    unsafe {
-        file_manager::get_current_file()
-            .as_mut()
-            .unwrap()
-            .current_health = 24;
-    }
+    file_manager::set_current_health(24);
 }
 
 pub fn update_tricks() {
@@ -262,12 +254,7 @@ pub fn update_tricks() {
             }
         },
         ActiveTrick::Guay => {
-            let health = unsafe {
-                file_manager::get_current_file()
-                    .as_mut()
-                    .unwrap()
-                    .current_health
-            };
+            let health = file_manager::get_current_health();
             if is_pressed(DPAD_LEFT) || health == 0 {
                 reload_guay();
             }

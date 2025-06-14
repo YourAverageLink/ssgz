@@ -108,6 +108,14 @@ pub fn load_selected_to_A() {
 pub fn get_current_health() -> u16 {
     unsafe { FileManager__GetCurrentHealth(FILE_MANAGER) }
 }
+pub fn set_current_health(health: u16) {
+    unsafe {
+        get_current_file()
+            .as_mut()
+            .unwrap()
+            .current_health = health;
+    }
+}
 pub fn get_current_file() -> *mut SaveFile {
     unsafe { FileManager__GetCurrentFile(FILE_MANAGER) }
 }
