@@ -34,7 +34,7 @@ While in gz, pressing Z and C simultaneously on the Nunchuck will open up a Prac
 
 In the Display Menu, you may toggle whether or not certain information should be passively displayed on-screen
 - **Input Viewer** will show any buttons currently pressed, and the directions registered on the Joystick and D-Pad. Note that this display is currently cut off on 4:3 Aspect Ratio
-- **Link Pos Viewer** will show Link's x, y, and z coordinates, along with his facing angle.
+- **Link Pos Viewer** will show Link's x, y, and z coordinates, facing angle, and current movement speed.
 - **Scene Flag Viewer** will display the scene flags and temporary flags active in the current scene.
 - **Frame Count Viewer** will display the number of in-game frames that have passed since the last load.
 
@@ -83,10 +83,12 @@ For each item, you may use D-Pad left / right to increase / decrease how many up
 
 ### Tricks Menu
 
-The Tricks Menu contains some specific functionality to help practice tricks.
+The Tricks Menu contains some specific functionality to help practice tricks. Each trick can be reloaded manually with D-Pad Left, or automatically reloaded if performed successfully.
 
-- **Wing Ceremony Cutscene Skip** - When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. Pressing D-Pad Left will reload the area to retry. This also kills Link, to make the reload much faster if you succeed.
-- **Guay Deathwarp** - When activated, you will be loaded into the Sky as though you just performed the Sky RBW in most early game Skyloft routes, your health will be set to 6 hearts, and the flag for the Fi text near the Faron Pillar will be unset, allowing you to practice the deathwarp with the guay. Pressing D-Pad Left will reload the area to retry.
+- **Wing Ceremony Cutscene Skip** - When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. This also kills Link, to make the reload much faster if you succeed.
+- **Guay Deathwarp** - When activated, you will be loaded into the Sky as though you just performed the Sky RBW in most early game Skyloft routes, your health will be set to 6 hearts, and the flag for the Fi text near the Faron Pillar will be unset, allowing you to practice the deathwarp with the guay.
+- **Keese Yeet** - When activated, you will be loaded into the Earth Temple (positioned for Keese Yeet) and given the Goddess Sword.
+- **Extending Blow** - When activated, you will be loaded into Deep Woods (positioned to setup for Extending Blow), and given the B-Wheel, Slingshot, and Goddess Sword.
 
 ## Debug / Extra Features
 

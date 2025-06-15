@@ -142,7 +142,7 @@ impl super::Menu for MainMenu {
             MenuState::MenuSelect => {
                 let menu = crate::reset_menu();
                 // TODO - automate versioning here
-                menu.set_heading("SSGZ 0.1.3 - Select a Menu");
+                menu.set_heading("SSGZ 0.1.4 - Select a Menu");
                 menu.add_entry("Display Menu", "Passively display info on-screen.");
                 menu.add_entry("Warp Menu", "Warp to a given stage, room, layer, and entrance.");
                 // menu.add_entry("Heap Menu");
