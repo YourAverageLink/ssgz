@@ -6,6 +6,9 @@ mod utils;
 
 use alloc::boxed::Box;
 use crate::utils::menu::SimpleMenu;
+use crate::menus::Menu;
+use crate::menus::main_menu;
+use crate::game::reloader::in_reset;
 use core::option::Option;
 
 #[no_mangle]
@@ -22,6 +25,10 @@ pub fn reset_menu() -> &'static mut SimpleMenu {
 // Update menus each frame
 #[no_mangle]
 pub fn dyn_hook() -> u32 {
+    // The game would softlock if the menu were still open during a soft reset
+    if in_reset() {
+        main_menu::MainMenu::disable();
+    }
     menus::update();
     if menus::is_active() {
         return 0;

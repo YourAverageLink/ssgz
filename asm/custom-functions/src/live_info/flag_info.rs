@@ -16,6 +16,8 @@ pub fn disp_scene_flags() {
         let val_lo = (*flag_bytes >> 0) as u8;
         let _ = console.write_fmt(format_args!(" {val_hi:02X} {val_lo:02X}"));
     }
+    let idx = SceneflagManager::get_scene_idx();
+    let _ = console.write_fmt(format_args!(" (index {idx})"));
     let flags = unsafe { &*SceneflagManager::get_temp_flags() };
     let _ = console.write_str("\n Temp:");
     for flag_bytes in flags {

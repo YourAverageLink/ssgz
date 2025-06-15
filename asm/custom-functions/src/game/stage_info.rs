@@ -210,6 +210,15 @@ pub const DUNGEONS: StageCategory = StageCategory {
     name:   "Dungeons",
     stages: &define_stages!(
         ("D000", "D000 - Waterfall Cave", [0, 1], [0]),
+        ("D003_0", "D003_0 - Sky Keep (Courage Room)", [0, 1, 2, 5], [0]),
+        ("D003_1", "D003_1 - Sky Keep (ET Room)", [0, 5, 6], [0]),
+        ("D003_2", "D003_2 - Sky Keep (Power Room)", [0, 1, 2, 5], [0]),
+        ("D003_3", "D003_3 - Sky Keep (Wisdom Room)", [0, 1, 5], [0]),
+        ("D003_4", "D003_4 - Sky Keep (LMF Room)", [0, 3], [0]),
+        ("D003_5", "D003_5 - Sky Keep (SV Room)", [0, 1, 4, 5], [0]),
+        ("D003_6", "D003_6 - Sky Keep (Dreadfuse Room)", [0, 1, 5], [0]),
+        ("D003_7", "D003_7 - Sky Keep (Entrance)", [0, 4, 5], [0]),
+        ("D003_8", "D003_8 - Sky Keep (Triforce Room)", [0, 1, 2, 3, 5, 6], [0]),
         (
             "D100",
             "D100 - Skyview Temple",

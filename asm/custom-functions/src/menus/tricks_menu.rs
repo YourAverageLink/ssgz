@@ -1,5 +1,5 @@
 use crate::{
-    game::file_manager, game::flag_managers::StoryflagManager, game::player, game::reloader, system::button::*,
+    game::file_manager, game::flag_managers::{StoryflagManager, SceneflagManager, ItemflagManager}, game::player, game::reloader, system::button::*,
     utils::menu::SimpleMenu, utils::console::Console, menus::main_menu,
 };
 
@@ -13,19 +13,31 @@ pub struct Trick {
     on_select: Option<fn()>,
 }
 
-const TRICKS: [Trick; 2] = [
+const TRICKS: [Trick; 4] = [
     Trick {
         name:   "Wing Ceremony Cutscene Skip",
-        description: "Reload WCCS Save Prompt with D-Pad Left. (Kills Link for faster reloads).",
+        description: "Practice WCCS Save Prompt sidehop (Kills Link for faster reloads).",
         associated_enum: ActiveTrick::WCCS,
         on_select: Some(reload_wccs_prompt),
     },
     Trick {
         name:   "Guay Deathwarp",
-        description: "Reload the guay deathwarp after Sky RBW with D-Pad Left or by dying.",
+        description: "Practice the guay deathwarp after Sky RBW.",
         associated_enum: ActiveTrick::Guay,
         on_select: Some(reload_guay),
     },
+    Trick {
+        name:   "Keese Yeet",
+        description: "Practice in Earth Temple positioned for Keese Yeet.",
+        associated_enum: ActiveTrick::KeeseYeet,
+        on_select: Some(reload_keese_yeet),
+    },
+    Trick {
+        name:   "Extending Blow",
+        description: "Practice the Extending Blow in Deep Woods.",
+        associated_enum: ActiveTrick::EB,
+        on_select: Some(reload_eb),
+    }
 ];
 
 #[derive(PartialEq, Eq)]
@@ -39,6 +51,8 @@ enum ActiveTrick {
     None,
     WCCS,
     Guay,
+    KeeseYeet,
+    EB,
 }
 
 pub struct TricksMenu {
@@ -96,7 +110,7 @@ impl super::Menu for TricksMenu {
         let tricks_menu: &mut TricksMenu = unsafe { &mut TRICKS_MENU };
 
         let menu = crate::reset_menu();
-        menu.set_heading("Activate a trick to practice it (see description).");
+        menu.set_heading("Practice a trick (reloads on success or pressing D-Pad Left).");
         for trick in &TRICKS {
             menu.add_entry_fmt(format_args!(
                 "{} [{}]",
@@ -242,6 +256,68 @@ fn reload_guay() {
     file_manager::set_current_health(24);
 }
 
+fn reload_keese_yeet() {
+    SceneflagManager::unset_global(14, 29); // ET keese yeet rope cut
+    SceneflagManager::unset_global(14, 24); // ET drawbridge down
+    set_sword_to_goddess();
+    let current_file = file_manager::get_file_A();
+    // Positioned for Keese Yeet
+    current_file.pos_t1.x = 512.0;
+    current_file.pos_t1.y = 0.0;
+    current_file.pos_t1.z = 6600.0;
+    current_file.angle_t1 = 0;
+    reloader::trigger_entrance(
+        b"D200\0".as_ptr(),
+        1,
+        0,
+        2, // Entrance 2 (for no entrance animation)
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reloader_type(1);
+    reloader::set_reload_trigger(5);
+}
+
+fn set_sword_to_goddess() {
+    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword
+    // Remove higher-level swords
+    ItemflagManager::set_to_value(12, 0);
+    ItemflagManager::set_to_value(9, 0);
+    ItemflagManager::set_to_value(13, 0);
+    ItemflagManager::set_to_value(14, 0);
+    ItemflagManager::do_commit();
+}
+
+fn reload_eb() {
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(52, 1); // Give Slingshot
+    ItemflagManager::increase_counter(4, 20); // Refill Seeds
+    set_sword_to_goddess();
+    let current_file = file_manager::get_file_A();
+    // Positioned for EB
+    current_file.pos_t1.x = -450.0;
+    current_file.pos_t1.y = 2405.0;
+    current_file.pos_t1.z = 15000.0;
+    current_file.angle_t1 = 32000;
+    reloader::trigger_entrance(
+        b"F101\0".as_ptr(),
+        0,
+        1,
+        2, // Entrance 2 (for no entrance animation)
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reloader_type(1);
+    reloader::set_reload_trigger(5);
+}
+
 pub fn update_tricks() {
     let tricks_menu: &mut TricksMenu = unsafe { &mut TRICKS_MENU };
 
@@ -251,12 +327,42 @@ pub fn update_tricks() {
             check_wccs();
             if is_pressed(DPAD_LEFT) {
                 reload_wccs_prompt();
+            } else if let Some(link) = player::as_mut() {
+                if link.pos.z < 5205f32 {
+                    // Link dies and falls over after successful WCCS, reload
+                    link.pos.z = 5300f32;
+                    reload_wccs_prompt();
+                }
             }
         },
         ActiveTrick::Guay => {
             let health = file_manager::get_current_health();
+            // Auto-reload on successful deathwarp
             if is_pressed(DPAD_LEFT) || health == 0 {
                 reload_guay();
+            }
+        },
+        ActiveTrick::KeeseYeet => {
+            // Auto-reload on successful Keese Yeet
+            if is_pressed(DPAD_LEFT) || SceneflagManager::check_global(14, 29) {
+                reload_keese_yeet();
+            } else if let Some(link) = player::as_mut() {
+                if link.pos.x >= 4999f32 && link.pos.z <= 3451f32 && link.angle.y == -16384 {
+                    // Position failed to load somehow, so reload again
+                    link.pos.x = 4900f32;
+                    reload_keese_yeet();
+                }
+            }
+        },
+        ActiveTrick::EB => {
+            if is_pressed(DPAD_LEFT) {
+                reload_eb();
+            } else if let Some(link) = player::as_mut() {
+                if link.pos.z < 2500f32 {
+                    // Successfully got EB
+                    link.pos.z = 4000f32;
+                    reload_eb();
+                }
             }
         }
     }

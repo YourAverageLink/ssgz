@@ -32,11 +32,23 @@ pub struct Reloader {
     prevent_save_respawn_info: bool,
 }
 
+
+#[repr(C)]
+pub struct ReloadColorFader {
+    pub _0:             [u8; 0x14],
+    pub current_state:  u32,
+    pub unk:            u32,
+    pub previous_state: u32,
+    pub _1:             [u8; 0x65],
+    pub other_state:    u8,
+}
+
 extern "C" {
     static mut SPAWN_MASTER: SpawnStruct;
     static mut SPAWN_SLAVE: SpawnStruct;
     static mut RELOADER_PTR: *mut Reloader;
     static mut RELOADER_TYPE: u8;
+    static mut reload_color_fader: *mut ReloadColorFader;
     fn RoomManager__getRoomByIndex(room_mgr: *mut c_void, room_number: u32);
     fn Reloader__setReloadTrigger(reloader: *mut Reloader, trigger: u8);
     fn actuallyTriggerEntrance(
@@ -50,6 +62,7 @@ extern "C" {
         transition_fade_frames: u8,
         param_9: u8,
     );
+    fn doSoftResetMaybe(fader: *mut ReloadColorFader);
 }
 
 pub fn get_ptr() -> *mut Reloader {
@@ -100,4 +113,18 @@ pub fn trigger_entrance(
             param_9,
         )
     };
+}
+
+pub fn soft_reset() {
+    unsafe {
+        (*reload_color_fader).other_state = 1;
+        (*reload_color_fader).previous_state = (*reload_color_fader).current_state;
+        (*reload_color_fader).current_state = 1;
+
+        doSoftResetMaybe(reload_color_fader);
+    }
+}
+
+pub fn in_reset() -> bool {
+    return unsafe { (*reload_color_fader).other_state == 1};
 }

@@ -119,9 +119,9 @@ fn load_file(direct: bool) {
     reloader::set_reload_trigger(5);
 }
 
-fn enter_bit() {
+pub fn enter_bit() {
     reloader::set_reloader_type(3);
-    crate::utils::practice_saves::soft_reset();
+    reloader::soft_reset();
 }
 
 fn give_item() {}

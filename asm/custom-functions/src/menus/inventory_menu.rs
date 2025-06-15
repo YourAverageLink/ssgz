@@ -127,6 +127,13 @@ pub fn initialize_item_list() {
     );
     inventory_menu.items.push(
         ItemEntry {
+            names: vec!["No Sailcloth", "Sailcloth"],
+            flags: vec![15],
+            description: "Whether or not you have the Sailcloth",
+        },
+    );
+    inventory_menu.items.push(
+        ItemEntry {
             names: vec!["No Mitts", "Digging Mitts", "Mogma Mitts"],
             flags: vec![56, 99],
             description: "What type of mitts you have",

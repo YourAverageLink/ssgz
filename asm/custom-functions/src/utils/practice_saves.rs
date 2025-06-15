@@ -1,5 +1,6 @@
 use crate::game::file_manager::{get_saved_save_files, get_skip_dat, initialize_write_save};
 use crate::game::save_file::{SavedSaveFiles, SkipData};
+use crate::game::reloader::soft_reset;
 use crate::system::printf;
 use core::ffi::{c_char, c_void};
 use core::mem::size_of;
@@ -42,7 +43,6 @@ use alloc::vec;
 // }
 
 extern "C" {
-    static reload_color_fader: *mut ReloadColorFader;
     // fn requestFileLoadFromDiskOrDie(
     // path: *const c_char,
     // mount_direction: i32,
@@ -75,27 +75,6 @@ extern "C" {
     fn DVDClose(info: *mut c_void);
     fn DVDReadPrio(info: *mut c_void, dest: *mut c_void, size: i32, offset: i32, prio: i32) -> i32;
     // fn allocOnCurrentHeap(count: usize) -> *mut c_void;
-    fn doSoftResetMaybe(fader: *mut ReloadColorFader);
-}
-
-#[repr(C)]
-pub struct ReloadColorFader {
-    pub _0:             [u8; 0x14],
-    pub current_state:  u32,
-    pub unk:            u32,
-    pub previous_state: u32,
-    pub _1:             [u8; 0x65],
-    pub other_state:    u8,
-}
-
-pub fn soft_reset() {
-    unsafe {
-        (*reload_color_fader).other_state = 1;
-        (*reload_color_fader).previous_state = (*reload_color_fader).current_state;
-        (*reload_color_fader).current_state = 1;
-
-        doSoftResetMaybe(reload_color_fader);
-    }
 }
 
 #[no_mangle]
