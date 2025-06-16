@@ -1,0 +1,11 @@
+[package]
+name = "ss-practice"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+binrw = "0.15.0"
+disc_riider = "0.2.2"
+sha1 = "0.10.6"
+thiserror = "2.0.12"
+clap = { version = "4.5.20", features = ["derive"] }
