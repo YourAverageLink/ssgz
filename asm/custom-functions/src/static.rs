@@ -7,26 +7,15 @@ use alloc::boxed::Box;
 #[link_section = "data"]
 pub static mut UPDATE_HOOK: Option<fn() -> u32> = Option::None;
 
-
-
-const STARTING_COUNTDOWN: u16 = 180;
 #[no_mangle]
 #[link_section = "data"]
-pub static mut COUNTDOWN_TIMER: u16 = STARTING_COUNTDOWN + 1;
-
+pub static mut INSTANT_TEXT_ACTIVE: bool = false;
 
 // A Common Place where Custom code can be injected to run once per frame
 // Returns whether or not to stop (1 == continue)
 #[no_mangle]
 pub extern "C" fn custom_main_additions() -> u32 {
     unsafe {
-        if COUNTDOWN_TIMER <= STARTING_COUNTDOWN {
-            COUNTDOWN_TIMER -= 1;
-            if COUNTDOWN_TIMER == 0 {
-                load_rel("custom\0".as_ptr() as *const c_char);
-                COUNTDOWN_TIMER = STARTING_COUNTDOWN + 1;
-            }
-        }
         // there's only one hook here, but you could imagine this being a list of
         // hooks if we end up having multiple custom rels
         if let Option::Some(hook) = UPDATE_HOOK {
@@ -51,6 +40,11 @@ pub fn clear_hook() {
     }
 }
 
+#[no_mangle]
+pub fn set_instant_text(active: bool) {
+    unsafe { INSTANT_TEXT_ACTIVE = active; }
+}
+
 #[repr(C)]
 pub struct DynamicModuleControl {
     pub dat: [u8; 0x48usize],
@@ -66,10 +60,9 @@ extern "C" {
 }
 
 #[no_mangle]
-pub fn load_custom_rel() {
-    // Start a 10-second countdown to load in the rel
-    unsafe { COUNTDOWN_TIMER = STARTING_COUNTDOWN; }
-    // load_rel("custom\0".as_ptr() as *const c_char)
+pub fn load_custom_rel() -> bool {
+    // When this rel is loaded, it will wait 180 frames before menus are available
+    load_rel("custom\0".as_ptr() as *const c_char)
 }
 
 #[no_mangle]

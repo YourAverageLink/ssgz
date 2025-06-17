@@ -1,8 +1,11 @@
 main.dol:
-  custom_main_additions: 0x8067B540
-  set_hook: 0x8067B5B4
-  clear_hook: 0x8067B5C0
-  load_custom_rel: 0x8067B5D0
-  load_rel: 0x8067B5E0
-  UPDATE_HOOK: 0x8067B6C4
-  COUNTDOWN_TIMER: 0x8067B6C8
+  handle_instant_text: 0x8067B540
+  finish_instant_text: 0x8067B55C
+  custom_main_additions: 0x8067B560
+  set_hook: 0x8067B59C
+  clear_hook: 0x8067B5A8
+  set_instant_text: 0x8067B5B8
+  load_custom_rel: 0x8067B5C8
+  load_rel: 0x8067B5F0
+  UPDATE_HOOK: 0x8067B6D4
+  INSTANT_TEXT_ACTIVE: 0x8067B6D8
