@@ -3,6 +3,10 @@ name = "ss-practice"
 version = "0.1.4"
 edition = "2024"
 
+# Want to let end users run the patcher from source w/o needing to build asm patches
+[workspace]
+exclude = ["custom-functions"]
+
 [dependencies]
 disc_riider = "0.2.2"
 sha1 = "0.10.6"

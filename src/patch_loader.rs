@@ -18,13 +18,6 @@ macro_rules! embed_patch_diffs {
     };
 }
 
-struct RawPatchData {
-    version: GameVersion,
-    custom_rel: &'static [u8],
-    patch_diffs: &'static str,
-    practice_saves_dir: Dir<'static>,
-}
-
 pub struct PatchData {
     pub version: GameVersion,
     pub custom_rel: &'static [u8],
@@ -46,42 +39,29 @@ type PatchDiffMapRaw = HashMap<u32, PatchDiffEntry>;
 
 // TODO - don't like how this has to be manually done
 // Compiling necessary patch data into the executable
-fn get_raw_patch_data(version: GameVersion) -> Option<RawPatchData> {
+pub fn get_patch_data(version: GameVersion) -> Option<PatchData> {
     match version {
-        GameVersion::NTSC1_0 => Some(RawPatchData {
+        GameVersion::NTSC1_0 => Some(PatchData {
             version: GameVersion::NTSC1_0,
             custom_rel: embed_rel!("US"),
-            patch_diffs: embed_patch_diffs!("us"),
+            patch_diffs: parse_diffs(embed_patch_diffs!("us")),
             practice_saves_dir: include_dir!("practice-saves/US/saves/"),
         }),
-        GameVersion::JP => Some(RawPatchData {
+        GameVersion::JP => Some(PatchData {
             version: GameVersion::JP,
             custom_rel: embed_rel!("JP"),
-            patch_diffs: embed_patch_diffs!("jp"),
+            patch_diffs: parse_diffs(embed_patch_diffs!("jp")),
             practice_saves_dir: include_dir!("practice-saves/JP/saves/"),
         }),
         _ => None,
     }
 }
 
-fn parse_raw_data(data: RawPatchData) -> PatchData {
-    let full_pd: FullPatchList = serde_yml::from_str(data.patch_diffs).unwrap();
-    let patch_diffs = full_pd.0.get("main.dol")
+fn parse_diffs(raw_diff_str: &'static str) -> PatchDiffMap {
+    let full_pd: FullPatchList = serde_yml::from_str(raw_diff_str).unwrap();
+    full_pd.0.get("main.dol")
         .unwrap()
         .iter()
         .map(|(addr, patch)| (addr.clone(), patch.data.clone()))
-        .collect();
-    PatchData {
-        version: data.version,
-        custom_rel: data.custom_rel,
-        patch_diffs,
-        practice_saves_dir: data.practice_saves_dir,
-    }
-}
-
-pub fn get_patch_data(version: GameVersion) -> Option<PatchData> {
-    match get_raw_patch_data(version) {
-        Some(dat) => Some(parse_raw_data(dat)),
-        None => None,
-    }
+        .collect()
 }
