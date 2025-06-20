@@ -4,15 +4,18 @@ macro_rules! hex {
     ($hex:literal) => {{
         const HEX_STR: &str = $hex;
         const LEN: usize = HEX_STR.len();
-        
-        const _: () = assert!(LEN % 2 == 0, "Must use even number of digits for full bytes.");
-        
+
+        const _: () = assert!(
+            LEN % 2 == 0,
+            "Must use even number of digits for full bytes."
+        );
+
         const BYTE_LEN: usize = LEN / 2;
         const fn hex_to_bytes() -> [u8; BYTE_LEN] {
             let hex_bytes = HEX_STR.as_bytes();
             let mut result = [0u8; BYTE_LEN];
             let mut i = 0;
-            
+
             while i < BYTE_LEN {
                 let high = hex_char_to_nibble(hex_bytes[i * 2]);
                 let low = hex_char_to_nibble(hex_bytes[i * 2 + 1]);
@@ -21,7 +24,7 @@ macro_rules! hex {
             }
             result
         }
-        
+
         const fn hex_char_to_nibble(c: u8) -> u8 {
             match c {
                 b'0'..=b'9' => c - b'0',
@@ -30,7 +33,7 @@ macro_rules! hex {
                 _ => panic!("Invalid hex character"),
             }
         }
-        
+
         hex_to_bytes()
     }};
 }

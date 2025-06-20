@@ -10,13 +10,13 @@ use crate::hex;
 use anyhow::Error;
 
 use binrw::{BinWrite, BinWriterExt};
+use clap::ValueEnum;
 use disc_riider::{
     Fst, FstNode, WiiIsoReader, WiiPartitionReadInfo, builder::build_from_directory,
     structs::WiiPartType,
 };
 use indicatif::ProgressBar;
 use sha1::{Digest, Sha1};
-use clap::ValueEnum;
 
 struct Section {
     part: String,
@@ -45,11 +45,11 @@ pub enum GameVersion {
     NTSC1_0,
     #[value(name = "jp")]
     JP,
-    #[value(skip)] 
+    #[value(skip)]
     NTSC1_2,
-    #[value(skip)] 
+    #[value(skip)]
     PAL1_0,
-    #[value(skip)] 
+    #[value(skip)]
     Unknown,
 }
 
@@ -285,13 +285,13 @@ pub fn rebuild_from_directory(src_dir: PathBuf, dest_path: PathBuf) -> Result<()
         .open(&dest_path)?;
     println!("Rebuilding ISO...");
     let bar = ProgressBar::new(100);
-        bar.set_style(
-            indicatif::ProgressStyle::with_template(
-                "{spinner:.green} [{wide_bar:.cyan/blue}] {percent}% ({eta})",
-            )
-            .unwrap()
-            .progress_chars("#>-"),
-        );
+    bar.set_style(
+        indicatif::ProgressStyle::with_template(
+            "{spinner:.green} [{wide_bar:.cyan/blue}] {percent}% ({eta})",
+        )
+        .unwrap()
+        .progress_chars("#>-"),
+    );
     build_from_directory(&src_dir, &mut dest_file, &mut |done_percent| {
         bar.set_position(done_percent as u64);
     })?;

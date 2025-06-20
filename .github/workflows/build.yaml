@@ -1,3 +1,5 @@
+name: Rust
+
 on:
   - push
   - pull_request
@@ -10,56 +12,62 @@ jobs:
         include:
           - name: Windows Build
             os: windows-latest
-            architecture: x64
+            target: x86_64-pc-windows-msvc
             artifact: windows
             artifact_suffix: ""
+            executable_suffix: ".exe"
           - name: MacOS Build x64
             os: macos-13
-            architecture: x64
+            target: x86_64-apple-darwin
             artifact: macos
             artifact_suffix: _intel
+            executable_suffix: ""
           - name: MacOS Build arm64
             os: macos-14
-            architecture: arm64
+            target: aarch64-apple-darwin
             artifact: macos
             artifact_suffix: _apple_silicon
+            executable_suffix: ""
           - name: Linux Build
             os: ubuntu-latest
-            architecture: x64
+            target: x86_64-unknown-linux-gnu
             artifact: linux
             artifact_suffix: ""
+            executable_suffix: ""
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Cache dependencies
+        uses: actions/cache@v4
         with:
-          python-version: "3.11"
-      - name: Setup poetry
-        run: python -mpip install poetry
-      - name: Install dependencies
-        run: poetry install --with build --with dev
-        #env:
-        #  POETRY_VIRTUALENVS_CREATE: false
-      #- name: Install dependencies
-      #  run: poetry install
-      #  env:
-      #    POETRY_VIRTUALENVS_CREATE: false
-      - name: Test if the formatting is correct
-        run: poetry run black . --check
-      - name: Build distribution
-        run: poetry run python -mPyInstaller ss-practice.spec --log-level=WARN
-      #- name: Build distribution (macOS)
-      #  if: runner.os == 'macOS'
-      #  run: python -mPyInstaller ss-practice.spec --log-level=WARN
-      - name: Copy Readme
-        run: cp README.md dist
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run tests
+        run: cargo test
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
+      - name: Create distribution directory
+        run: mkdir -p dist
+        shell: bash
+      - name: Copy executable to dist
+        run: |
+          cp target/${{ matrix.target }}/release/ss-practice${{ matrix.executable_suffix }} dist/
+        shell: bash
+      - name: Copy README
+        run: cp README.md dist/
         shell: bash
       - uses: SebRollen/toml-action@v1.2.0
         id: read_toml
         with:
-          file: "pyproject.toml"
-          field: "tool.poetry.version"
+          file: "Cargo.toml"
+          field: "package.version"
       - uses: actions/upload-artifact@v4
         with:
           name: SSGZ ${{ steps.read_toml.outputs.value }} (${{ matrix.artifact }}${{ matrix.artifact_suffix }})

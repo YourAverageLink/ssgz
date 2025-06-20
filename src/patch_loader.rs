@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use include_dir::{Dir, include_dir};
 use serde::Deserialize;
-use include_dir::{Dir, include_dir}; // Why is this one directory higher than include_bytes / include_str???
+use std::collections::HashMap; // Why is this one directory higher than include_bytes / include_str???
 
 use crate::iso_tools::GameVersion;
 
@@ -14,7 +14,11 @@ macro_rules! embed_rel {
 // For patch info
 macro_rules! embed_patch_diffs {
     ($version:literal) => {
-        include_str!(concat!("../asm/patch_diffs/", $version, "/ss_necessary_diff.txt"))
+        include_str!(concat!(
+            "../asm/patch_diffs/",
+            $version,
+            "/ss_necessary_diff.txt"
+        ))
     };
 }
 
@@ -59,7 +63,9 @@ pub fn get_patch_data(version: GameVersion) -> Option<PatchData> {
 
 fn parse_diffs(raw_diff_str: &'static str) -> PatchDiffMap {
     let full_pd: FullPatchList = serde_yml::from_str(raw_diff_str).unwrap();
-    full_pd.0.get("main.dol")
+    full_pd
+        .0
+        .get("main.dol")
         .unwrap()
         .iter()
         .map(|(addr, patch)| (addr.clone(), patch.data.clone()))

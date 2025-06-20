@@ -3,7 +3,7 @@ const DOL_DATA_SECTION_COUNT: usize = 11;
 
 fn read_u32(data: &[u8], offset: usize) -> u32 {
     assert!(offset + 4 <= data.len());
-    u32::from_be_bytes(data[offset..offset+4].try_into().unwrap())
+    u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap())
 }
 
 fn write_u32(data: &mut [u8], offset: usize, value: u32) {
@@ -55,8 +55,10 @@ impl Dol {
     }
 
     pub fn write_data_u32(&mut self, address: u32, value: u32) {
-        let offset = self.address_to_offset(address)
-            .expect(format!("Address {address} is not found in any DOL sections.").as_str()) as usize;
+        let offset = self
+            .address_to_offset(address)
+            .expect(format!("Address {address} is not found in any DOL sections.").as_str())
+            as usize;
         let end = offset + 4;
         if self.data.len() < end {
             self.data.resize(end, 0);

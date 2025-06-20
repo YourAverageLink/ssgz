@@ -1,5 +1,5 @@
-use std::fs::{OpenOptions, create_dir_all};
 use std::fs;
+use std::fs::{OpenOptions, create_dir_all};
 use std::io::Write;
 
 use anyhow::Error;

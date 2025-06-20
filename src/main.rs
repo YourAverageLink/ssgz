@@ -22,8 +22,10 @@ fn main() -> Result<(), Error> {
     let version = args.version;
     assert!(version.is_supported()); // arg parser should only accept supported versions
 
-
-    println!("Starting SSGZ Patcher {0} for the {version} version", env!("CARGO_PKG_VERSION"));
+    println!(
+        "Starting SSGZ Patcher {0} for the {version} version",
+        env!("CARGO_PKG_VERSION")
+    );
 
     let extract_done = paths::extract_dol_exists(version);
     let dol_copied = paths::dol_copy_exists(version);
