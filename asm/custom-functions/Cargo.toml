@@ -1,10 +1,14 @@
 [package]
 name = "custom-functions"
-version = "0.1.0"
+version = "0.1.4"
 edition = "2021"
 
 [lib]
 crate-type=["staticlib"]
+
+# Required so the asm scripts don't try to compile / format the patcher code
+[workspace]
+exclude = ["ss-practice"]
 
 [features]
 default = []
