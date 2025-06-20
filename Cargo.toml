@@ -1,11 +1,19 @@
 [package]
 name = "ss-practice"
-version = "0.1.0"
+version = "0.1.4"
 edition = "2024"
 
 [dependencies]
-binrw = "0.15.0"
 disc_riider = "0.2.2"
 sha1 = "0.10.6"
 thiserror = "2.0.12"
 clap = { version = "4.5.20", features = ["derive"] }
+rfd = "0.15.3"
+anyhow = "1.0.98"
+binrw = "0.14.1"
+indicatif = "0.17.11"
+const_format = "0.2.34"
+include_dir = { version = "0.7.4", features = ["glob"] }
+serde_yml = "0.0.12"
+serde = { version = "1.0.219", features = ["derive"] }
+dialoguer = "0.11.0"
