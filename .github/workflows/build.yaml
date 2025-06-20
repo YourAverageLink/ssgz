@@ -49,8 +49,9 @@ jobs:
             ${{ runner.os }}-cargo-
       - name: Check formatting
         run: cargo fmt --check
-      - name: Run tests
-        run: cargo test
+      # No tests are currently included
+      # - name: Run tests
+      #   run: cargo test
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
       - name: Create distribution directory
