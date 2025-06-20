@@ -15,6 +15,16 @@ use core::option::Option;
 #[link_section = "data"]
 static mut SHARED_MENU: Option<SimpleMenu> = Option::None;
 
+// Wait 6 seconds after loading the rel to enable menus,
+// to allow time for the main heap to be initialized
+#[no_mangle]
+#[link_section = "data"]
+pub static mut COUNTDOWN_TIMER: u8 = 180;
+
+#[no_mangle]
+#[link_section = "data"]
+pub static mut INITIALIZED: bool = false;
+
 pub fn reset_menu() -> &'static mut SimpleMenu {
     unsafe {
         SHARED_MENU = Some(SimpleMenu::new());
@@ -25,16 +35,27 @@ pub fn reset_menu() -> &'static mut SimpleMenu {
 // Update menus each frame
 #[no_mangle]
 pub fn dyn_hook() -> u32 {
-    // The game would softlock if the menu were still open during a soft reset
-    if in_reset() {
-        main_menu::MainMenu::disable();
+    if unsafe {INITIALIZED} {
+        // The game would softlock if the menu were still open during a soft reset
+        if in_reset() {
+            main_menu::MainMenu::disable();
+        }
+        menus::update();
+        if menus::is_active() {
+            return 0;
+        }
+        live_info::display();
+        menus::do_global_updates();
+    } else {
+        unsafe {
+            COUNTDOWN_TIMER -= 1;
+            if COUNTDOWN_TIMER == 0 {
+                menus::initialize();
+                crate::system::printf("Menus are ready!\n\0".as_ptr() as *const i8);
+                INITIALIZED = true;
+            }
+        }
     }
-    menus::update();
-    if menus::is_active() {
-        return 0;
-    }
-    live_info::display();
-    menus::do_global_updates();
 
     return 1;
 }
@@ -53,8 +74,7 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn _prolog() {
     unsafe {
-        menus::initialize();
-        crate::system::printf("Successfully loaded this rel file!\n\0".as_ptr() as *const i8);
+        crate::system::printf("Loaded customNP.rel, waiting 6 seconds to initialize...\n\0".as_ptr() as *const i8);
         set_hook(dyn_hook);
     }
 }

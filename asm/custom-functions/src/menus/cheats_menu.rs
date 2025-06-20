@@ -9,12 +9,12 @@ pub struct Cheat {
 }
 
 extern "C" {
-    static mut lineForInstantText: u32; // REALLY BAD AND HACKY
+    fn set_instant_text(active: bool);
 }
 
 #[no_mangle]
 #[link_section = "data"]
-pub static mut CHEATS: [Cheat; 7] = [
+pub static mut CHEATS: [Cheat; 8] = [
     Cheat {
         name:   "Infinite Health",
         active: false,
@@ -43,16 +43,14 @@ pub static mut CHEATS: [Cheat; 7] = [
         name:   "Moon Jump while holding D-Pad Right",
         active: false,
     },
-    /*
+    //Cheat {
+    //    name:   "Super Speed",
+    //    active: false,
+    //},
     Cheat {
-        name:   "Super Speed",
+        name:   "Instant Text",
         active: false,
     },
-    */
-    // Cheat {
-    // name:   "Instant Text",
-    // active: false,
-    // },
 ];
 
 #[derive(PartialEq, Eq)]
@@ -159,17 +157,6 @@ pub fn update_cheats() {
                 player.velocity.y = 56f32; // Minimum amount for consistent liftoff on the ground
             }
         }
-        /*
-        if CHEATS[7].active {
-            if let Some(player) = player::as_mut() {
-                player.forward_accel = 10f32;
-            }
-        }
-        */
-        // if CHEATS[8].active {
-        // lineForInstantText = 0x38800001; // li r4, 1
-        // } else {
-        // lineForInstantText = 0x38800000; // li r4, 0
-        // }
+        set_instant_text(CHEATS[7].active);
     }
 }

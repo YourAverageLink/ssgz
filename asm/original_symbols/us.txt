@@ -148,7 +148,7 @@ main.dol:
     Print_TextWriterBase_WChar: 0x80432970
     Printf_TextWriterBase_WChar: 0x80432590
     PrintMutable_TextWriterBase_WChar: 0x80432c70
-    lineForInstantText: 0x80115A04
+    returnForInstantText: 0x80115A08
     # ----------------- GX Stuffs -----------------------------
     PSMTXIdentity: 0x803b7f40
     C_MTXOrtho: 0x803b9070

@@ -2,6 +2,18 @@
 
 .org @NextFreeSpace
 .global custom_main_additions
+.global handle_instant_text
+.global finish_instant_text
+handle_instant_text:
+lis r9, INSTANT_TEXT_ACTIVE@ha
+li r4, 0
+lbz r9, INSTANT_TEXT_ACTIVE@l(r9)
+cmpwi r9, 0
+beq finish_instant_text
+li r4, 1
+b finish_instant_text
+finish_instant_text:
+b returnForInstantText
 ; .global is_instant_text
 
 
@@ -22,7 +34,8 @@ b load_custom_rel
 ;.org 0x800646a0
 ;lis r3, 0xD0
 
-;.org 0x801160bc ; instant text patch
+.org 0x801160b4 ; instant text patch
+b handle_instant_text
 ;bl is_instant_text
 
 .close
