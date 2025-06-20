@@ -29,6 +29,8 @@ enum MenuState {
     TricksMenu,
 }
 
+const GZ_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 const NUM_MENUS: usize = 6;
 
 impl MenuState {
@@ -142,7 +144,7 @@ impl super::Menu for MainMenu {
             MenuState::MenuSelect => {
                 let menu = crate::reset_menu();
                 // TODO - automate versioning here
-                menu.set_heading("SSGZ 0.1.4 - Select a Menu");
+                menu.set_heading_fmt(format_args!("SSGZ {} - Select a Menu", GZ_VERSION));
                 menu.add_entry("Display Menu", "Passively display info on-screen.");
                 menu.add_entry("Warp Menu", "Warp to a given stage, room, layer, and entrance.");
                 // menu.add_entry("Heap Menu");
