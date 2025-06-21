@@ -133,10 +133,10 @@ fn split_pointer_hi_lo(pointer: u32) -> (u32, u32) {
 }
 
 fn patch_dol(dol: &mut Dol, patch_data: &PatchData) {
-    for (org_address, patch_bytes) in patch_data.patch_diffs.iter() {
-        let free_space_start = get_free_space_address(patch_data.version)
-            .expect("Supported version must have free space addr defined to patch.");
+    let free_space_start = get_free_space_address(patch_data.version)
+        .expect("Supported version must have free space addr defined to patch.");
 
+    for (org_address, patch_bytes) in patch_data.patch_diffs.iter() {
         if *org_address >= free_space_start {
             add_free_space_section(dol, patch_bytes, patch_data.version);
         } else {

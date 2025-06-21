@@ -67,6 +67,7 @@ The Cheats Menu contains some useful cheats that will remain active as long as t
 - Infinite Arrows
 - Infinite Rupees
 - Moon Jump (only active while holding D-Pad Right)
+- Instant Text (only as fast as the old Randomizer instant text as current rando instant text changes text RBM timing)
 
 ### Practice Saves Menu
 

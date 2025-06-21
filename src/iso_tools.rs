@@ -92,6 +92,26 @@ impl GameVersion {
             GameVersion::Unknown => "",
         }
     }
+
+    pub fn from_id(id: i32) -> Self {
+        match id {
+            0 => GameVersion::NTSC1_0,
+            1 => GameVersion::JP,
+            2 => GameVersion::NTSC1_2,
+            3 => GameVersion::PAL1_0,
+            _ => GameVersion::Unknown,
+        }
+    }
+
+    pub fn to_id(&self) -> i32 {
+        match *self {
+            GameVersion::NTSC1_0 => 0,
+            GameVersion::JP => 1,
+            GameVersion::NTSC1_2 => 2,
+            GameVersion::PAL1_0 => 3,
+            GameVersion::Unknown => i32::MAX,
+        }
+    }
 }
 
 impl fmt::Display for GameVersion {
@@ -151,7 +171,6 @@ impl WiiIsoExtractor {
         hasher.update(&dol);
         Ok(hasher.finalize().try_into().unwrap())
     }
-
     // Verify that the given ISO has the right DOL hash
     pub fn validate(&mut self) -> Result<(), HashMismatchError> {
         let hash = self

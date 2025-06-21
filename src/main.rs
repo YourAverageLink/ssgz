@@ -12,20 +12,35 @@ use iso_tools::*;
 use rfd::FileDialog;
 use std::fs;
 
+const VERSION_STR: &str = env!("CARGO_PKG_VERSION");
+
 #[derive(Parser, Debug)]
 #[clap(about = "Practice ROM Hack Patcher for Skyward Sword")]
+#[clap(version = VERSION_STR)]
 struct Args {
-    version: GameVersion,
+    #[arg(long)]
+    noui: bool,
+    #[arg(requires = "noui")]
+    version: Option<GameVersion>,
 }
 fn main() -> Result<(), Error> {
     let args = Args::parse();
-    let version = args.version;
+    if args.noui {
+        if let Some(ver) = args.version {
+            do_noui(ver)
+        } else {
+            panic!("When using --noui, you must specify a version.")
+        }
+    } else {
+        do_gui().unwrap();
+        Ok(())
+    }
+}
+
+fn do_noui(version: GameVersion) -> Result<(), Error> {
     assert!(version.is_supported()); // arg parser should only accept supported versions
 
-    println!(
-        "Starting SSGZ Patcher {0} for the {version} version",
-        env!("CARGO_PKG_VERSION")
-    );
+    println!("Starting SSGZ Patcher {VERSION_STR} for the {version} version");
 
     let extract_done = paths::extract_dol_exists(version);
     let dol_copied = paths::dol_copy_exists(version);
@@ -79,4 +94,9 @@ fn main() -> Result<(), Error> {
         "All done, happy speedrunning! Press Z and C simultaneously to access practice menus!"
     );
     Ok(())
+}
+
+
+fn do_gui() -> Result<(), Error> {
+    todo!();
 }
