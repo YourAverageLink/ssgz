@@ -47,7 +47,23 @@ jobs:
             ${{ runner.os }}-
       
       - name: Install Dioxus CLI
-        run: cargo install dioxus-cli
+        run: |
+          if ! command -v dx &> /dev/null; then
+            echo "Downloading pre-built Dioxus CLI..."
+            if [ "${{ runner.os }}" = "Linux" ]; then
+              curl -L https://github.com/DioxusLabs/dioxus/releases/download/v0.6.3/dx-x86_64-unknown-linux-gnu.tar.gz | tar xz
+              chmod +x dx
+              sudo mv dx /usr/local/bin/
+            elif [ "${{ runner.os }}" = "macOS" ]; then
+              curl -L https://github.com/DioxusLabs/dioxus/releases/download/v0.6.3/dx-x86_64-apple-darwin.tar.gz | tar xz
+              chmod +x dx
+              sudo mv dx /usr/local/bin/
+            elif [ "${{ runner.os }}" = "Windows" ]; then
+              curl -L https://github.com/DioxusLabs/dioxus/releases/download/v0.6.3/dx-x86_64-pc-windows-msvc.zip -o dx.zip
+              unzip dx.zip
+              mv dx.exe /c/Windows/System32/
+            fi
+          fi
       
       - name: Check formatting
         run: cargo fmt --check
