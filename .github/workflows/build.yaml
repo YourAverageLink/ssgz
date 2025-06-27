@@ -96,8 +96,18 @@ jobs:
       # - name: Run tests
       #   run: cargo test
       
-      - name: Bundle for desktop
-        run: dx bundle --release --target ${{ matrix.target }}
+      - name: Build for desktop
+        run: dx build --release --target ${{ matrix.target }}
+        shell: bash
+      
+      - name: Debug after build (wanna find out what exactly to copy below)
+        run: |
+          echo "Contents of target directory after bundle:"
+          find target -name "*.exe" -o -name "*.app" -o -name "ssgz" | head -10
+          echo "Contents of dist directory (if exists):"
+          ls -la dist/ || echo "dist directory not found"
+          echo "Looking for CSS files in bundle:"
+          find target -name "*.css" | head -10
         shell: bash
       
       - name: Create distribution directory
@@ -115,14 +125,6 @@ jobs:
       
       - name: Copy README
         run: cp README.md dist/
-        shell: bash
-      
-      - name: Copy assets
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            mkdir dist/assets
-            cp -r assets dist/assets
-          fi
         shell: bash
       
       - uses: SebRollen/toml-action@v1.2.0
