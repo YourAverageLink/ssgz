@@ -97,7 +97,7 @@ jobs:
           if [ "${{ runner.os }}" = "macOS" ]; then
             find target -name "*.app" -type d -exec cp -r {} dist/ \;
           else
-            find target -name "test${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
+            find target -name "ssgz${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
           fi
         shell: bash
       
