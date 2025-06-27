@@ -15,25 +15,25 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact: windows
             artifact_suffix: ""
-            executable_suffix: ".exe"
+            target_path: "windows/app"
           - name: MacOS Build x64
             os: macos-13
             target: x86_64-apple-darwin
             artifact: macos
             artifact_suffix: _intel
-            executable_suffix: ""
+            target_path: "macos"
           - name: MacOS Build arm64
             os: macos-14
             target: aarch64-apple-darwin
             artifact: macos
             artifact_suffix: _apple_silicon
-            executable_suffix: ""
+            target_path: "macos"
           - name: Linux Build
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact: linux
             artifact_suffix: ""
-            executable_suffix: ""
+            target_path: "linux/app"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -100,27 +100,12 @@ jobs:
         run: dx build --release --target ${{ matrix.target }}
         shell: bash
       
-      - name: Debug after build (wanna find out what exactly to copy below)
-        run: |
-          echo "Contents of target directory after bundle:"
-          find target -name "*.exe" -o -name "*.app" -o -name "ssgz" | head -10
-          echo "Contents of dist directory (if exists):"
-          ls -la dist/ || echo "dist directory not found"
-          echo "Looking for CSS files in bundle:"
-          find target -name "*.css" | head -10
-        shell: bash
-      
       - name: Create distribution directory
         run: mkdir -p dist
         shell: bash
       
       - name: Copy desktop artifacts
-        run: |
-          if [ "${{ runner.os }}" = "macOS" ]; then
-            find target -name "*.app" -type d -exec cp -r {} dist/ \;
-          else
-            find target -name "ssgz${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
-          fi
+        run: cp -r target/dx/ssgz/release/${{ matrix.target_path}} dist/
         shell: bash
       
       - name: Copy README
