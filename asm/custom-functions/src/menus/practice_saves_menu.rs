@@ -187,8 +187,8 @@ pub fn initialize_practice_saves() {
         description: "Saves for the CSWW No EBR Fast Faron BiT All Dungeons route."
     };
     let hundo = SpeedrunCategory {
-        name:      "100%",
-        base_path: "/saves/100",
+        name:      "100% (v5.1.3 Route)",
+        base_path: "/saves/100 v5_1_3",
         saves: vec![
             ("Start", "2 blank Hero Mode files with 99 of every treasure and bug."),
             ("Copy After Cave", "Save after the copy after Waterfall Cave"),
@@ -239,9 +239,71 @@ pub fn initialize_practice_saves() {
         ],
         description: "Saves for the v5.1.3 Imp1 Skip + Fast Faron BiT 100% route."
     };
+    let hundo_sc_delay = SpeedrunCategory {
+        name:      "100% (v5.2.0 Route)",
+        base_path: "/saves/100 v5_2_0",
+        saves: vec![
+            ("Start", "2 blank Hero Mode files with 99 of every treasure and bug."),
+            ("Copy After Cave", "Save after the copy after Waterfall Cave"),
+            ("Sealed Grounds", "Save just after entering Faron the first time"),
+            ("Faron Entry Statue", "Save after performing Sealed Grounds Skip"),
+            ("Deep Woods", "Save in Deep Woods before Skyview"),
+            ("Skyview 1 Start", "Save at the start of Skyview Temple"),
+            ("Skyview 1 After Copy", "Save in Skyview Temple after obtaining the Beetle and copying F1 -> F2"),
+            ("Skyview 1 Ghirahim", "Save in Skyview Temple before fighting Ghirahim"),
+            ("After Skyview", "Save at the prompt after Skyview Temple"),
+            ("Before Sealed Grounds 1", "Hacked save at the start of the return to Sealed Grounds"),
+            ("Eldin RBW", "Save before the Reverse BiTWarp to Eldin"),
+            ("ET Door RBM", "Save just before the RBM to open ET"),
+            ("ET Start", "Save at the start of Earth Temple"),
+            // ("Scaldera", "Save just before fighting Scaldera in Earth Temple"),
+            ("Batreaux Inside Door RBM", "Save after ET before the Batreaux door RBM"),
+            ("Lanayru Mine Entry", "Save after entering Lanayru the first time"),
+            ("Lanayru Gorge 2x20 RBM", "Save at Lanayru Gorge before the Thunder Dragon healing RBM"),
+            ("Machi RBM", "Save at Lanayru Gorge before the escort skip RBM"),
+            ("Gorge BiTWarp", "Save before the OoB BiTWarp in Lanayru Gorge"),
+            ("Early Boko Base RBW", "Save before RBW into Bokoblin Base for early items"),
+            ("Faron Trial RBW", "Save before RBW into Faron Silent Realm"),
+            ("Cistern RBW", "Save before RBW into Ancient Cistern"),
+            ("Lake Floria", "Save after Ancient Cistern at the Floria Waterfall statue"),
+            ("Raise LMF RBM", "Save before RBM to open Lanayru Mining Facility"),
+            ("LMF Start", "Save at the start of Lanayru Mining Facility"),
+            ("Moldarach", "Save just before fighting Moldarach in LMF"),
+            ("After LMF", "Save just after completing Lanayru Mining Facility"),
+            ("Sharkhead RBM", "Save before RBM to open up the Pirate Stronghold Sharkhead"),
+            ("Skyloft 3", "Save at the start of the third major Skyloft segment (after getting pumpkin soup)"),
+            ("Ballad RBM", "Save before RBM to obtain Ballad of the Goddess"),
+            ("Early Thunderhead", "Save before RBM to open the Thunderhead"),
+            ("ELTS", "Save before RBM to obtain Life Tree Seedling early"),
+            ("After Shipyard", "Save after completing the Shipyard in Sand Sea"),
+            ("Sandship Start", "Save at the start of Sandship"),
+            ("Eldin 2 RBW", "Save before the second RBW to the start of Eldin Volcano"),
+            ("Gate of Time RBM", "Save before RBM to open the Gate of Time early"),
+            ("Sailcloth Setup RBW", "Save before the RBW to setup obtaining the Sailcloth"),
+            ("Party Wheel Pickup", "Save in Lanayru before obtaining the Party Wheel"),
+            ("Northeast Sky Cleanup", "Save in the Sky before opening various Goddess Chests"),
+            ("Boko Base RBW", "Save before second RBW to complete Bokoblin Base"),
+            ("FS Flame Wall RBM", "Save before RBM to remove flames in front of Fire Sanctuary"),
+            ("FS Start", "Save at the start of Fire Sanctuary"),
+            ("Skyloft 5", "Save at the start of the fifth major Skyloft segment (after FS)"),
+            ("Lumpy Pumpkin", "Save before completing Lumpy Pumpkin sidequests"),
+            ("Volcano East", "Save at Volcano East for Eldin cleanup before SotH segments"),
+            ("Imprisoned 3", "Save before fighting the third version of The Imprisoned"),
+            ("Tadtones", "Save in the Sealed Temple before the Tadtones segment"),
+            ("After Tadtones", "Save after obtaining Faron's part of the Song of the Hero"),
+            ("Boss Rush", "Save before playing the Boss Rush minigame"),
+            ("Farores Courage RBM", "Save before RBM to obtain Farore's Courage"),
+            ("Skyloft 6", "Save at the start of the sixth major Skyloft segment (after Thunderhead cleanup)"),
+            ("After Skyloft Trial", "Save after completing the Skyloft Silent Realm"),
+            ("Courage Lever RBM", "Save before RBM to open the bars to the Triforce of Courage early"),
+            ("Horde", "Save in Temple of Hylia before the final boss gauntlet"),
+        ],
+        description: "Saves for the v5.2.0 Sailcloth Delay 100% route."
+    };
     unsafe {
         PRACTICE_SAVES_MENU.categories.push(any_percent);
         PRACTICE_SAVES_MENU.categories.push(all_dungeons);
         PRACTICE_SAVES_MENU.categories.push(hundo);
+        PRACTICE_SAVES_MENU.categories.push(hundo_sc_delay);
     }
 }
