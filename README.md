@@ -4,8 +4,10 @@ A ROM hack for *The Legend of Zelda: Skyward Sword* aimed to help out speedrunne
 
 ## Downloads / Usage
 
-ssgz is a command-line program that may be run from source or run as an executable from the Releases tab.
-It accepts one argument for the version you wish to patch: `us` for the NTSC North American 1.0 version, or `jp` for the Japanese version.
+ssgz is a program that may be run from source or run as an executable from the Releases tab. It features a UI from which you may extract a copy of Skyward Sword and apply practice patches.
+
+It can optionally accept the `--noui` argument to run solely in the command line, along with another argument for the version you wish to patch: `us` for the NTSC North American 1.0 version, or `jp` for the Japanese version.
+
 You will need to provide a clean `.iso` file of either of these versions (version code `SOUE01` or `SOUJ01`, respectively).
 
 ### Running from Source 
@@ -15,20 +17,25 @@ You will need to provide a clean `.iso` file of either of these versions (versio
     ``git clone https://github.com/YourAverageLink/ss-practice``
     
     ``cd ss-practice``
-- Run (release mode is recommended for optimal performance): `cargo run --release [us | jp]`
+- Run (release mode is recommended for optimal performance): `cargo run --release`
+
+ssgz uses Dioxus to power its UI, so you may also wish to install the [Dioxus CLI for hotreloading with `dx serve --release`](https://dioxuslabs.com/learn/0.6/getting_started/#)
 
 ### Running an executable:
-- Windows:
-  - In the command line, navigate to the directory `ss-practice` is installed, and run `ss-practice.exe [us | jp]`
-- MacOS / Linux:
-  - In the terminal, navigate to the directory `ss-practice` is installed, and run `./ss-practice [us | jp]`
+- Windows / Linux:
+  - Simply open the executable (or optionally, run with no UI in the command line with ) `ssgz.exe --noui [us | jp]` on Windows or `./ssgz --noui [us | jp]`
+- MacOS
+  - Unfortunately, the MacOS `.app` file won't work on a fresh install due to code signing issues. However, you can make it executable after download by navigating to where it was downloaded and running `xattr -c Ssgz.app`. This will clear Apple's Quarantine flag and allow you to run the program.
+  - If you wish to run with noui, you will need to run `./Ssgz.app/Contents/MacOS/ssgz --noui [us | jp]`
 
+When running with no UI, the program will automatically perform the extract and patching steps below, asking if you want to create a patched ISO.
 
-The program will ask you to provide your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `extract/[version]`, while copying the original `main.dol` file to `original-dol/[version]`. A progress bar will display the extraction progress.
-It will then copy a patched dol file over `main.dol` in the extract, copy practice saves, and copy the custom REL file. **Though some large files (namely hint videos / credits videos) are removed to save on space,
+To setup patches for your version of the game, click `Extract ISO`. It will then ask for your copy of *Skyward Sword*. Once you select a valid iso, it will begin extracting it to `extract/[version]`, while copying the original `main.dol` file to `original-dol/[version]`. A progress bar will display the extraction progress. **Though some large files (namely hint videos / credits videos) are removed to save on space,
 note that the extract will still take up more than 2 GB of space.**
 
-Once patching is done, it will ask if you wish to create a new patched iso, and if so, where to put it. A progress bar will display the ISO packing progress. You may play this iso through Dolphin or on console with a USB loader.
+You may now click `Write Patched ISO`, and it will then copy a patched dol file over `main.dol` in the extract, copy practice saves, and copy the custom REL file. 
+
+Once patching is done, it will ask where to put the a patched ISO. A progress bar will display the ISO packing progress. You may play this ISO through Dolphin or on console with a USB loader.
 
 ## Features / In-Game Usage
 
