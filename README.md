@@ -83,7 +83,9 @@ The Cheats Menu contains some useful cheats that will remain active as long as t
 The Practice Saves Menu allows you to load practice saves for certain speedrun categories, useful for practicing certain parts of the run. Saves are included for...
 - Any% (on the Ghirahim 3 Escape + Fast Faron BiT route, the recommended route at the time of writing)
 - All Dungeons (on the Fast Faron BiT CSWW route, the recommended route at the time of writing)
-- 100% (on the Imp1 Skip + Fast Faron BiT route, the recommended route at the time of writing)
+- 100% (sets for both the Imp1 Skip + Fast Faron BiT route and the Sailcloth delay route)
+- Any% Restricted BiT (on the Ghirahim 3 Escape route with the bed/death trick to skip Scrapper Escort)
+- Any% No BiT (where files 1 through 3 are described in the description field for each save)
 
 ### Flag Menu
 

@@ -300,10 +300,73 @@ pub fn initialize_practice_saves() {
         ],
         description: "Saves for the v5.2.0 Sailcloth Delay 100% route."
     };
+    let restricted_bit = SpeedrunCategory {
+        name: "Any% Restricted BiT",
+        base_path: "/saves/Any Restricted BiT",
+        saves: vec![
+            ("Start", "1 blank Hero Mode file"),
+            ("Goddess Sword RBM", "Save before RBMing the Goddess Sword"),
+            ("Fi Escort Skip", "Save during Fi chase before BiTSave to skip escort"),
+            ("Behind the Temple", "Saved at the Behind the Temple statue after Sealed Grounds"),
+            ("Before Deep Woods", "Save just before Deep Woods after Slingshot"),
+            ("Faron Trial + ETH RBM", "Save before RBMing open the Faron trial & Thunderhead"),
+            ("Faron Trial", "Save at Viewing Platform before the Faron trial"),
+            ("Skyview", "Saved at the start of Skyview Temple"),
+            ("Eldin Pillar RBM", "Save before RBM to open the Eldin Pillar"),
+            ("Eldin 1", "Save at the start of Eldin Volcano"),
+            ("ET Door RBM", "Save at Volcano Ascent before RBM to open ET"),
+            ("ET Bridge RBM", "Save before RBM to raise bridge in ET"),
+            ("ELTS", "Save before BiTSave + Early Life Tree Seedling RBM"),
+            ("Lanayru", "Save at the start of Lanayru Mine"),
+            ("Lanayru Trial RBM", "Save just before the RBM to open the Lanayru trial"),
+            ("Wryna Crystals RBM", "Save before BiTSave + 5 Crystals RBM"),
+            ("Eldin 2", "Save at Volcano Ascent before Eldin Trial RBM"),
+            ("Rope Floria", "Save at Faron Woods Entry before Rope Floria trick"),
+            ("Ancient Cistern", "Save at the start of Ancient Cistern"),
+            ("Scrapper Escort Skip", "Save before Bed/Death Trick to Volcano Summit"),
+            ("Fire Sanctuary", "Save at the start of Fire Sanctuary"),
+            ("Imprisoned 2", "Save before fighting The Imprisoned before Gate of Time"),
+            ("Skyloft LA BiTSave", "Save before BiTSave back to Skyloft after TMS"),
+            ("Before Levias", "Save at Lumpy Pumpkin after getting pumpkin soup"),
+            ("Minecart Escort", "Save at the start of Lanayru Gorge"),
+            ("G3 Escape", "Save after healing the Thunder Dragon"),
+        ],
+        description: "Saves for the G3 Escape + Escort Skip File Dupe Restricted BiT Route."
+    };
+    let no_bit = SpeedrunCategory {
+        name: "Any% No BiT",
+        base_path: "/saves/Any No BiT",
+        saves: vec![
+            ("Start", "1 blank Hero Mode file"),
+            ("Skyloft 1", "Save Loftwing, Fi Chase, Faron Pillar Fi Text Skip"),
+            ("Faron 1", "Sealed Temple, Kikwis, Deep Woods"),
+            ("Skyview 1", "Skyview start, Stalfos, Ghirahim 1"),
+            ("Eldin 1", "Start Eldin, Digging Mitts, 5 Keys"),
+            ("Earth Temple", "Earth Temple, Ball Ride, Scaldera"),
+            ("Lanayru 1", "Start Lanayru, Enter Desert, Fire Node"),
+            ("Lanayru Mining Facility", "Enter LMF, Minecart Ride, Moldarach"),
+            ("Imprisoned 1", "File saved before Imprisoned 1"),
+            ("Skyloft 2", "Start turning windmills (already talked to Gaepora)"),
+            ("Faron 2", "Faron Trial, Skyview 2, Triple Stalfos"),
+            ("Ancient Cistern", "Ancient Cistern, Stalmaster, Koloktos"),
+            ("Lanaryu Trial", "File saved before Lanaryu Trial"),
+            ("Sand Sea", "Skippers Retreat, Shipyard, Pirate Stronghold"),
+            ("Sandship", "Sandship, Scervo, Mast Skip"),
+            ("Tentalus", "File saved before fighting Tentalus"),
+            ("Eldin 2", "Eldin Trial, Escort, Enter FS"),
+            ("Fire Sanctuary", "Double Magmamos, Ghirahim 2"),
+            ("Pre-SotH", "Imp 2, Levias"),
+            ("Minecart Escort", "Save at the start of the Minecart Escort"),
+            ("Endgame", "G3 Escape, Hylia's Realm Statue, Demise"),
+        ],
+        description: "Saves for No BiT (slots 1-3 described in description)."
+    };
     unsafe {
         PRACTICE_SAVES_MENU.categories.push(any_percent);
         PRACTICE_SAVES_MENU.categories.push(all_dungeons);
         PRACTICE_SAVES_MENU.categories.push(hundo);
         PRACTICE_SAVES_MENU.categories.push(hundo_sc_delay);
+        PRACTICE_SAVES_MENU.categories.push(restricted_bit);
+        PRACTICE_SAVES_MENU.categories.push(no_bit);
     }
 }
