@@ -112,6 +112,34 @@ jobs:
         run: cp README.md dist/
         shell: bash
       
+      # MacOS app isn't usable out of the box, so need to include a script to remove the quarantine attribute
+      - name: Create launch script for macOS
+        if: runner.os == 'macOS'
+        run: |
+          cat > dist/RUN_BEFORE_USE.command << 'EOF'
+          #!/bin/bash
+          # find script dir
+          DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+          
+          # find app bundle
+          APP_BUNDLE=$(find "$DIR" -name "*.app" -type d | head -1)
+          
+          if [ -n "$APP_BUNDLE" ]; then
+            echo "Removing quarantine attribute from $(basename "$APP_BUNDLE")..."
+            xattr -c "$APP_BUNDLE"
+            echo "Done! You can now run $(basename "$APP_BUNDLE")"
+            echo "Press any key to close this window..."
+            read -n 1
+          else
+            echo "No .app bundle found in $DIR"
+            echo "Press any key to close this window..."
+            read -n 1
+            exit 1
+          fi
+          EOF
+          chmod +x dist/RUN_BEFORE_USE.command
+        shell: bash
+      
       - uses: SebRollen/toml-action@v1.2.0
         id: read_toml
         with:

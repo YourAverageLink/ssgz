@@ -24,9 +24,11 @@ ssgz uses Dioxus to power its UI, so you may also wish to install the [Dioxus CL
 ### Running an executable:
 - Windows / Linux:
   - Simply open the executable (or optionally, run with no UI in the command line with ) `ssgz.exe --noui [us | jp]` on Windows or `./ssgz --noui [us | jp]`
+  - Note that the included `assets` directory must be in the same folder as the executable for the css to properly load
 - MacOS
-  - Unfortunately, the MacOS `.app` file won't work on a fresh install due to code signing issues. However, you can make it executable after download by navigating to where it was downloaded and running `xattr -c Ssgz.app`. This will clear Apple's Quarantine flag and allow you to run the program.
+  - Unfortunately, the MacOS `.app` file won't work on a fresh install due to code signing issues. However, you can make it executable after download by double-clicking the included `RUN_BEFORE_USE.command` file.
   - If you wish to run with noui, you will need to run `./Ssgz.app/Contents/MacOS/ssgz --noui [us | jp]`
+  - The `.app` file includes its own assets, so you won't need an assets folder
 
 When running with no UI, the program will automatically perform the extract and patching steps below, asking if you want to create a patched ISO.
 
