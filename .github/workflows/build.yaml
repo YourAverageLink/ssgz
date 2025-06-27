@@ -78,14 +78,8 @@ jobs:
       # - name: Run tests
       #   run: cargo test
       
-      - name: Build/Bundle for desktop
-        run: |
-          if [ "${{ runner.os }}" = "macOS" ]; then
-            # bundling is required to include the app icon
-            dx bundle --release --package-types macos --target ${{ matrix.target }}
-          else
-            dx build --release
-          fi
+      - name: Bundle for desktop
+        run: dx bundle --release --target ${{ matrix.target }}
         shell: bash
       
       - name: Create distribution directory
