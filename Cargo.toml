@@ -1,5 +1,5 @@
 [package]
-name = "ss-practice"
+name = "ssgz"
 version = "0.1.4"
 edition = "2024"
 
@@ -21,3 +21,22 @@ include_dir = { version = "0.7.4", features = ["glob"] }
 serde_yml = "0.0.12"
 serde = { version = "1.0.219", features = ["derive"] }
 dialoguer = "0.11.0"
+dioxus = { version = "0.6.0" }
+futures = "0.3.31"
+tokio = "1.45.1"
+
+[features]
+default = ["desktop"]
+desktop = ["dioxus/desktop"]
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"

@@ -12,31 +12,28 @@ jobs:
         include:
           - name: Windows Build
             os: windows-latest
-            target: x86_64-pc-windows-msvc
             artifact: windows
             artifact_suffix: ""
             executable_suffix: ".exe"
           - name: MacOS Build x64
             os: macos-13
-            target: x86_64-apple-darwin
             artifact: macos
             artifact_suffix: _intel
             executable_suffix: ""
           - name: MacOS Build arm64
             os: macos-14
-            target: aarch64-apple-darwin
             artifact: macos
             artifact_suffix: _apple_silicon
             executable_suffix: ""
           - name: Linux Build
             os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
             artifact: linux
             artifact_suffix: ""
             executable_suffix: ""
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
@@ -44,31 +41,54 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-desktop-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-desktop-
+            ${{ runner.os }}-
+      
+      - name: Install Dioxus CLI
+        run: cargo install dioxus-cli
+      
       - name: Check formatting
         run: cargo fmt --check
+      
       # No tests are currently included
       # - name: Run tests
       #   run: cargo test
-      - name: Build release
-        run: cargo build --release --target ${{ matrix.target }}
+      
+      - name: Build/Bundle for desktop
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            # bundling is required to include the app icon
+            dx bundle --release --package-types macos
+          else
+            dx build --release
+          fi
+        shell: bash
+      
       - name: Create distribution directory
         run: mkdir -p dist
         shell: bash
-      - name: Copy executable to dist
+      
+      - name: Copy desktop artifacts
         run: |
-          cp target/${{ matrix.target }}/release/ss-practice${{ matrix.executable_suffix }} dist/
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            find target -name "*.app" -type d -exec cp -r {} dist/ \;
+          else
+            find target -name "test${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
+          fi
         shell: bash
+      
       - name: Copy README
         run: cp README.md dist/
         shell: bash
+      
       - uses: SebRollen/toml-action@v1.2.0
         id: read_toml
         with:
           file: "Cargo.toml"
           field: "package.version"
+      
       - uses: actions/upload-artifact@v4
         with:
           name: SSGZ ${{ steps.read_toml.outputs.value }} (${{ matrix.artifact }}${{ matrix.artifact_suffix }})

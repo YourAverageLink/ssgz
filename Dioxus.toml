@@ -1,0 +1,14 @@
+[application]
+name = "Skyward Sword GZ"
+
+[bundle]
+identifier = "com.ssgz"
+publisher = "SSGZ"
+icon = [
+    "assets/GZIcon.icns",
+    "assets/GZIcon.ico",
+    "assets/GZIcon.png",
+]
+
+[web.app]
+title = "Skyward Sword GZ"
