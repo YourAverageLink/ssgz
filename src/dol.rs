@@ -1,3 +1,5 @@
+use anyhow::Context;
+
 const DOL_TEXT_SECTION_COUNT: usize = 7;
 const DOL_DATA_SECTION_COUNT: usize = 11;
 
@@ -54,10 +56,10 @@ impl Dol {
         None
     }
 
-    pub fn write_data_u32(&mut self, address: u32, value: u32) {
+    pub fn write_data_u32(&mut self, address: u32, value: u32) -> anyhow::Result<()> {
         let offset = self
             .address_to_offset(address)
-            .expect(format!("Address {address} is not found in any DOL sections.").as_str())
+            .with_context(|| format!("Address {address} is not found in any DOL sections."))?
             as usize;
         let end = offset + 4;
         if self.data.len() < end {
@@ -66,10 +68,15 @@ impl Dol {
         assert!(end <= self.data.len());
         let bytes = value.to_be_bytes();
         self.data[offset..end].copy_from_slice(&bytes);
+
+        Ok(())
     }
 
-    pub fn write_data_bytes(&mut self, address: u32, bytes: &[u8]) {
-        let offset = self.address_to_offset(address).unwrap() as usize;
+    pub fn write_data_bytes(&mut self, address: u32, bytes: &[u8]) -> anyhow::Result<()> {
+        let offset = self
+            .address_to_offset(address)
+            .with_context(|| format!("Address {address} is not found in any DOL sections."))?
+            as usize;
         let end = offset + bytes.len();
         if self.data.len() < end {
             self.data.resize(end, 0);
@@ -77,6 +84,8 @@ impl Dol {
         assert!(end <= self.data.len());
 
         self.data[offset..end].copy_from_slice(bytes);
+
+        Ok(())
     }
 
     pub fn save_changes(&mut self) {

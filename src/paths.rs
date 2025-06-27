@@ -57,7 +57,7 @@ pub fn dol_copy_exists(version: GameVersion) -> bool {
     original_dol_path(version).exists()
 }
 
-pub fn copy_dol_after_extract(version: GameVersion) -> Result<(), anyhow::Error> {
+pub fn copy_dol_after_extract(version: GameVersion) -> anyhow::Result<()> {
     let src_path = modified_dol_path(version); // after the extract, this dol is still clean
     let dest_path = original_dol_path(version);
     fs::create_dir_all(dest_path.parent().unwrap())?;

@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::hex;
-use anyhow::Error;
+use anyhow::{Context, Error};
 
 use binrw::{BinWrite, BinWriterExt};
 use clap::ValueEnum;
@@ -15,7 +15,6 @@ use disc_riider::{
     Fst, FstNode, WiiIsoReader, WiiPartitionReadInfo, builder::build_from_directory,
     structs::WiiPartType,
 };
-use indicatif::ProgressBar;
 use sha1::{Digest, Sha1};
 
 struct Section {
@@ -27,13 +26,13 @@ struct Section {
 pub struct WiiIsoExtractor {
     iso: WiiIsoReader<fs::File>,
     partition: Section,
-    version: GameVersion,
+    pub(crate) version: GameVersion,
 }
 
 pub fn binrw_write_file(
     p: &Path,
     value: &impl for<'a> BinWrite<Args<'a> = ()>,
-) -> Result<(), Error> {
+) -> anyhow::Result<()> {
     let mut f = fs::File::create(p)?;
     f.write_be(value)?;
     Ok(())
@@ -119,7 +118,7 @@ pub enum HashMismatchError {
 }
 
 impl WiiIsoExtractor {
-    pub fn new(path: PathBuf, version: GameVersion) -> Result<Self, Error> {
+    pub fn new_with_version(path: PathBuf, version: GameVersion) -> anyhow::Result<Self> {
         let iso_file = fs::File::open(&path)?;
         let mut iso = WiiIsoReader::open(iso_file)?;
         let section_str = "DATA".to_owned();
@@ -130,7 +129,7 @@ impl WiiIsoExtractor {
             .iter()
             .find(|p| p.get_type() == part_type)
             .cloned()
-            .unwrap();
+            .with_context(|| "Couldn't find the DATA partition!")?;
 
         let partition_reader = iso.open_partition(partition)?;
         let section = Section {
@@ -138,20 +137,54 @@ impl WiiIsoExtractor {
             fst: partition_reader.get_fst().clone(),
             partition_reader,
         };
-        Ok(WiiIsoExtractor {
+        let mut instance = WiiIsoExtractor {
             iso,
             partition: section,
             version,
-        })
+        };
+        instance.validate()?;
+        Ok(instance)
     }
 
-    pub fn get_dol_hash(&mut self) -> Result<[u8; 20], Error> {
+    /*
+    pub fn new(path: PathBuf) -> anyhow::Result<Self> {
+        let iso_file = fs::File::open(&path)?;
+        let mut iso = WiiIsoReader::open(iso_file)?;
+        let section_str = "DATA".to_owned();
+        let part_type = WiiPartType::Data;
+
+        let partition = iso
+            .partitions()
+            .iter()
+            .find(|p| p.get_type() == part_type)
+            .cloned()
+            .with_context(|| "Couldn't find the DATA partition!")?;
+
+        let partition_reader = iso.open_partition(partition)?;
+        let section = Section {
+            part: section_str,
+            fst: partition_reader.get_fst().clone(),
+            partition_reader,
+        };
+        // Temporarily create with unknown version, then get version from dol hash
+        let mut instance = WiiIsoExtractor {
+            iso,
+            partition: section,
+            version: GameVersion::Unknown,
+        };
+        let hash = instance.get_dol_hash()?;
+        instance.version = GameVersion::from_hash(hash);
+        instance.validate()?;
+        Ok(instance)
+    }
+    */
+
+    pub fn get_dol_hash(&mut self) -> anyhow::Result<[u8; 20]> {
         let dol = self.partition.partition_reader.read_dol(&mut self.iso)?;
         let mut hasher = Sha1::new();
         hasher.update(&dol);
         Ok(hasher.finalize().try_into().unwrap())
     }
-
     // Verify that the given ISO has the right DOL hash
     pub fn validate(&mut self) -> Result<(), HashMismatchError> {
         let hash = self
@@ -174,7 +207,28 @@ impl WiiIsoExtractor {
         Ok(())
     }
 
-    pub fn extract_to(&mut self, path: PathBuf) -> Result<(), Error> {
+    pub fn size_of_extract(&mut self) -> anyhow::Result<usize> {
+        let mut total_bytes = 0usize;
+        self.partition
+            .fst
+            .callback_all_files::<std::io::Error, _>(&mut |_, node| {
+                if let FstNode::File { length, name, .. } = node {
+                    if !name.ends_with(".thp") {
+                        total_bytes += *length as usize;
+                    }
+                }
+
+                Ok(())
+            })?;
+
+        Ok(total_bytes)
+    }
+
+    pub fn extract_to<T: FnMut(u64)>(
+        &mut self,
+        path: PathBuf,
+        callback: &mut T,
+    ) -> anyhow::Result<()> {
         let disc_header = self.iso.get_header().clone();
         let region = self.iso.get_region().clone();
         let section_path = path.join(format!("{}", self.partition.part));
@@ -189,29 +243,6 @@ impl WiiIsoExtractor {
             .partition_reader
             .extract_system_files(&section_path, &mut self.iso)?;
         let mut buffer = [0; 0x10_000];
-        // count files
-        let mut total_bytes = 0usize;
-        self.partition
-            .fst
-            .callback_all_files::<std::io::Error, _>(&mut |_, node| {
-                if let FstNode::File { length, name, .. } = node {
-                    if !name.ends_with(".thp") {
-                        total_bytes += *length as usize;
-                    }
-                }
-
-                Ok(())
-            })?;
-
-        println!("Extracting files...");
-        let bar = ProgressBar::new(total_bytes as u64);
-        bar.set_style(
-            indicatif::ProgressStyle::with_template(
-                "{spinner:.green} [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({eta})",
-            )
-            .unwrap()
-            .progress_chars("#>-"),
-        );
         let mut done_bytes = 0usize;
         let mut wii_encrypt_reader = self
             .partition
@@ -244,7 +275,7 @@ impl WiiIsoExtractor {
                             outfile.write_all(&buffer[..bytes_read])?;
                             done_bytes += bytes_read;
                             bytes_left -= bytes_read;
-                            bar.inc(bytes_read as u64);
+                            callback(done_bytes as u64);
                             // println!("{}", bytes_left);
                         }
                     }
@@ -271,12 +302,15 @@ impl WiiIsoExtractor {
                 .ticket,
         )?;
 
-        bar.finish_with_message("Extraction done.");
         Ok(())
     }
 }
 
-pub fn rebuild_from_directory(src_dir: PathBuf, dest_path: PathBuf) -> Result<(), Error> {
+pub fn rebuild_from_directory<T: FnMut(u8)>(
+    src_dir: PathBuf,
+    dest_path: PathBuf,
+    callback: &mut T,
+) -> anyhow::Result<()> {
     let mut dest_file = OpenOptions::new()
         .truncate(true)
         .read(true)
@@ -284,17 +318,6 @@ pub fn rebuild_from_directory(src_dir: PathBuf, dest_path: PathBuf) -> Result<()
         .create(true)
         .open(&dest_path)?;
     println!("Rebuilding ISO...");
-    let bar = ProgressBar::new(100);
-    bar.set_style(
-        indicatif::ProgressStyle::with_template(
-            "{spinner:.green} [{wide_bar:.cyan/blue}] {percent}% ({eta})",
-        )
-        .unwrap()
-        .progress_chars("#>-"),
-    );
-    build_from_directory(&src_dir, &mut dest_file, &mut |done_percent| {
-        bar.set_position(done_percent as u64);
-    })?;
-    bar.finish_with_message("Rebuilding done.");
+    build_from_directory(&src_dir, &mut dest_file, callback)?;
     Ok(())
 }
