@@ -4,7 +4,7 @@ use crate::{
 use dioxus::prelude::*;
 use std::sync::mpsc;
 
-const FAVICON: Asset = asset!("/assets/GZIcon.ico");
+const FAVICON: Asset = asset!("/icons/icon.ico");
 const MAIN_CSS: Asset = asset!("/assets/gz.css");
 
 const SUPPORTED_VERSIONS: [GameVersion; 2] = [GameVersion::NTSC1_0, GameVersion::JP];
