@@ -39,8 +39,8 @@ pub fn do_gz_patches(version: GameVersion) -> anyhow::Result<()> {
 
 fn copy_practice_saves(patch_data: &PatchData) -> anyhow::Result<()> {
     let target_path = extract_practice_saves_path(patch_data.version);
-    // Only want to copy wiiking2.sav, skip.dat, and banner.bin
-    let file_types = ["wiiking2.sav", "skip.dat", "banner.bin"];
+    // Only want to copy wiiking2.sav & skip.dat
+    let file_types = ["wiiking2.sav", "skip.dat"];
     let mut files_to_copy = Vec::new();
 
     for filename in file_types {
