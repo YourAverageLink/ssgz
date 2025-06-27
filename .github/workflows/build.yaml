@@ -57,6 +57,7 @@ jobs:
             echo "Dioxus CLI already installed"
             dx --version
           fi
+        shell: bash
       
       - name: Check formatting
         run: cargo fmt --check
