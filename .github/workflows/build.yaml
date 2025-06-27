@@ -52,7 +52,7 @@ jobs:
         run: |
           if ! command -v dx &> /dev/null; then
             echo "Installing Dioxus CLI..."
-            cargo install dioxus-cli --version 0.6.3
+            cargo binstall dioxus-cli --version 0.6.3
           else
             echo "Dioxus CLI already installed"
             dx --version
