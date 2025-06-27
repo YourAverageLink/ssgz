@@ -109,12 +109,20 @@ jobs:
           if [ "${{ runner.os }}" = "macOS" ]; then
             find target -name "*.app" -type d -exec cp -r {} dist/ \;
           else
-            find target -name "*${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
+            find target -name "ssgz${{ matrix.executable_suffix }}" -type f -executable -exec cp {} dist/ \;
           fi
         shell: bash
       
       - name: Copy README
         run: cp README.md dist/
+        shell: bash
+      
+      - name: Copy assets
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mkdir dist/assets
+            cp -r assets dist/assets
+          fi
         shell: bash
       
       - uses: SebRollen/toml-action@v1.2.0
