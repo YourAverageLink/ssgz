@@ -8,7 +8,7 @@ crate-type=["staticlib"]
 
 # Required so the asm scripts don't try to compile / format the patcher code
 [workspace]
-exclude = ["ss-practice"]
+exclude = ["ssgz"]
 
 [features]
 default = []

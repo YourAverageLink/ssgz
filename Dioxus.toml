@@ -6,7 +6,7 @@ identifier = "com.ssgz"
 publisher = "SSGZ"
 icon = [
     "assets/GZIcon.icns",
-    "assets/GZIcon.ico",
+    "assets\\GZIcon.ico",
     "assets/GZIcon.png",
 ]
 
