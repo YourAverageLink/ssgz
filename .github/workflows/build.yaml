@@ -49,15 +49,9 @@ jobs:
             ${{ runner.os }}-
       
       - name: Install Dioxus CLI
-        run: |
-          if ! command -v dx &> /dev/null; then
-            echo "Installing Dioxus CLI..."
-            cargo binstall dioxus-cli --version 0.6.3
-          else
-            echo "Dioxus CLI already installed"
-            dx --version
-          fi
-        shell: bash
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dioxus-cli@0.6.3
       
       - name: Check formatting
         run: cargo fmt --check
