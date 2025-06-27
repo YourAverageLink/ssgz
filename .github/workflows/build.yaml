@@ -85,14 +85,9 @@ jobs:
             build-essential
       
       - name: Install Dioxus CLI
-        run: |
-          if ! command -v dx &> /dev/null; then
-            cargo install dioxus-cli@0.6.3
-          else
-            echo "Dioxus CLI already installed"
-            dx --version
-          fi
-        shell: bash
+        uses: taiki-e/install-action@v2
+        with:
+          tool: dioxus-cli@0.6.3
       
       - name: Check formatting
         run: cargo fmt --check
