@@ -96,7 +96,6 @@ jobs:
         run: |
           if [ "${{ runner.os }}" = "macOS" ]; then
             find target -name "*.app" -type d -exec cp -r {} dist/ \;
-            # Create a ZIP for easier distribution on macOS
             cd dist
             zip -r "Ssgz${{ matrix.artifact_suffix }}.zip" *.app
             rm -rf *.app  # Remove the .app to only keep the ZIP
