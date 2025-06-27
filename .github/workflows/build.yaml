@@ -12,21 +12,25 @@ jobs:
         include:
           - name: Windows Build
             os: windows-latest
+            target: x86_64-pc-windows-msvc
             artifact: windows
             artifact_suffix: ""
             executable_suffix: ".exe"
           - name: MacOS Build x64
             os: macos-13
+            target: x86_64-apple-darwin
             artifact: macos
             artifact_suffix: _intel
             executable_suffix: ""
           - name: MacOS Build arm64
             os: macos-14
+            target: aarch64-apple-darwin
             artifact: macos
             artifact_suffix: _apple_silicon
             executable_suffix: ""
           - name: Linux Build
             os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
             artifact: linux
             artifact_suffix: ""
             executable_suffix: ""
@@ -74,8 +78,14 @@ jobs:
       # - name: Run tests
       #   run: cargo test
       
-      - name: Build for desktop
-        run: dx build --release
+      - name: Build/Bundle for desktop
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            # bundling is required to include the app icon
+            dx bundle --release --package-types macos --target ${{ matrix.target }}
+          else
+            dx build --release
+          fi
         shell: bash
       
       - name: Create distribution directory
