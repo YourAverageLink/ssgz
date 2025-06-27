@@ -5,7 +5,7 @@ name = "Skyward Sword GZ"
 identifier = "com.ssgz"
 publisher = "SSGZ"
 icon = [
-    "icons/.icns",
+    "icons/icon.icns",
     "icons/icon.ico",
     "icons/icon.png",
 ]
