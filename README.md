@@ -14,9 +14,9 @@ You will need to provide a clean `.iso` file of either of these versions (versio
 - Install Rust (if necessary): https://rustup.rs/
 - Clone this repo
 
-    ``git clone https://github.com/YourAverageLink/ss-practice``
+    ``git clone https://github.com/YourAverageLink/ssgz``
     
-    ``cd ss-practice``
+    ``cd ssgz``
 - Run (release mode is recommended for optimal performance): `cargo run --release`
 
 ssgz uses Dioxus to power its UI, so you may also wish to install the [Dioxus CLI for hotreloading with `dx serve --release`](https://dioxuslabs.com/learn/0.6/getting_started/#)
