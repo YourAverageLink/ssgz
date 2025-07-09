@@ -34,6 +34,21 @@ pub fn is_active() -> bool {
 pub fn do_global_updates() {
     cheats_menu::update_cheats();
     tricks_menu::update_tricks();
+    if main_menu::check_extra_hotkey_pressed(crate::system::button::DPAD_RIGHT) {
+        action_menu::action_save_file();
+        // Show guardian potion running out to indicate save
+        let current_file = crate::game::file_manager::get_file_A();
+        current_file.guardianPotionTimer = 1;
+    }
+    else if main_menu::check_extra_hotkey_pressed(crate::system::button::DPAD_LEFT) {
+        action_menu::action_load_position();
+    }
+    else if main_menu::check_extra_hotkey_pressed(crate::system::button::DPAD_UP) {
+        action_menu::action_load_file_direct();
+    }
+    else if main_menu::check_extra_hotkey_pressed(crate::system::button::DPAD_DOWN) {
+        action_menu::action_load_file();
+    }
 }
 
 pub fn initialize() {

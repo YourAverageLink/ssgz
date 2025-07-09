@@ -325,7 +325,7 @@ pub fn update_tricks() {
         ActiveTrick::None => {},
         ActiveTrick::WCCS => {
             check_wccs();
-            if is_pressed(DPAD_LEFT) {
+            if ButtonBuffer::check_combo_down_up(DPAD_LEFT, C) {
                 reload_wccs_prompt();
             } else if let Some(link) = player::as_mut() {
                 if link.pos.z < 5205f32 {
@@ -338,13 +338,13 @@ pub fn update_tricks() {
         ActiveTrick::Guay => {
             let health = file_manager::get_current_health();
             // Auto-reload on successful deathwarp
-            if is_pressed(DPAD_LEFT) || health == 0 {
+            if ButtonBuffer::check_combo_down_up(DPAD_LEFT, C) || health == 0 {
                 reload_guay();
             }
         },
         ActiveTrick::KeeseYeet => {
             // Auto-reload on successful Keese Yeet
-            if is_pressed(DPAD_LEFT) || SceneflagManager::check_global(14, 29) {
+            if ButtonBuffer::check_combo_down_up(DPAD_LEFT, C) || SceneflagManager::check_global(14, 29) {
                 reload_keese_yeet();
             } else if let Some(link) = player::as_mut() {
                 if link.pos.x >= 4999f32 && link.pos.z <= 3451f32 && link.angle.y == -16384 {
@@ -355,7 +355,7 @@ pub fn update_tricks() {
             }
         },
         ActiveTrick::EB => {
-            if is_pressed(DPAD_LEFT) {
+            if ButtonBuffer::check_combo_down_up(DPAD_LEFT, C) {
                 reload_eb();
             } else if let Some(link) = player::as_mut() {
                 if link.pos.z < 2500f32 {

@@ -9,6 +9,7 @@ use crate::utils::menu::SimpleMenu;
 use crate::menus::Menu;
 use crate::menus::main_menu;
 use crate::game::reloader::in_reset;
+use crate::system::button::ButtonBuffer;
 use core::option::Option;
 
 #[no_mangle]
@@ -36,6 +37,7 @@ pub fn reset_menu() -> &'static mut SimpleMenu {
 #[no_mangle]
 pub fn dyn_hook() -> u32 {
     if unsafe {INITIALIZED} {
+        ButtonBuffer::update();
         // The game would softlock if the menu were still open during a soft reset
         if in_reset() {
             main_menu::MainMenu::disable();

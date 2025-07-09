@@ -55,6 +55,7 @@ pub struct MainMenu {
     cursor:      u32,
     force_close: bool,
     description: &'static str,
+    extra_hotkeys_on: bool,
 }
 
 #[link_section = "data"]
@@ -64,7 +65,13 @@ pub static mut MAIN_MENU: MainMenu = MainMenu {
     cursor:      0,
     force_close: false,
     description: "",
+    extra_hotkeys_on: false,
 };
+
+pub fn check_extra_hotkey_pressed(button: Buttons) -> bool {
+    let main_menu = unsafe { &MAIN_MENU };
+    main_menu.extra_hotkeys_on && is_pressed(button) && is_down(C)
+}
 
 impl super::Menu for MainMenu {
     fn enable() {
@@ -101,7 +108,7 @@ impl super::Menu for MainMenu {
                         MenuState::FlagMenu => FlagMenu::enable(),
                         MenuState::InventoryMenu => InventoryMenu::enable(),
                         MenuState::TricksMenu => TricksMenu::enable(),
-                        _ => {},
+                        _ => {main_menu.extra_hotkeys_on ^= true},
                     };
                 }
             },
@@ -153,6 +160,11 @@ impl super::Menu for MainMenu {
                 menu.add_entry("Flag Menu", "Set/unset relevant progress flags.");
                 menu.add_entry("Inventory Menu", "Set/unset notable items in inventory.");
                 menu.add_entry("Tricks Menu", "Practice certain specific tricks.");
+                if main_menu.extra_hotkeys_on {
+                    menu.add_entry("Extra Hotkeys [x]", "See above for enabled in-game hotkeys.");
+                } else {
+                    menu.add_entry("Extra Hotkeys []", "Toggle action hotkeys from holding C and pressing a D-Pad direction.");
+                }
                 menu.set_cursor(main_menu.cursor);
                 menu.draw();
 
@@ -212,6 +224,18 @@ impl super::Menu for MainMenu {
                     main_menu.state = MenuState::MenuSelect;
                 }
             }
+        }
+
+        if MainMenu::is_active() && main_menu.extra_hotkeys_on {
+            writer.set_position(10f32, 380f32);
+            writer.print_symbol(wchz!(u16, "\x26\x32"));
+            writer.print(wchz!(u16, " Save File "));
+            writer.print_symbol(wchz!(u16, "\x26\x31"));
+            writer.print(wchz!(u16, " Load Position "));
+            writer.print_symbol(wchz!(u16, "\x26\x2F"));
+            writer.print(wchz!(u16, " Direct Load File "));
+            writer.print_symbol(wchz!(u16, "\x26\x30"));
+            writer.print(wchz!(u16, " Load File "));
         }
 
         if MainMenu::is_active() && !main_menu.description.is_empty() {

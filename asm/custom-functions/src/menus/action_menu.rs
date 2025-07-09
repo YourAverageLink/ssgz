@@ -2,6 +2,7 @@ use crate::game::{file_manager, flag_managers, item, player, reloader};
 use crate::system::button::*;
 use crate::system::math::Vec3s;
 use crate::utils::menu::SimpleMenu;
+use crate::menus::Menu;
 
 use super::main_menu;
 
@@ -120,6 +121,49 @@ fn load_file(direct: bool) {
     reloader::set_reload_trigger(5);
 }
 
+fn load_position() {
+    if let Some(link) = player::as_mut() {
+        let current_file = file_manager::get_file_A();
+        let mut angle = link.angle;
+        angle.y = current_file.angle_t1;
+        player::force_set_link_pos_rot(&current_file.pos_t1, &angle);
+    }
+}
+
+pub fn action_save_file() {
+    let action_menu = unsafe { &mut ACTION_MENU };
+    save_file();
+    action_menu.state = ActionMenuState::Off;
+    main_menu::MainMenu::disable();
+}
+
+pub fn action_load_file() {
+    let action_menu = unsafe { &mut ACTION_MENU };
+    if unsafe { SAVE_INFO.saved_data } {
+        load_file(false);
+        action_menu.state = ActionMenuState::Off;
+        main_menu::MainMenu::disable();
+    }
+}
+
+pub fn action_load_file_direct() {
+    let action_menu = unsafe { &mut ACTION_MENU };
+    if unsafe { SAVE_INFO.saved_data } {
+        load_file(true);
+        action_menu.state = ActionMenuState::Off;
+        main_menu::MainMenu::disable();
+    }
+}
+
+pub fn action_load_position() {
+    let action_menu = unsafe { &mut ACTION_MENU };
+    if unsafe { SAVE_INFO.saved_data } {
+        load_position();
+        action_menu.state = ActionMenuState::Off;
+        main_menu::MainMenu::disable();
+    }
+}
+
 pub fn enter_bit() {
     reloader::set_reloader_type(3);
     reloader::soft_reset();
@@ -153,43 +197,29 @@ impl super::Menu for ActionMenu {
         #[cfg(feature = "debug_dyn")]
         const DEBUG_SAVE: u32 = 8;
 
+        let b_pressed = is_pressed(B);
+        let a_pressed = is_pressed(A);
+        let right_pressed = is_pressed(DPAD_RIGHT) || should_scroll(DPAD_RIGHT);
+        let left_pressed = is_pressed(DPAD_LEFT) || should_scroll(DPAD_LEFT);
+
         match action_menu.state {
             ActionMenuState::Off => {},
             ActionMenuState::Main => {
-                if is_pressed(B) {
+                if b_pressed {
                     action_menu.state = ActionMenuState::Off;
-                } else if is_pressed(A) {
+                } else if a_pressed {
                     match action_menu.cursor {
                         SAVE_FILE => {
-                            save_file();
-                            action_menu.state = ActionMenuState::Off;
-                            main_menu::MainMenu::disable();
+                            action_save_file();
                         },
                         LOAD_FILE => {
-                            if unsafe { SAVE_INFO.saved_data } {
-                                load_file(false);
-                                action_menu.state = ActionMenuState::Off;
-                                main_menu::MainMenu::disable();
-                            }
+                            action_load_file();
                         },
                         LOAD_FILE_DIRECT => {
-                            if unsafe { SAVE_INFO.saved_data } {
-                                load_file(true);
-                                action_menu.state = ActionMenuState::Off;
-                                main_menu::MainMenu::disable();
-                            }
+                            action_load_file_direct();
                         },
                         LOAD_POS => {
-                            if unsafe { SAVE_INFO.saved_data } {
-                                if let Some(link) = player::as_mut() {
-                                    let current_file = file_manager::get_file_A();
-                                    let mut angle = link.angle;
-                                    angle.y = current_file.angle_t1;
-                                    player::force_set_link_pos_rot(&current_file.pos_t1, &angle);
-                                    action_menu.state = ActionMenuState::Off;
-                                    main_menu::MainMenu::disable();
-                                }
-                            }
+                            action_load_position();
                         },
                         KILL_LINK => {
                             file_manager::set_current_health(0);
@@ -219,19 +249,19 @@ impl super::Menu for ActionMenu {
                 }
             },
             ActionMenuState::Item => {
-                if is_pressed(B) {
+                if b_pressed {
                     action_menu.state = ActionMenuState::Main;
-                } else if is_pressed(A) {
+                } else if a_pressed {
                     item::give_item(action_menu.item_cursor, u32::MAX, 1);
                     action_menu.state = ActionMenuState::Off;
                     main_menu::MainMenu::disable();
-                } else if is_pressed(DPAD_RIGHT) {
+                } else if right_pressed {
                     action_menu.item_cursor = if action_menu.item_cursor == 0x1FE {
                         0
                     } else {
                         action_menu.item_cursor + 1
                     };
-                } else if is_pressed(DPAD_LEFT) {
+                } else if left_pressed {
                     action_menu.item_cursor = if action_menu.item_cursor == 0 {
                         0x1FE
                     } else {
@@ -240,15 +270,15 @@ impl super::Menu for ActionMenu {
                 }
             },
             ActionMenuState::SceneFlag => {
-                if is_pressed(B) {
+                if b_pressed {
                     action_menu.state = ActionMenuState::Main;
-                } else if is_pressed(A) {
+                } else if a_pressed {
                     flag_managers::SceneflagManager::set_local(calc_sceneflag_num(
                         &action_menu.flag_cursor,
                     ));
                     action_menu.state = ActionMenuState::Off;
                     main_menu::MainMenu::disable();
-                } else if is_pressed(DPAD_RIGHT) {
+                } else if right_pressed {
                     match action_menu.flag_cursor.menu_cursor {
                         0 => {
                             action_menu.flag_cursor.byte_cursor =
@@ -267,7 +297,7 @@ impl super::Menu for ActionMenu {
                                 };
                         },
                     }
-                } else if is_pressed(DPAD_LEFT) {
+                } else if left_pressed {
                     match action_menu.flag_cursor.menu_cursor {
                         0 => {
                             action_menu.flag_cursor.byte_cursor =
