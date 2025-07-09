@@ -58,6 +58,8 @@ main.dol:
     DVDReadPrio: 0x803c40c0
     doSoftResetMaybe: 0x80068440
     FRAME_COUNT: 0x805789f8
+    ActorEventFlowMgr__triggerEntryPoint: 0x801b1f10
+    ActorEventFlowMgr__getCurrentActorEventFlowMgr: 0x80038940
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800be400
     SceneflagManager__checkFlagGlobal: 0x800be470
@@ -66,10 +68,13 @@ main.dol:
     SceneflagManager__setFlagGlobal: 0x800be740
     SceneflagManager__setTempOrSceneflag: 0x800be820
     SceneflagManager__unsetFlagGlobal: 0x800bea50
+    SceneflagManager__setZoneflag: 0x800be620
+    SceneflagManager__unsetZoneflag: 0x800be930
     FlagManager__getFlagOrCounter: 0x800bf9d0
     FlagManager__setFlagOrCounter: 0x800bfa80
     FlagManager__setFlagTo1: 0x800bfb00
     FlagManager__getUncommittedFlags: 0x800bfb40
+    DungeonflagManager__setToValue: 0x800bff40
     FlagManger__copyAllFromSave: 0x800c0740
     ItemflagManager__doCommit: 0x800c0940
     StoryflagManager__doCommit: 0x800c09b0
@@ -79,7 +84,7 @@ main.dol:
     ITEMFLAG_MANAGER: 0x80578660
     DUNGEONFLAG_MANAGER: 0x80578664
     reload_color_fader: 0x805784d4
-    STATIC_STORYFLAGS: 0x805aab50
+    STATIC_STORYFLAGS: 0x805acd58
     STATIC_ITEMFLAGS: 0x805ace58
     STATIC_DUNGEON_FLAGS: 0x805aced8
     getCounterByIndex: 0x8016dd60

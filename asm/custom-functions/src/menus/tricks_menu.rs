@@ -1,6 +1,6 @@
 use crate::{
-    game::file_manager, game::flag_managers::{StoryflagManager, SceneflagManager, ItemflagManager}, game::player, game::reloader, system::button::*,
-    utils::menu::SimpleMenu, utils::console::Console, menus::main_menu,
+    game::file_manager, game::flag_managers::{StoryflagManager, SceneflagManager, ItemflagManager, DungeonflagManager}, game::player, game::reloader, system::button::*,
+    utils::menu::SimpleMenu, utils::console::Console, menus::main_menu, game::events::ActorEventFlowMgr
 };
 
 use core::fmt::Write;
@@ -13,7 +13,7 @@ pub struct Trick {
     on_select: Option<fn()>,
 }
 
-const TRICKS: [Trick; 4] = [
+const TRICKS: [Trick; 5] = [
     Trick {
         name:   "Wing Ceremony Cutscene Skip",
         description: "Practice WCCS Save Prompt sidehop (Kills Link for faster reloads).",
@@ -37,7 +37,13 @@ const TRICKS: [Trick; 4] = [
         description: "Practice the Extending Blow in Deep Woods.",
         associated_enum: ActiveTrick::EB,
         on_select: Some(reload_eb),
-    }
+    },
+    Trick {
+        name:   "Scaldera",
+        description: "Practice fighting Scaldera in Earth Temple.",
+        associated_enum: ActiveTrick::Scaldera,
+        on_select: Some(reload_scaldera),
+    },
 ];
 
 #[derive(PartialEq, Eq)]
@@ -53,6 +59,7 @@ enum ActiveTrick {
     Guay,
     KeeseYeet,
     EB,
+    Scaldera,
 }
 
 pub struct TricksMenu {
@@ -130,6 +137,7 @@ impl super::Menu for TricksMenu {
 
 extern "C" {
     static mut FRAME_COUNT: u32;
+    // static mut SCALDERA_CONTEXT_MAYBE: u16;
 }
 
 // The buffer will stop accepting A presses on the frame that is 3 frames too late
@@ -150,7 +158,8 @@ pub fn update_buffer() {
     }
 }
 
-fn eval_wccs(buffer: u8) {
+fn eval_wccs() {
+    let buffer = unsafe {WCCS_INPUT_BUFFER};
     let mut console = Console::with_pos_and_size(0f32, 378f32, 120f32, 60f32);
     console.set_bg_color(0x0000007F);
     console.set_font_size(0.5f32);
@@ -209,10 +218,9 @@ fn check_wccs() {
     if count < THREE_FRAMES_LATE {
         update_buffer();
     }
-    let buf = unsafe {WCCS_INPUT_BUFFER};
     // kinda hacky but prevents eye-blinding reloads from the display
     if count >= THREE_FRAMES_LATE && count & 0x80000000 == 0 {
-        eval_wccs(buf);
+        eval_wccs();
         // Kill Link for faster reloads
         file_manager::set_current_health(0);
     }
@@ -271,6 +279,41 @@ fn reload_keese_yeet() {
         1,
         0,
         2, // Entrance 2 (for no entrance animation)
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reloader_type(1);
+    reloader::set_reload_trigger(5);
+}
+
+fn reload_scaldera() {
+    // DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+    SceneflagManager::set_global(14, 47); // Boulder rolling cutscene
+    SceneflagManager::set_global(14, 37); // Fi Text in Room
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    // StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
+    // StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
+    StoryflagManager::set_to_value(686, 0); // Unset something???
+    // StoryflagManager::set_to_value(1102, 0); // Unset something???
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
+    ItemflagManager::increase_counter(2, 10); // Refill Bombs
+    set_sword_to_goddess();
+    let current_file = file_manager::get_file_A();
+    // Positioned for Scaldera
+    current_file.pos_t1.x = 407.0;
+    current_file.pos_t1.y = 7440.0;
+    current_file.pos_t1.z = -21166.0;
+    current_file.angle_t1 = 16384;
+    // current_file.dungeon_flags[5][2] &= 0xFFFF - 1024;
+    reloader::trigger_entrance(
+        b"B200\0".as_ptr(),
+        10, // Room 10 (actual boss area)
+        2, // Layer 2
+        1, // Entrance 1 (for no entrance animation)
         0,
         0,
         0,
@@ -364,6 +407,24 @@ pub fn update_tricks() {
                     reload_eb();
                 }
             }
+        },
+        ActiveTrick::Scaldera => {
+            if is_pressed(DPAD_LEFT) {
+                reload_scaldera();
+            }
+            
+            if let Some(link) = player::as_mut() {
+                // No idea why, but setting these zoneflags allows skipping Ghirahim's text
+                SceneflagManager::set_zone_flag(10, 193, true);
+                SceneflagManager::set_zone_flag(10, 194, true);
+                SceneflagManager::set_zone_flag(10, 195, true);
+                // HACKY
+                if link.pos.x > 0f32 && link.pos.y > 7400f32 && link.pos.z < -20000f32 && !StoryflagManager::check(686) {
+                    ActorEventFlowMgr::trigger_entry_point(301, 9); // Scaldera trigger
+                    eval_wccs();
+                }
+            }
+            // DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
         }
     }
 }

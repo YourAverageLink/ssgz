@@ -83,6 +83,8 @@ main.dol:
     FRAME_COUNT: 0x80575798
     GAME_FRAME: 0x80575b78
     EXE_FRAME: 0x80575b7c
+    ActorEventFlowMgr__triggerEntryPoint: 0x801b18e0
+    ActorEventFlowMgr__getCurrentActorEventFlowMgr: 0x800387f0
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800bdeb0
     SceneflagManager__checkFlagGlobal: 0x800bdf20
@@ -91,10 +93,13 @@ main.dol:
     SceneflagManager__setFlagGlobal: 0x800be1f0
     SceneflagManager__setTempOrSceneflag: 0x800be2d0
     SceneflagManager__unsetFlagGlobal: 0x800be500
+    SceneflagManager__setZoneflag: 0x800be0d0
+    SceneflagManager__unsetZoneflag: 0x800be3e0
     FlagManager__getFlagOrCounter: 0x800bf480
     FlagManager__setFlagOrCounter: 0x800bf530
     FlagManager__setFlagTo1: 0x800bf5b0
     FlagManager__getUncommittedFlags: 0x800bf5f0
+    DungeonflagManager__setToValue: 0x800bf9f0
     FlagManger__copyAllFromSave: 0x800c01f0
     ItemflagManager__doCommit: 0x800c03f0
     StoryflagManager__doCommit: 0x800c0460
