@@ -1,5 +1,6 @@
 use crate::game::{file_manager, flag_managers, item, player, reloader};
 use crate::system::button::*;
+use crate::system::math::Vec3s;
 use crate::utils::menu::SimpleMenu;
 
 use super::main_menu;
@@ -142,14 +143,15 @@ impl super::Menu for ActionMenu {
         const SAVE_FILE: u32 = 0;
         const LOAD_FILE: u32 = 1;
         const LOAD_FILE_DIRECT: u32 = 2;
-        const KILL_LINK: u32 = 3;
-        const SCENE_FLAG: u32 = 4;
-        const ENTER_BIT: u32 = 5;
+        const LOAD_POS: u32 = 3;
+        const KILL_LINK: u32 = 4;
+        const SCENE_FLAG: u32 = 5;
+        const ENTER_BIT: u32 = 6;
 
         #[cfg(feature = "debug_dyn")]
-        const GIVE_ITEM: u32 = 6;
+        const GIVE_ITEM: u32 = 7;
         #[cfg(feature = "debug_dyn")]
-        const DEBUG_SAVE: u32 = 7;
+        const DEBUG_SAVE: u32 = 8;
 
         match action_menu.state {
             ActionMenuState::Off => {},
@@ -175,6 +177,18 @@ impl super::Menu for ActionMenu {
                                 load_file(true);
                                 action_menu.state = ActionMenuState::Off;
                                 main_menu::MainMenu::disable();
+                            }
+                        },
+                        LOAD_POS => {
+                            if unsafe { SAVE_INFO.saved_data } {
+                                if let Some(link) = player::as_mut() {
+                                    let current_file = file_manager::get_file_A();
+                                    let mut angle = link.angle;
+                                    angle.y = current_file.angle_t1;
+                                    player::force_set_link_pos_rot(&current_file.pos_t1, &angle);
+                                    action_menu.state = ActionMenuState::Off;
+                                    main_menu::MainMenu::disable();
+                                }
                             }
                         },
                         KILL_LINK => {
@@ -289,9 +303,11 @@ impl super::Menu for ActionMenu {
                 if can_load {
                     menu.add_entry("Load File", "Load saved file at saved entrance.");
                     menu.add_entry("Direct Load File", "Load saved file at saved position.");
+                    menu.add_entry("Load Position", "Set Link's position & rotation to that of the saved file.");
                 } else {
                     menu.add_entry("Load File", "You must save a file in this menu first to use this.");
                     menu.add_entry("Direct Load File", "You must save a file in this menu first to use this.");
+                    menu.add_entry("Load Position", "You must save a file in this menu first to use this.");
                 }
                 menu.add_entry("Kill Link", "Kills Link (even with Infinite Health enabled).");
                 menu.add_entry("RBM Scene Flag", "RBMs and commits a chosen scene flag in this area.");
