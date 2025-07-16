@@ -85,10 +85,12 @@ main.dol:
     EXE_FRAME: 0x80575b7c
     ActorEventFlowMgr__triggerEntryPoint: 0x801b18e0
     ActorEventFlowMgr__getCurrentActorEventFlowMgr: 0x800387f0
+    ENEMY_LIST: 0x80575098
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800bdeb0
     SceneflagManager__checkFlagGlobal: 0x800bdf20
     SceneflagManager__checkTempOrSceneflag: 0x800bdfc0
+    SceneflagManager__checkZoneflag: 0x800bdc70
     SceneflagManager__setFlag: 0x800be180
     SceneflagManager__setFlagGlobal: 0x800be1f0
     SceneflagManager__setTempOrSceneflag: 0x800be2d0

@@ -1,9 +1,10 @@
 use crate::{
     game::file_manager, game::flag_managers::{StoryflagManager, SceneflagManager, ItemflagManager, DungeonflagManager}, game::player, game::reloader, system::button::*,
-    utils::menu::SimpleMenu, utils::console::Console, menus::main_menu, game::events::ActorEventFlowMgr
+    utils::menu::SimpleMenu, utils::console::Console, menus::main_menu, game::events::ActorEventFlowMgr, game::actor::get_first_enemy
 };
 
 use core::fmt::Write;
+use core::ffi::c_void;
 use core::option::*;
 
 pub struct Trick {
@@ -137,7 +138,24 @@ impl super::Menu for TricksMenu {
 
 extern "C" {
     static mut FRAME_COUNT: u32;
-    // static mut SCALDERA_CONTEXT_MAYBE: u16;
+}
+
+fn get_boss_health() -> Option<u32> {
+    match get_first_enemy() {
+        Some(e) => {
+            unsafe {
+                Some((e.add(0x10) as *mut u32).read())
+            }
+        },
+        None => None,
+    }
+}
+
+fn is_boss_dead() -> bool {
+    match get_boss_health() {
+        Some(hp) => hp == 0,
+        None => false,
+    }
 }
 
 // The buffer will stop accepting A presses on the frame that is 3 frames too late
@@ -213,6 +231,18 @@ fn eval_wccs() {
     console.draw(false);
 }
 
+fn display_boss_health(name: &'static str) {
+    if let Some(hp) = get_boss_health() {
+        let mut console = Console::with_pos_and_size(0f32, 378f32, 120f32, 60f32);
+        console.set_bg_color(0x0000007F);
+        console.set_font_size(0.5f32);
+        console.set_dynamic_size(true);
+        console.set_font_color(0xFFFFFFFF);
+        let _ = console.write_fmt(format_args!("{} health: {}", name, hp));
+        console.draw(false);
+    }
+}
+
 fn check_wccs() {
     let count = unsafe {FRAME_COUNT};
     if count < THREE_FRAMES_LATE {
@@ -267,6 +297,7 @@ fn reload_guay() {
 fn reload_keese_yeet() {
     SceneflagManager::unset_global(14, 29); // ET keese yeet rope cut
     SceneflagManager::unset_global(14, 24); // ET drawbridge down
+    StoryflagManager::do_commit();
     set_sword_to_goddess();
     let current_file = file_manager::get_file_A();
     // Positioned for Keese Yeet
@@ -290,25 +321,23 @@ fn reload_keese_yeet() {
 }
 
 fn reload_scaldera() {
-    // DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
     SceneflagManager::set_global(14, 47); // Boulder rolling cutscene
     SceneflagManager::set_global(14, 37); // Fi Text in Room
+    SceneflagManager::set_global(14, 56); // Heart Container obtained
     StoryflagManager::set_to_value(58, 1); // Give B-Wheel
-    // StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
-    // StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
-    StoryflagManager::set_to_value(686, 0); // Unset something???
-    // StoryflagManager::set_to_value(1102, 0); // Unset something???
+    StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
+    StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
     ItemflagManager::increase_counter(2, 10); // Refill Bombs
     set_sword_to_goddess();
     let current_file = file_manager::get_file_A();
-    // Positioned for Scaldera
+    // Positioned for Scaldera cutscene trigger
     current_file.pos_t1.x = 407.0;
-    current_file.pos_t1.y = 7440.0;
+    current_file.pos_t1.y = 7700.0;
     current_file.pos_t1.z = -21166.0;
     current_file.angle_t1 = 16384;
-    // current_file.dungeon_flags[5][2] &= 0xFFFF - 1024;
+    current_file.equipped_b_item = 0; // Bomb Bag
     reloader::trigger_entrance(
         b"B200\0".as_ptr(),
         10, // Room 10 (actual boss area)
@@ -322,6 +351,7 @@ fn reload_scaldera() {
     );
     reloader::set_reloader_type(1);
     reloader::set_reload_trigger(5);
+    file_manager::set_current_health(24);
 }
 
 fn set_sword_to_goddess() {
@@ -414,17 +444,28 @@ pub fn update_tricks() {
             }
             
             if let Some(link) = player::as_mut() {
-                // No idea why, but setting these zoneflags allows skipping Ghirahim's text
-                SceneflagManager::set_zone_flag(10, 193, true);
-                SceneflagManager::set_zone_flag(10, 194, true);
-                SceneflagManager::set_zone_flag(10, 195, true);
-                // HACKY
-                if link.pos.x > 0f32 && link.pos.y > 7400f32 && link.pos.z < -20000f32 && !StoryflagManager::check(686) {
-                    ActorEventFlowMgr::trigger_entry_point(301, 9); // Scaldera trigger
-                    eval_wccs();
+                // Bounding box near cutscene trigger
+                let should_set_zoneflags = link.pos.x > 0f32 && link.pos.y > 7400f32 && link.pos.z < -20000f32 && link.pos.y < 7600f32;
+
+                if should_set_zoneflags {
+                    // No idea why, but setting these zoneflags allows skipping Ghirahim's text
+                    SceneflagManager::set_zone_flag(10, 193, true);
+                    SceneflagManager::set_zone_flag(10, 194, true);
+                    SceneflagManager::set_zone_flag(10, 195, true);
+                }
+
+                if SceneflagManager::check_zone_flag(10, 192) && !SceneflagManager::check_zone_flag(10, 195) {
+                    // We need to unset this flag if it's already set on load (from a post-Scaldera file), but 
+                    // NOT if we manually triggered the fight already.
+                    SceneflagManager::set_zone_flag(10, 192, false);
+                }
+
+                DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+                display_boss_health("Scaldera");
+                if is_boss_dead() {
+                    reload_scaldera();
                 }
             }
-            // DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
         }
     }
 }

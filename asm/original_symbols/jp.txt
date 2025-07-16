@@ -60,10 +60,12 @@ main.dol:
     FRAME_COUNT: 0x805789f8
     ActorEventFlowMgr__triggerEntryPoint: 0x801b1f10
     ActorEventFlowMgr__getCurrentActorEventFlowMgr: 0x80038940
+    ENEMY_LIST: 0x805782f8
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800be400
     SceneflagManager__checkFlagGlobal: 0x800be470
     SceneflagManager__checkTempOrSceneflag: 0x800be510
+    SceneflagManager__checkZoneflag: 0x800be1c0
     SceneflagManager__setFlag: 0x800be6d0
     SceneflagManager__setFlagGlobal: 0x800be740
     SceneflagManager__setTempOrSceneflag: 0x800be820

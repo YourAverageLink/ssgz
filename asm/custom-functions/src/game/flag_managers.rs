@@ -57,6 +57,7 @@ extern "C" {
     ) -> bool;
     fn SceneflagManager__setZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16);
     fn SceneflagManager__unsetZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16);
+    fn SceneflagManager__checkZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16) -> bool;
     fn DungeonflagManager__setToValue(mgr: *mut DungeonflagManager, flag: u16, value: i32);
     fn StoryflagManager__doCommit(mgr: *mut StoryflagManager);
     fn ItemflagManager__doCommit(mgr: *mut ItemflagManager);
@@ -158,6 +159,9 @@ impl SceneflagManager {
         } else {
             unsafe { SceneflagManager__unsetZoneflag(SCENEFLAG_MANAGER, room, flag) };
         }
+    }
+    pub fn check_zone_flag(room: u16, flag: u16) -> bool {
+        unsafe { SceneflagManager__checkZoneflag(SCENEFLAG_MANAGER, room, flag) }
     }
     pub fn get_scene_idx() -> u16 {
         unsafe { (*SCENEFLAG_MANAGER).scene_idx }
