@@ -159,7 +159,7 @@ impl super::Menu for MainMenu {
                 menu.add_entry("Practice Saves Menu", "Load speedrun practice saves.");
                 menu.add_entry("Flag Menu", "Set/unset relevant progress flags.");
                 menu.add_entry("Inventory Menu", "Set/unset notable items in inventory.");
-                menu.add_entry("Tricks Menu", "Practice certain specific tricks.");
+                menu.add_entry("Tricks Menu", "Practice certain specific tricks / boss fights.");
                 if main_menu.extra_hotkeys_on {
                     menu.add_entry("Extra Hotkeys [x]", "See above for enabled in-game hotkeys.");
                 } else {

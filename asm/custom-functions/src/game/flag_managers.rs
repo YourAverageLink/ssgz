@@ -55,6 +55,10 @@ extern "C" {
         scene_index: u16,
         flag: u16,
     ) -> bool;
+    fn SceneflagManager__setZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16);
+    fn SceneflagManager__unsetZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16);
+    fn SceneflagManager__checkZoneflag(mgr: *mut SceneflagManager, room: u16, flag: u16) -> bool;
+    fn DungeonflagManager__setToValue(mgr: *mut DungeonflagManager, flag: u16, value: i32);
     fn StoryflagManager__doCommit(mgr: *mut StoryflagManager);
     fn ItemflagManager__doCommit(mgr: *mut ItemflagManager);
     fn checkStoryflagIsSet(p: *const StoryflagManager, flag: u16) -> bool;
@@ -149,6 +153,16 @@ impl SceneflagManager {
             t.zoneflags.flag_count.into(),
         );
     }
+    pub fn set_zone_flag(room: u16, flag: u16, set: bool) {
+        if set {
+            unsafe { SceneflagManager__setZoneflag(SCENEFLAG_MANAGER, room, flag) };
+        } else {
+            unsafe { SceneflagManager__unsetZoneflag(SCENEFLAG_MANAGER, room, flag) };
+        }
+    }
+    pub fn check_zone_flag(room: u16, flag: u16) -> bool {
+        unsafe { SceneflagManager__checkZoneflag(SCENEFLAG_MANAGER, room, flag) }
+    }
     pub fn get_scene_idx() -> u16 {
         unsafe { (*SCENEFLAG_MANAGER).scene_idx }
     }
@@ -169,6 +183,9 @@ impl DungeonflagManager {
                 .as_mut_ptr()
                 .add(scn_idx as usize)
         }
+    }
+    pub fn set_to_value(flag: u16, value: i32) {
+        unsafe { DungeonflagManager__setToValue(DUNGEONFLAG_MANAGER, flag, value) }
     }
     pub fn get_global_key_count(scn_idx: u16) -> u16 {
         unsafe { (*Self::get_global(scn_idx))[1] & 0xF }

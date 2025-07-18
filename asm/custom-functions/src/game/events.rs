@@ -16,3 +16,23 @@ pub struct ActorEventFlowMgr {
     pub unk7:                       u32,
     pub unk8:                       u32,
 }
+
+/*
+extern "C" {
+    fn ActorEventFlowMgr__getCurrentActorEventFlowMgr() -> *mut ActorEventFlowMgr;
+    fn ActorEventFlowMgr__triggerEntryPoint(aef_mgr: *mut ActorEventFlowMgr, entry_section: i32, entry_num: i32);
+}
+
+impl ActorEventFlowMgr {
+    fn get_instance() -> *mut ActorEventFlowMgr {
+        unsafe { ActorEventFlowMgr__getCurrentActorEventFlowMgr() }
+    }
+
+    pub fn trigger_entry_point(entry_section: i32, entry_num: i32) {
+        let mgr = ActorEventFlowMgr::get_instance();
+        unsafe {
+            ActorEventFlowMgr__triggerEntryPoint(mgr, entry_section, entry_num)
+        }
+    }
+}
+*/

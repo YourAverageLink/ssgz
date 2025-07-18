@@ -711,8 +711,26 @@ pub enum ActorID {
     INVALID,
 }
 
+// probably wrong
+#[repr(C)]
+struct EnemyLinkedList {
+    prev: *mut c_void,
+    next: *mut c_void,
+}
+
 extern "C" {
     fn findActorByActorType(actor_type: i32, start_actor: *const c_void) -> *mut c_void;
+    static ENEMY_LIST: EnemyLinkedList;
+}
+
+pub fn get_first_enemy() -> Option<*mut c_void> {
+    unsafe {
+        if ENEMY_LIST.prev.is_null() {
+            return None;
+        }
+
+        Some(ENEMY_LIST.prev)
+    }
 }
 
 pub fn find_actor_by_type(actor_type: i32, start_actor: *const c_void) -> *mut c_void {
