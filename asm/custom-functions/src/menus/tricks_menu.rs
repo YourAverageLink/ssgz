@@ -14,7 +14,7 @@ pub struct Trick {
     on_select: Option<fn()>,
 }
 
-const TRICKS: [Trick; 5] = [
+const TRICKS: [Trick; 13] = [
     Trick {
         name:   "Wing Ceremony Cutscene Skip",
         description: "Practice WCCS Save Prompt sidehop (Kills Link for faster reloads).",
@@ -40,10 +40,58 @@ const TRICKS: [Trick; 5] = [
         on_select: Some(reload_eb),
     },
     Trick {
+        name:   "Ghirahim 1",
+        description: "Practice fighting Ghirahim in Skyview Temple (with Goddess Sword).",
+        associated_enum: ActiveTrick::G1,
+        on_select: Some(reload_g1),
+    },
+    Trick {
         name:   "Scaldera",
-        description: "Practice fighting Scaldera in Earth Temple.",
+        description: "Practice fighting Scaldera in Earth Temple (with Goddess Sword).",
         associated_enum: ActiveTrick::Scaldera,
         on_select: Some(reload_scaldera),
+    },
+    Trick {
+        name:   "Moldarach",
+        description: "Practice fighting Moldarach in Lanayru Mining Facility.",
+        associated_enum: ActiveTrick::Moldarach,
+        on_select: Some(reload_moldarach),
+    },
+    Trick {
+        name:   "Koloktos",
+        description: "Practice fighting Koloktos in Ancient Cistern (with Goddess Sword).",
+        associated_enum: ActiveTrick::Koloktos,
+        on_select: Some(reload_koloktos),
+    },
+    Trick {
+        name:   "Tentalus",
+        description: "Practice fighting Tentalus in Sandship.",
+        associated_enum: ActiveTrick::Tentalus,
+        on_select: Some(reload_tentalus),
+    },
+    Trick {
+        name:   "Ghirahim 2",
+        description: "Practice fighting Ghirahim in Fire Sanctuary (with Goddess White Sword).",
+        associated_enum: ActiveTrick::G2,
+        on_select: Some(reload_g2),
+    },
+    Trick {
+        name:   "Horde",
+        description: "Practice fighting the Horde Battle in Hylia's Realm.",
+        associated_enum: ActiveTrick::Horde,
+        on_select: Some(reload_horde),
+    },
+    Trick {
+        name:   "Ghirahim 3",
+        description: "Practice fighting Ghirahim in Hylia's Realm.",
+        associated_enum: ActiveTrick::G3,
+        on_select: Some(reload_g3),
+    },
+    Trick {
+        name:   "Demise",
+        description: "Practice fighting Demise at the end of the game.",
+        associated_enum: ActiveTrick::Demise,
+        on_select: Some(reload_demise),
     },
 ];
 
@@ -60,7 +108,15 @@ enum ActiveTrick {
     Guay,
     KeeseYeet,
     EB,
+    G1,
     Scaldera,
+    Moldarach,
+    Koloktos,
+    Tentalus,
+    G2,
+    Horde,
+    G3,
+    Demise,
 }
 
 pub struct TricksMenu {
@@ -277,7 +333,9 @@ fn reload_wccs_prompt() {
 
 fn reload_guay() {
     // Flag 24 is having seen the Fi text near Faron Pillar, must be unset
+    // 364 is spiral charge, should also be unset
     StoryflagManager::set_to_value(24, 0);
+    StoryflagManager::set_to_value(364, 0);
     StoryflagManager::do_commit();
     reloader::trigger_entrance(
         b"F020\0".as_ptr(),
@@ -320,13 +378,33 @@ fn reload_keese_yeet() {
     reloader::set_reload_trigger(5);
 }
 
+fn reload_g1() {
+    SceneflagManager::set_global(13, 102); // Heart Container obtained
+    StoryflagManager::set_to_value(466, 0); // Unset intro cutscene flag
+    StoryflagManager::do_commit();
+    set_sword_to_goddess();
+    reloader::trigger_entrance(
+        b"B100\0".as_ptr(),
+        0,
+        1, // Layer 1
+        2, // Entrance 2 (after cs)
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(8);
+}
+
 fn reload_scaldera() {
     SceneflagManager::set_global(14, 47); // Boulder rolling cutscene
     SceneflagManager::set_global(14, 37); // Fi Text in Room
     SceneflagManager::set_global(14, 56); // Heart Container obtained
     StoryflagManager::set_to_value(58, 1); // Give B-Wheel
-    StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
-    StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
+    // StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
+    // StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
     ItemflagManager::increase_counter(2, 10); // Refill Bombs
@@ -354,11 +432,199 @@ fn reload_scaldera() {
     file_manager::set_current_health(24);
 }
 
+fn reload_moldarach() {
+    SceneflagManager::set_global(17, 126); // Heart Container obtained
+    SceneflagManager::unset_global(17, 120); // Related to boss defeat
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(52, 1); // Give Slingshot
+    ItemflagManager::set_to_value(20, 1); // Give Clawshots
+    ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
+    ItemflagManager::increase_counter(4, 20); // Refill Seeds
+    // Not setting sword because this varies by category
+    let current_file = file_manager::get_file_A();
+    current_file.pouch_items[0] = 0x100074; // Wooden Shield
+    current_file.shield_pouch_slot = 0;
+    current_file.lastUsedPouchItemSlot = 0;
+    reloader::trigger_entrance(
+        b"B300\0".as_ptr(),
+        0,
+        1, // Layer 1
+        1,
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(24);
+}
+
+fn reload_koloktos() {
+    SceneflagManager::set_global(12, 77); // Heart Container obtained
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(137, 1); // Give Whip
+    ItemflagManager::set_to_value(52, 1); // Give Slingshot
+    ItemflagManager::increase_counter(4, 20); // Refill Seeds
+    ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
+    ItemflagManager::increase_counter(2, 10); // Refill Bombs
+    set_sword_to_goddess();
+    let current_file = file_manager::get_file_A();
+    current_file.equipped_b_item = 6; // Whip
+    reloader::trigger_entrance(
+        b"B101\0".as_ptr(),
+        0,
+        1, // Layer 1
+        2, // Entrance 2
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(16);
+}
+
+fn reload_tentalus() {
+    SceneflagManager::unset_global(18, 82); // Crest rises
+    SceneflagManager::unset_global(18, 84); // Crest struck
+    SceneflagManager::set_global(18, 85); // Heart Container obtained
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(19, 1); // Give Bow
+    ItemflagManager::increase_counter(1, 20); // Refill Arrows
+    let current_file = file_manager::get_file_A();
+    current_file.equipped_b_item = 1; // Bow
+    reloader::trigger_entrance(
+        b"B301\0".as_ptr(),
+        0,
+        1, // Layer 1
+        0, // Entrance 0
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(16);
+}
+
+fn reload_g2() {
+    SceneflagManager::set_global(15, 124); // Heart Container obtained
+    StoryflagManager::set_to_value(84, 0); // Unset defeated G2 storyflag
+    StoryflagManager::set_to_value(464, 0); // Unset intro cutscene flag
+    StoryflagManager::do_commit();
+    set_sword_to_white();
+    reloader::trigger_entrance(
+        b"B201\0".as_ptr(),
+        0,
+        1, // Layer 1
+        1, // Entrance 1 (after cs)
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(8);
+}
+
+fn reload_horde() {
+    StoryflagManager::set_to_value(134, 0); // Unset horde defeated
+    StoryflagManager::set_to_value(347, 0); // Unset horde cutscene
+    StoryflagManager::do_commit();
+    reloader::trigger_entrance(
+        b"F403\0".as_ptr(),
+        1,
+        13, // Layer 13 (horde cutscene)
+        0, // Entrance 0
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(80); // Full refill, whatever the file's max health happens to be
+}
+
+fn reload_g3() {
+    StoryflagManager::set_to_value(347, 1); // Set horde cutscene (for barriers)
+    StoryflagManager::set_to_value(225, 0); // Unset G3 defeated
+    StoryflagManager::set_to_value(348, 0); // Unset G3 cutscene
+    StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
+    let current_file = file_manager::get_file_A();
+    current_file.pouch_items[0] = 0x100074; // Wooden Shield
+    current_file.shield_pouch_slot = 0;
+    current_file.lastUsedPouchItemSlot = 0;
+    reloader::trigger_entrance(
+        b"F403\0".as_ptr(),
+        1,
+        14, // Layer 14 (G3 cutscene)
+        2, // Entrance 2
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(80); // Full refill, whatever the file's max health happens to be
+}
+
+fn reload_demise() {
+    let current_file = file_manager::get_file_A();
+    StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
+    ItemflagManager::set_to_value(20, 1); // Give Clawshots :)
+    current_file.pouch_items[0] = 0x100074; // Wooden Shield
+    current_file.shield_pouch_slot = 0;
+    current_file.lastUsedPouchItemSlot = 0;
+    reloader::trigger_entrance(
+        b"B400\0".as_ptr(),
+        0,
+        1, // Layer 1 (boss fight)
+        0,
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(80); // Full refill, whatever the file's max health happens to be
+}
+/*
+fn reload_bilocyte() {
+    StoryflagManager::set_to_value(364, 1); // Spiral Charge
+    StoryflagManager::set_to_value(288, 1); // Triggered Bilocyte fight
+    StoryflagManager::do_commit();
+}
+*/
+
 fn set_sword_to_goddess() {
     ItemflagManager::set_to_value(11, 1); // Give Goddess Sword
     // Remove higher-level swords
     ItemflagManager::set_to_value(12, 0);
     ItemflagManager::set_to_value(9, 0);
+    ItemflagManager::set_to_value(13, 0);
+    ItemflagManager::set_to_value(14, 0);
+    ItemflagManager::do_commit();
+}
+
+fn set_sword_to_white() {
+    ItemflagManager::set_to_value(9, 1); // Give Goddess White Sword
+    // Remove higher-level swords
     ItemflagManager::set_to_value(13, 0);
     ItemflagManager::set_to_value(14, 0);
     ItemflagManager::do_commit();
@@ -438,8 +704,15 @@ pub fn update_tricks() {
                 }
             }
         },
+        ActiveTrick::G1 => {
+            if is_pressed(DPAD_LEFT) || is_boss_dead() {
+                reload_g1();
+            }
+            DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+            display_boss_health("Ghirahim");
+        },
         ActiveTrick::Scaldera => {
-            if is_pressed(DPAD_LEFT) {
+            if is_pressed(DPAD_LEFT) || is_boss_dead() {
                 reload_scaldera();
             }
             
@@ -462,10 +735,55 @@ pub fn update_tricks() {
 
                 DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
                 display_boss_health("Scaldera");
-                if is_boss_dead() {
-                    reload_scaldera();
-                }
             }
-        }
+        },
+        ActiveTrick::Moldarach => {
+            DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+            if is_pressed(DPAD_LEFT) || SceneflagManager::check_global(17, 120) {
+                reload_moldarach();
+            }
+        },
+        ActiveTrick::Koloktos => {
+            if is_pressed(DPAD_LEFT) || is_boss_dead() {
+                reload_koloktos();
+            }
+            // Setting these zoneflags skips straight to the Koloktos spawning cutscene
+            SceneflagManager::set_zone_flag(0, 193, true);
+            SceneflagManager::set_zone_flag(0, 210, true);
+            DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+        },
+        ActiveTrick::Tentalus => {
+            // This scene flag sets super late though :(
+            if is_pressed(DPAD_LEFT) || SceneflagManager::check_global(18, 82) {
+                reload_tentalus();
+            }
+
+            DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+        },
+        ActiveTrick::G2 => {
+            // This also sets super late, but he goes to 0 health in phase 1 so :(
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(84) {
+                reload_g2();
+            }
+            DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
+            display_boss_health("Ghirahim");
+        },
+        ActiveTrick::Horde => {
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(134) {
+                reload_horde();
+            }
+        },
+        ActiveTrick::G3 => {
+            // Hylia's Realm layer 15 = post-G3 cutscene
+            if is_pressed(DPAD_LEFT) || reloader::get_spawn_slave().layer == 15 {
+                reload_g3();
+            }
+        },
+        ActiveTrick::Demise => {
+            // Demise arena layer 14 = post-Demise cutscene
+            if is_pressed(DPAD_LEFT) || reloader::get_spawn_slave().layer == 14 {
+                reload_demise();
+            }
+        },
     }
 }
