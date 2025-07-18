@@ -1,4 +1,4 @@
-# ssgz (name pending)
+# ssgz 0.2.1 (name pending)
 
 A ROM hack for *The Legend of Zelda: Skyward Sword* aimed to help out speedrunners with practice and research.
 
@@ -49,7 +49,7 @@ In the Display Menu, you may toggle whether or not certain information should be
 - **Input Viewer** will show any buttons currently pressed, and the directions registered on the Joystick and D-Pad. Note that this display is currently cut off on 4:3 Aspect Ratio
 - **Link Pos Viewer** will show Link's x, y, and z coordinates, facing angle, and current movement speed.
 - **Scene Flag Viewer** will display the scene flags and temporary flags active in the current scene.
-- **Frame Count Viewer** will display the number of in-game frames that have passed since the last load.
+- **Frame Count Viewer** will display the number of in-game frames that have passed since the last load, as well as a conversion to `mm:ss.xx`
 
 ### Warp Menu
 
@@ -62,6 +62,7 @@ The Action Menu contains some useful miscellaneous functions.
 - **Save File** acts like pressing D-Pad Right in the old practice Gecko codes -- it saves your stage, position, flags, etc., which may be loaded by the two following options
 - **Load File** will reload the area you saved in with **Save File**, at the last entrance you took on that file.
 - **Direct Load File** will reload the file you saved with **Save File** with the coordinates you saved at as well.
+- **Load Position** will set Link's position to that of the file you saved with **Save File**, without reloading the map.
 - **Kill Link** kills Link (even if you have the **Infinite Health** cheat enabled).
 - **RBM Scene Flag** pulls up a submenu where you may select a scene flag to RBM (& commit) in the current area.
 - **Enter BiT** will load into Back in Time on Skyloft.
@@ -99,12 +100,30 @@ For each item, you may use D-Pad left / right to increase / decrease how many up
 
 ### Tricks Menu
 
-The Tricks Menu contains some specific functionality to help practice tricks. Each trick can be reloaded manually with D-Pad Left, or automatically reloaded if performed successfully.
+The Tricks Menu contains some specific functionality to help practice tricks and boss fights. Each trick can be reloaded manually with D-Pad Left, or automatically reloaded if performed successfully.
 
 - **Wing Ceremony Cutscene Skip** - When activated, you will be loaded into the save prompt before the Wing Ceremony. The game will keep track of your A presses and evaluate your timing on WCCS. This also kills Link, to make the reload much faster if you succeed.
 - **Guay Deathwarp** - When activated, you will be loaded into the Sky as though you just performed the Sky RBW in most early game Skyloft routes, your health will be set to 6 hearts, and the flag for the Fi text near the Faron Pillar will be unset, allowing you to practice the deathwarp with the guay.
 - **Keese Yeet** - When activated, you will be loaded into the Earth Temple (positioned for Keese Yeet) and given the Goddess Sword.
 - **Extending Blow** - When activated, you will be loaded into Deep Woods (positioned to setup for Extending Blow), and given the B-Wheel, Slingshot, and Goddess Sword.
+- **Ghirahim 1** - When activated, you will be loaded into the Ghirahim fight in Skyview Temple, with the Goddess Sword and at 2 hearts. Text on-screen will show his health.
+- **Scaldera** - When activated, you will be loaded into the Scaldera fight (skipping directly to the spawn cutscene) in Earth Temple, with the Goddess Sword and a full Bomb Bag at 6 hearts. Text on-screen will show his health.
+- **Moldarach** - When activated, you will be loaded into the Moldarach fight in Lanayru Mining Facility, with a shield, the Clawshots, and Slingshot (`TODO - forgot to give gust bellows`).
+- **Koloktos** - When activated, you will be loaded into the Koloktos fight in Ancient Cistern, with the Goddess Sword, Whip, Slingshot, and Bomb Bag at 4 hearts.
+- **Tentalus** - When activated, you will be loaded into the Tentalus fight in Sandship, with the Bow.
+- **Ghirahim 2** - When activated, you will be loaded into the Ghirahim fight in Fire Sanctuary, with the Goddess White Sword at 2 hearts. Text on-screen will show his health.
+- **Horde** - When activated, you will be loaded into the Horde battle in Hylia's Realm with full health.
+- **Ghirahim 3** - When activated, you will be loaded into the Ghirahim battle in Hylia's Realm with full health and a shield.
+- **Demise** - When activated, you will be loaded into the Demise fight at the end of the game with full health, a shield, *and Clawshots :)*
+
+### Extra Hotkeys
+
+You may enable extra hotkeys in the main menu. When enabled, you may run the following Action Menu commands with a button combination anywhere:
+
+- **C + D-Pad Right**: Save File (gives 1 frame of Guardian potion to indicate a successful save)
+- **C + D-Pad Left**: Load Position
+- **C + D-Pad Up**: Direct Load File
+- **C + D-Pad Down**: Load File
 
 ## Debug / Extra Features
 
