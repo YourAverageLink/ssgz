@@ -82,9 +82,9 @@ impl SimpleMenu {
 
     pub fn move_cursor(&self) -> u32 {
         let len = self.lines.len() as u32;
-        if is_pressed(DPAD_UP) {
+        if is_pressed(DPAD_UP) || should_scroll(DPAD_UP) {
             (self.cursor + len - 1) % len
-        } else if is_pressed(DPAD_DOWN) {
+        } else if is_pressed(DPAD_DOWN) || should_scroll(DPAD_DOWN) {
             (self.cursor + 1) % len
         } else {
             self.cursor % len

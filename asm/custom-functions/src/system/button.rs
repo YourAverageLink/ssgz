@@ -14,6 +14,7 @@ extern "C" {
 }
 
 bitflags::bitflags! {
+    #[derive(Copy, Clone)]
     pub struct Buttons: u32 {
         const DPAD_LEFT = 0x0001;
         const DPAD_RIGHT = 0x0002;
@@ -86,4 +87,73 @@ pub fn is_any_pressed(buttons: Buttons) -> bool {
 
 pub fn get_stick_pos() -> [f32; 2] {
     unsafe { (*CORE_CONTROLLER).free_stick_pos }
+}
+
+// Mainly for d-pad directions in menus
+pub fn should_scroll(button: Buttons) -> bool {
+    let frames = ButtonBuffer::num_frames_held(button);
+    if frames >= 60 {
+        return frames & 1 == 0;
+    }
+    if frames >= 30 {
+        return frames & 3 == 0;
+    }
+    if frames >= 8 {
+        return frames & 7 == 0;
+    }
+
+    return false;
+}
+
+pub struct ButtonBuffer {
+    pub frames_down: [u16; 16], // Number of frames each button has been held for
+}
+
+pub static mut BUTTON_BUFFER: ButtonBuffer = ButtonBuffer {
+    frames_down: [0u16; 16],
+};
+
+impl ButtonBuffer {
+    fn get_buf() -> &'static ButtonBuffer {
+        unsafe { &BUTTON_BUFFER }
+    }
+    fn get_buf_mut() -> &'static mut ButtonBuffer {
+        unsafe { &mut BUTTON_BUFFER }
+    }
+    pub fn update() {
+        let buf = Self::get_buf_mut();
+        let down = buttons_down();
+        let up = down.complement();
+        for btn in down.iter() {
+            buf.frames_down[btn.bits().trailing_zeros() as usize] += 1;
+        }
+        for btn in up.iter() {
+            buf.frames_down[btn.bits().trailing_zeros() as usize] = 0;
+        }
+    }
+
+    pub fn num_frames_held(buttons: Buttons) -> u16 {
+        let buf = Self::get_buf();
+        buttons
+            .iter()
+            .map(|btn| buf.frames_down[btn.bits().trailing_zeros() as usize])
+            .min()
+            .unwrap_or(0)
+    }
+
+    pub fn check_combo_down(buttons: Buttons) -> bool {
+        Self::num_frames_held(buttons) > 0
+    }
+
+    pub fn check_combo_pressed(buttons: Buttons) -> bool {
+        Self::num_frames_held(buttons) == 1
+    }
+
+    pub fn check_combo_down_up(down: Buttons, up: Buttons) -> bool {
+        Self::check_combo_down(down) && !Self::check_combo_down(up)
+    }
+
+    pub fn check_combo_pressed_up(pressed: Buttons, up: Buttons) -> bool {
+        Self::check_combo_pressed(pressed) && !Self::check_combo_down(up)
+    }
 }

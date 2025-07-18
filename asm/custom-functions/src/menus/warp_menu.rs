@@ -165,8 +165,8 @@ impl Menu for WarpMenu {
 
         let b_pressed = is_pressed(B);
         let a_pressed = is_pressed(A);
-        let right_pressed = is_pressed(DPAD_RIGHT);
-        let left_pressed = is_pressed(DPAD_LEFT);
+        let right_pressed = is_pressed(DPAD_RIGHT) || should_scroll(DPAD_RIGHT);
+        let left_pressed = is_pressed(DPAD_LEFT) || should_scroll(DPAD_LEFT);
 
         match warp_menu.state {
             WarpState::Off => {},

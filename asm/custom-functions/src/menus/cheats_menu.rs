@@ -152,7 +152,7 @@ pub fn update_cheats() {
                 ItemflagManager::increase_counter(0, 9900);
             }
         }
-        if CHEATS[6].active && is_down(Buttons::DPAD_RIGHT) {
+        if CHEATS[6].active && ButtonBuffer::check_combo_down_up(DPAD_RIGHT, C) {
             if let Some(player) = player::as_mut() {
                 player.velocity.y = 56f32; // Minimum amount for consistent liftoff on the ground
             }
