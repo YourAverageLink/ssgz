@@ -216,4 +216,11 @@ pub fn initialize_item_list() {
             description: "What type of bug net you have",
         },
     );
+    inventory_menu.items.push(
+        ItemEntry {
+            names: vec!["No Life Tree Seedling", "Life Tree Seedling"],
+            flags: vec![497],
+            description: "Whether or not you have the Life Tree Seedling",
+        },
+    );
 }

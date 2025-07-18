@@ -287,7 +287,6 @@ pub fn initialize_practice_saves() {
             ("FS Start", "Save at the start of Fire Sanctuary"),
             ("Skyloft 5", "Save at the start of the fifth major Skyloft segment (after FS)"),
             ("Lumpy Pumpkin", "Save before completing Lumpy Pumpkin sidequests"),
-            ("Volcano East", "Save at Volcano East for Eldin cleanup before SotH segments"),
             ("Imprisoned 3", "Save before fighting the third version of The Imprisoned"),
             ("Tadtones", "Save in the Sealed Temple before the Tadtones segment"),
             ("After Tadtones", "Save after obtaining Faron's part of the Song of the Hero"),

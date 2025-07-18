@@ -1,6 +1,6 @@
 [package]
 name = "ssgz"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 
 # Want to let end users run the patcher from source w/o needing to build asm patches
