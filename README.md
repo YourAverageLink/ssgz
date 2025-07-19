@@ -1,4 +1,4 @@
-# ssgz 0.2.1 (name pending)
+# ssgz 0.3.0 (name pending)
 
 A ROM hack for *The Legend of Zelda: Skyward Sword* aimed to help out speedrunners with practice and research.
 
@@ -108,13 +108,14 @@ The Tricks Menu contains some specific functionality to help practice tricks and
 - **Extending Blow** - When activated, you will be loaded into Deep Woods (positioned to setup for Extending Blow), and given the B-Wheel, Slingshot, and Goddess Sword.
 - **Ghirahim 1** - When activated, you will be loaded into the Ghirahim fight in Skyview Temple, with the Goddess Sword and at 2 hearts. Text on-screen will show his health.
 - **Scaldera** - When activated, you will be loaded into the Scaldera fight (skipping directly to the spawn cutscene) in Earth Temple, with the Goddess Sword and a full Bomb Bag at 6 hearts. Text on-screen will show his health.
-- **Moldarach** - When activated, you will be loaded into the Moldarach fight in Lanayru Mining Facility, with a shield, the Clawshots, and Slingshot (`TODO - forgot to give gust bellows`).
+- **Moldarach** - When activated, you will be loaded into the Moldarach fight in Lanayru Mining Facility, with a shield, the Gust Bellows, Clawshots, Slingshot, and *at least* the Goddess Sword.
 - **Koloktos** - When activated, you will be loaded into the Koloktos fight in Ancient Cistern, with the Goddess Sword, Whip, Slingshot, and Bomb Bag at 4 hearts.
-- **Tentalus** - When activated, you will be loaded into the Tentalus fight in Sandship, with the Bow.
-- **Ghirahim 2** - When activated, you will be loaded into the Ghirahim fight in Fire Sanctuary, with the Goddess White Sword at 2 hearts. Text on-screen will show his health.
-- **Horde** - When activated, you will be loaded into the Horde battle in Hylia's Realm with full health.
-- **Ghirahim 3** - When activated, you will be loaded into the Ghirahim battle in Hylia's Realm with full health and a shield.
-- **Demise** - When activated, you will be loaded into the Demise fight at the end of the game with full health, a shield, *and Clawshots :)*
+- **Tentalus** - When activated, you will be loaded into the Tentalus fight in Sandship, with the Bow and *at least* the Goddess Longsword.
+- **Ghirahim 2** - When activated, you will be loaded into the Ghirahim fight in Fire Sanctuary, at 2 hearts and *at least* the Goddess White Sword. Text on-screen will show his health.
+- **Bilocyte** - When activated, you will be loaded into the Thunderhead with the battle against Levias started, with Spiral Charge, the Bow, and the True Master Sword.
+- **Horde** - When activated, you will be loaded into the Horde battle in Hylia's Realm with full health and *at least* the Master Sword.
+- **Ghirahim 3** - When activated, you will be loaded into the Ghirahim battle in Hylia's Realm with full health, a shield, and *at least* the Goddess Sword.
+- **Demise** - When activated, you will be loaded into the Demise fight at the end of the game with full health, a shield, *at least* the Goddess Sword, *and Clawshots :)*
 
 ### Extra Hotkeys
 

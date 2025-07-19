@@ -348,7 +348,7 @@ pub fn initialize_practice_saves() {
             ("Skyloft 2", "Start turning windmills (already talked to Gaepora)"),
             ("Faron 2", "Faron Trial, Skyview 2, Triple Stalfos"),
             ("Ancient Cistern", "Ancient Cistern, Stalmaster, Koloktos"),
-            ("Lanaryu Trial", "File saved before Lanaryu Trial"),
+            ("Lanayru Trial", "File saved before Lanayru Trial"),
             ("Sand Sea", "Skippers Retreat, Shipyard, Pirate Stronghold"),
             ("Sandship", "Sandship, Scervo, Mast Skip"),
             ("Tentalus", "File saved before fighting Tentalus"),

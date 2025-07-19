@@ -14,7 +14,7 @@ pub struct Trick {
     on_select: Option<fn()>,
 }
 
-const TRICKS: [Trick; 13] = [
+const TRICKS: [Trick; 14] = [
     Trick {
         name:   "Wing Ceremony Cutscene Skip",
         description: "Practice WCCS Save Prompt sidehop (Kills Link for faster reloads).",
@@ -57,6 +57,14 @@ const TRICKS: [Trick; 13] = [
         associated_enum: ActiveTrick::Moldarach,
         on_select: Some(reload_moldarach),
     },
+    /*
+    Trick {
+        name:   "Imprisoned 1",
+        description: "Practice fighting The Imprisoned after learning Ballad of the Goddess.",
+        associated_enum: ActiveTrick::Imp1,
+        on_select: Some(reload_imp1),
+    },
+    */
     Trick {
         name:   "Koloktos",
         description: "Practice fighting Koloktos in Ancient Cistern (with Goddess Sword).",
@@ -71,9 +79,29 @@ const TRICKS: [Trick; 13] = [
     },
     Trick {
         name:   "Ghirahim 2",
-        description: "Practice fighting Ghirahim in Fire Sanctuary (with Goddess White Sword).",
+        description: "Practice fighting Ghirahim in Fire Sanctuary.",
         associated_enum: ActiveTrick::G2,
         on_select: Some(reload_g2),
+    },
+    /*
+    Trick {
+        name:   "Imprisoned 2",
+        description: "Practice fighting The Imprisoned before opening the Gate of Time.",
+        associated_enum: ActiveTrick::Imp2,
+        on_select: Some(reload_imp2),
+    },
+    Trick {
+        name:   "Imprisoned 3",
+        description: "Practice fighting The Imprisoned during the Faron SotH quest.",
+        associated_enum: ActiveTrick::Imp3,
+        on_select: Some(reload_imp3),
+    },
+    */
+    Trick {
+        name:   "Bilocyte",
+        description: "Practice fighting Bilocyte in the Thunderhead (currently at the main entrance).",
+        associated_enum: ActiveTrick::Bilocyte,
+        on_select: Some(reload_bilocyte),
     },
     Trick {
         name:   "Horde",
@@ -111,9 +139,13 @@ enum ActiveTrick {
     G1,
     Scaldera,
     Moldarach,
+    // Imp1,
     Koloktos,
     Tentalus,
     G2,
+    // Imp2,
+    Bilocyte,
+    //Imp3,
     Horde,
     G3,
     Demise,
@@ -439,10 +471,11 @@ fn reload_moldarach() {
     StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(52, 1); // Give Slingshot
+    ItemflagManager::set_to_value(49, 1); // Give Gust Bellows
     ItemflagManager::set_to_value(20, 1); // Give Clawshots
     ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
     ItemflagManager::increase_counter(4, 20); // Refill Seeds
-    // Not setting sword because this varies by category
+    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword (unless player already has a higher sword)
     let current_file = file_manager::get_file_A();
     current_file.pouch_items[0] = 0x100074; // Wooden Shield
     current_file.shield_pouch_slot = 0;
@@ -497,6 +530,7 @@ fn reload_tentalus() {
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(19, 1); // Give Bow
     ItemflagManager::increase_counter(1, 20); // Refill Arrows
+    ItemflagManager::set_to_value(12, 1); // Give Goddess Longsword (unless player already has a higher sword)
     let current_file = file_manager::get_file_A();
     current_file.equipped_b_item = 1; // Bow
     reloader::trigger_entrance(
@@ -519,7 +553,7 @@ fn reload_g2() {
     StoryflagManager::set_to_value(84, 0); // Unset defeated G2 storyflag
     StoryflagManager::set_to_value(464, 0); // Unset intro cutscene flag
     StoryflagManager::do_commit();
-    set_sword_to_white();
+    ItemflagManager::set_to_value(9, 1); // Give Goddess White Sword (unless player already has a higher sword)
     reloader::trigger_entrance(
         b"B201\0".as_ptr(),
         0,
@@ -539,6 +573,7 @@ fn reload_horde() {
     StoryflagManager::set_to_value(134, 0); // Unset horde defeated
     StoryflagManager::set_to_value(347, 0); // Unset horde cutscene
     StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(13, 1); // Give Master Sword (unless player already has a higher sword)
     reloader::trigger_entrance(
         b"F403\0".as_ptr(),
         1,
@@ -561,6 +596,7 @@ fn reload_g3() {
     StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
+    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword (unless player already has a higher sword)
     let current_file = file_manager::get_file_A();
     current_file.pouch_items[0] = 0x100074; // Wooden Shield
     current_file.shield_pouch_slot = 0;
@@ -587,6 +623,7 @@ fn reload_demise() {
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
     ItemflagManager::set_to_value(20, 1); // Give Clawshots :)
+    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword (unless player already has a higher sword)
     current_file.pouch_items[0] = 0x100074; // Wooden Shield
     current_file.shield_pouch_slot = 0;
     current_file.lastUsedPouchItemSlot = 0;
@@ -605,26 +642,150 @@ fn reload_demise() {
     file_manager::set_current_health(80); // Full refill, whatever the file's max health happens to be
 }
 /*
-fn reload_bilocyte() {
-    StoryflagManager::set_to_value(364, 1); // Spiral Charge
-    StoryflagManager::set_to_value(288, 1); // Triggered Bilocyte fight
+fn reload_imprisoned(fight: u16) {
+    // Set flag for this imp fight, unset other flags
+    const BASE_TRIGGER: u16 = 143;
+    const BASE_DEFEATED: u16 = 131;
+    const BASE_SCENE_TRIGGER: u16 = 10;
+    for idx in 1..=3 {
+        // StoryflagManager::set_to_value(BASE_TRIGGER + idx - 1, (idx == fight) as u16);
+        // StoryflagManager::set_to_value(BASE_DEFEATED + idx - 1, (idx < fight) as u16); // Boss defeated
+        /*
+        if idx == fight {
+            SceneflagManager::set_global(10, BASE_SCENE_TRIGGER + idx - 1);
+        } else {
+            SceneflagManager::unset_global(10, BASE_SCENE_TRIGGER + idx - 1);
+        }
+        */
+    }
+    StoryflagManager::set_to_value(11, (fight != 1) as u16); // Groosenator tracks
+    SceneflagManager::set_global(10, 7); // Air vents
+    if fight != 1 {
+        SceneflagManager::set_global(10, 91); // Another flag
+    }
+    if fight == 3 {
+       //  SceneflagManager::set_global(10, 108); // Another flag
+    }
+    SceneflagManager::unset_global(10, 9); // Big air vent
+
+    // Give at least the appropriate sword, and set/unset certain flags
+    match fight {
+        1 => {
+            ItemflagManager::set_to_value(11, 1);
+            // Setting story flags set in boss rush
+            StoryflagManager::set_to_value(703, 1);
+            StoryflagManager::set_to_value(13, 0);
+            StoryflagManager::set_to_value(131, 0);
+            StoryflagManager::set_to_value(136, 1);
+            StoryflagManager::set_to_value(71, 0);
+            StoryflagManager::set_to_value(149, 0);
+        },
+        2 => {
+            ItemflagManager::set_to_value(13, 1);
+            // Setting story flags set in boss rush
+            StoryflagManager::set_to_value(704, 1);
+            StoryflagManager::set_to_value(132, 0);
+            StoryflagManager::set_to_value(136, 1);
+            // these were set by the flow
+            /*
+            SceneflagManager::unset_global(10, 26);
+            StoryflagManager::set_to_value(796, 1);
+            SceneflagManager::set_global(10, 36);
+            SceneflagManager::unset_global(10, 30);
+            SceneflagManager::set_global(10, 81);
+            StoryflagManager::set_to_value(795, 0);
+            */
+            // StoryflagManager::set_to_value(144, 1);
+        },
+        3 => {
+            ItemflagManager::set_to_value(14, 1);
+            // Setting story flags set in boss rush
+            StoryflagManager::set_to_value(705, 1);
+            StoryflagManager::set_to_value(136, 1);
+            // StoryflagManager::set_to_value(145, 1);
+            // these were set by the flow
+            /*
+            SceneflagManager::unset_global(10, 108);
+            StoryflagManager::set_to_value(796, 1);
+            SceneflagManager::set_global(10, 36);
+            StoryflagManager::set_to_value(145, 1);
+            */
+        },
+        _ => {},
+    }
+
     StoryflagManager::do_commit();
+    let current_file = file_manager::get_file_A();
+    // Positioned for the cutscene trigger
+    // current_file.pos_t1.x = -772.0;
+    // current_file.pos_t1.y = 1.0;
+    // current_file.pos_t1.z = -153.0;
+    reloader::trigger_entrance(
+        b"F401\0".as_ptr(),
+        1,
+        0, // 1 + (fight as u8), // 2 for imp1, 3 for imp2, 4 for imp3
+        7, // Entrance 7
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    // reloader::set_reloader_type(1);
+    reloader::set_reload_trigger(5);
+    file_manager::set_current_health(80); // Full refill, whatever the file's max health happens to be
+}
+
+fn reload_imp1() {
+    reload_imprisoned(1);
+}
+fn reload_imp2() {
+    reload_imprisoned(2);
+}
+fn reload_imp3() {
+    reload_imprisoned(3);
 }
 */
+
+fn reload_bilocyte() {
+    StoryflagManager::set_to_value(364, 1); // Spiral Charge
+    StoryflagManager::set_to_value(366, 1);
+    StoryflagManager::set_to_value(368, 1);
+    // StoryflagManager::set_to_value(288, 1); // Triggered Bilocyte fight
+    StoryflagManager::set_to_value(200, 0); // Defeated Bilocyte fight
+    StoryflagManager::set_to_value(58, 1); // Give B-Wheel
+    StoryflagManager::do_commit();
+    ItemflagManager::set_to_value(19, 1); // Give Bow
+    ItemflagManager::increase_counter(1, 20); // Refill Arrows
+    ItemflagManager::set_to_value(14, 1); // Give True Master Sword
+    /*
+    let current_file = file_manager::get_file_A();
+    current_file.pos_t1.x = -111223.0;
+    current_file.pos_t1.y = -1206.0;
+    current_file.pos_t1.z = -89997.0;
+    current_file.angle_t1 = 0;
+    */
+    reloader::trigger_entrance(
+        b"F023\0".as_ptr(),
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0xF,
+        0xFF,
+    );
+    // reloader::set_reloader_type(1);
+    reloader::set_reload_trigger(5);
+}
+
 
 fn set_sword_to_goddess() {
     ItemflagManager::set_to_value(11, 1); // Give Goddess Sword
     // Remove higher-level swords
     ItemflagManager::set_to_value(12, 0);
     ItemflagManager::set_to_value(9, 0);
-    ItemflagManager::set_to_value(13, 0);
-    ItemflagManager::set_to_value(14, 0);
-    ItemflagManager::do_commit();
-}
-
-fn set_sword_to_white() {
-    ItemflagManager::set_to_value(9, 1); // Give Goddess White Sword
-    // Remove higher-level swords
     ItemflagManager::set_to_value(13, 0);
     ItemflagManager::set_to_value(14, 0);
     ItemflagManager::do_commit();
@@ -768,6 +929,12 @@ pub fn update_tricks() {
             DungeonflagManager::set_to_value(3, 0); // Unset boss beaten dungeonflag
             display_boss_health("Ghirahim");
         },
+        ActiveTrick::Bilocyte => {
+            // This story flag sets super late though :(
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(200) {
+                reload_bilocyte();
+            }
+        },
         ActiveTrick::Horde => {
             if is_pressed(DPAD_LEFT) || StoryflagManager::check(134) {
                 reload_horde();
@@ -785,5 +952,22 @@ pub fn update_tricks() {
                 reload_demise();
             }
         },
+        /*
+        ActiveTrick::Imp1 => {
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(131) {
+                reload_imp1();
+            }
+        },
+        ActiveTrick::Imp2 => {
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(132) {
+                reload_imp2();
+            }
+        },
+        ActiveTrick::Imp3 => {
+            if is_pressed(DPAD_LEFT) || StoryflagManager::check(133) {
+                reload_imp3();
+            }
+        },
+        */
     }
 }

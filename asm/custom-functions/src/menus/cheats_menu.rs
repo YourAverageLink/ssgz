@@ -5,6 +5,7 @@ use crate::{
 
 pub struct Cheat {
     name:   &'static str,
+    description: &'static str,
     active: bool,
 }
 
@@ -17,30 +18,37 @@ extern "C" {
 pub static mut CHEATS: [Cheat; 8] = [
     Cheat {
         name:   "Infinite Health",
+        description: "Constantly refills health to 20 hearts (unless you're already dead).",
         active: false,
     },
     Cheat {
         name:   "Infinite Stamina",
+        description: "Constantly refills stamina and underwater air to full.",
         active: false,
     },
     Cheat {
         name:   "Infinite Slingshot Seeds",
+        description: "Constantly refills Slingshot Seeds to full.",
         active: false,
     },
     Cheat {
         name:   "Infinite Bombs",
+        description: "Constantly refills Bombs to full.",
         active: false,
     },
     Cheat {
         name:   "Infinite Arrows",
+        description: "Constantly refills Arrows to full.",
         active: false,
     },
     Cheat {
         name:   "Infinite Rupees",
+        description: "Constantly refills Rupees to 9900.",
         active: false,
     },
     Cheat {
         name:   "Moon Jump while holding D-Pad Right",
+        description: "Applies an upward velocity of 56 units to Link while holding D-Pad Right.",
         active: false,
     },
     //Cheat {
@@ -49,6 +57,7 @@ pub static mut CHEATS: [Cheat; 8] = [
     //},
     Cheat {
         name:   "Instant Text",
+        description: "Instantly fills in all text in text boxes.",
         active: false,
     },
 ];
@@ -107,7 +116,7 @@ impl super::Menu for CheatsMenu {
                 "{} [{}]",
                 cheat.name,
                 if cheat.active { "x" } else { "" }
-            ), if cheat.active { "This cheat is currently active."} else { "This cheat is currently inactive." })
+            ), cheat.description)
         }
         menu.set_cursor(cheats_menu.cursor);
         menu.draw();
