@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 #![feature(slice_ptr_get)]
 #![allow(unused_imports)]
+#![allow(static_mut_refs)]
 
 #[macro_use]
 extern crate alloc;

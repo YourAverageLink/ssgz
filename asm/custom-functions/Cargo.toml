@@ -10,8 +10,10 @@ crate-type=["staticlib"]
 [workspace]
 exclude = ["ssgz"]
 
+# Dynamic is enabled by default for rust-analyzer purposes. The build scripts will manually choose the right feature
+# You may change this to static or debug_dyn if you want to analyze that code instead.
 [features]
-default = []
+default = ["dynamic"]
 static = []
 dynamic = []
 debug_dyn = ["dynamic"]

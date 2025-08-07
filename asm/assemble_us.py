@@ -445,7 +445,7 @@ try:
                     if result := call(["cargo", "fmt"], cwd="./custom-functions"):
                         raise Exception("Formatting rust functions failed.")
                     if result := call(
-                        ["cargo", "build", "--features", "static", "--release"],
+                        ["cargo", "build", "--no-default-features", "--features", "static", "--release"],
                         cwd="./custom-functions",
                     ):
                         raise Exception("Building rust main.dol functions failed.")
@@ -570,7 +570,7 @@ try:
 
     # Build dynamic rust code (for a custom rel)
     if result := call(
-        ["cargo", "build", "--features", feature, "--release"],
+        ["cargo", "build", "--no-default-features", "--features", feature, "--release"],
         cwd="./custom-functions",
     ):
         raise Exception("Building rust rel functions failed.")
