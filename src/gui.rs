@@ -17,7 +17,7 @@ pub fn do_gui() {
 fn App() -> Element {
     rsx! {
         document::Link { rel: "favicon", href: FAVICON }
-        
+
         style { "{CSS}" }
         GZ {}
     }
