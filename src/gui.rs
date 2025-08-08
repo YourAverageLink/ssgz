@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 use std::sync::mpsc;
 
 const FAVICON: Asset = asset!("/icons/icon.ico");
-const MAIN_CSS: Asset = asset!("/assets/gz.css");
+const CSS: &str = include_str!("../assets/gz.css");
 
 const SUPPORTED_VERSIONS: [GameVersion; 2] = [GameVersion::NTSC1_0, GameVersion::JP];
 
@@ -17,7 +17,8 @@ pub fn do_gui() {
 fn App() -> Element {
     rsx! {
         document::Link { rel: "favicon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
+        
+        style { "{CSS}" }
         GZ {}
     }
 }
