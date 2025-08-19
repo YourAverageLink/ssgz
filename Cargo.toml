@@ -24,6 +24,8 @@ dialoguer = "0.11.0"
 dioxus = { version = "0.6.0" }
 futures = "0.3.31"
 tokio = "1.45.1"
+self_update = { version = "0.42", features = ["archive-zip", "compression-zip-deflate"] }
+semver = "1.0.26"
 
 [features]
 default = ["desktop"]
