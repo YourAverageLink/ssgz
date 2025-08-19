@@ -31,6 +31,7 @@ fn fix_macos_working_directory() -> anyhow::Result<()> {
     // (unless running from source or with dx serve)
     #[cfg(target_os = "macos")]
     {
+        use std::env;
         if let Ok(exe_path) = env::current_exe() {
             let mut current = exe_path.as_path();
             while let Some(parent) = current.parent() {
