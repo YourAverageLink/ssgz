@@ -1,5 +1,5 @@
-use crate::{
-    GZ_VERSION, do_extract_ui, do_repack, is_ready_to_patch, iso_tools::GameVersion, patcher,
+use crate::{ 
+    do_extract_ui, do_repack, is_ready_to_patch, iso_tools::GameVersion, patcher, updater::*,
 };
 use dioxus::prelude::*;
 use std::sync::mpsc;
@@ -17,8 +17,8 @@ pub fn do_gui() {
 fn App() -> Element {
     rsx! {
         document::Link { rel: "favicon", href: FAVICON }
-
         style { "{CSS}" }
+        UpdateChecker {}
         GZ {}
     }
 }
@@ -37,6 +37,164 @@ fn do_patch<T: FnMut(u8)>(version: GameVersion, cb: &mut T) -> anyhow::Result<()
         do_repack(version, cb)?;
     }
     Ok(())
+}
+
+#[component]
+fn UpdateChecker() -> Element {
+    let mut is_checking = use_signal(|| false);
+    let mut pending_update = use_signal(|| None::<String>);
+    let mut show_confirm_popup = use_signal(|| false);
+    let mut is_downloading = use_signal(|| false);
+    let mut update_complete = use_signal(|| false);
+    let mut showing_info = use_signal(|| false);
+    let mut info = use_signal(|| "".to_owned());
+    let mut update_receiver = use_signal(|| None::<mpsc::Receiver<UpdateStatus>>);
+
+    use_effect(move || {
+        is_checking.set(true);
+        
+        let (sender, receiver) = mpsc::channel();
+        update_receiver.set(Some(receiver));
+
+        // Spawn the update check thread
+        std::thread::spawn(move || {
+            match check_for_update() {
+                Ok(Some(asset_name)) => {
+                    let _ = sender.send(UpdateStatus::UpdateAvailable(asset_name));
+                }
+                Ok(None) => {
+                    let _ = sender.send(UpdateStatus::NoUpdate);
+                }
+                Err(e) => {
+                    let _ = sender.send(UpdateStatus::Failed(format!("Update check failed: {}", e)));
+                }
+            }
+        });
+    });
+
+    // Handle updates to that thread
+    use_effect(move || {
+        if *is_checking.read() || *is_downloading.read() {
+            spawn(async move {
+                while *is_checking.read() || *is_downloading.read() {
+                    if let Some(receiver) = update_receiver.read().as_ref() {
+                        while let Ok(update) = receiver.try_recv() {
+                            match update {
+                                UpdateStatus::UpdateAvailable(asset_name) => {
+                                    pending_update.set(Some(asset_name));
+                                    show_confirm_popup.set(true);
+                                    is_checking.set(false);
+                                }
+                                UpdateStatus::NoUpdate => {
+                                    is_checking.set(false);
+                                }
+                                UpdateStatus::DownloadComplete => {
+                                    info.set("Update complete! Please re-launch the app.".to_string());
+                                    is_downloading.set(false);
+                                    showing_info.set(true);
+                                    update_complete.set(true);
+                                }
+                                UpdateStatus::Failed(err) => {
+                                    info.set(err);
+                                    is_checking.set(false);
+                                    is_downloading.set(false);
+                                    showing_info.set(true);
+                                }
+                            }
+                        }
+                    }
+
+                    // Don't freeze
+                    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+                }
+            });
+        }
+    });
+
+    // Handlers
+    let handle_yes = move |_| {
+        show_confirm_popup.set(false);
+        
+        if let Some(asset_name) = pending_update.read().clone() {
+            is_downloading.set(true);
+            
+            let (sender, receiver) = mpsc::channel();
+            update_receiver.set(Some(receiver));
+            
+            std::thread::spawn(move || {
+                match perform_update(&asset_name) {
+                    Ok(_) => {
+                        let _ = sender.send(UpdateStatus::DownloadComplete);
+                    }
+                    Err(e) => {
+                        let _ = sender.send(UpdateStatus::Failed(format!("Update failed: {}", e)));
+                    }
+                }
+            });
+        }
+    };
+
+    let handle_no = move |_| {
+        show_confirm_popup.set(false);
+        pending_update.set(None);
+    };
+
+    let window = dioxus::desktop::use_window();
+
+    rsx! {
+        if *show_confirm_popup.read() {
+            div {
+                class: "popup-overlay",
+                div {
+                    class: "popup-content",
+                    h3 { "An update is available. Would you like to update now?" }
+                    div {
+                        style: "display: flex; gap: 10px; justify-content: center; margin-top: 20px;",
+                        button {
+                            class: "btn extract-btn",
+                            onclick: handle_yes,
+                            "Yes"
+                        }
+                        button {
+                            class: "btn extract-btn",
+                            onclick: handle_no,
+                            "No"
+                        }
+                    }
+                }
+            }
+        }
+
+        if *is_downloading.read() {
+            div {
+                class: "popup-overlay",
+                div {
+                    class: "popup-content",
+                    h3 { "Downloading update ..." }
+                }
+            }
+        }
+
+        if *showing_info.read() {
+            div {
+                class: "popup-overlay",
+                div {
+                    class: "popup-content",
+                    h3 { "{*info.read()}" }
+                    button {
+                        class: "btn extract-btn",
+                        onclick: move |_| {
+                            showing_info.set(false);
+                            if *update_complete.read() {
+                                window.close();
+                            }
+                        },
+                        "Close app"
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[component]
@@ -62,7 +220,7 @@ pub fn Title() -> Element {
             class: "header",
             h1 {
                 class: "main-title",
-                "SSGZ Version {GZ_VERSION}"
+                "SSGZ Version {CURRENT_VERSION}"
             }
             h2 {
                 class: "sub-title",
@@ -254,5 +412,13 @@ pub fn VersionCol(version: GameVersion) -> Element {
 enum FileIOStatus {
     Progress(u8),
     Completed,
+    Failed(String),
+}
+
+#[derive(Debug)]
+enum UpdateStatus {
+    UpdateAvailable(String),
+    NoUpdate,
+    DownloadComplete,
     Failed(String),
 }
