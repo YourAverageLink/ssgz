@@ -1,5 +1,8 @@
-use crate::{ 
-    do_extract_ui, do_repack, is_ready_to_patch, iso_tools::GameVersion, patcher, updater::*,
+use crate::{
+    do_extract_ui, do_repack, is_ready_to_patch,
+    iso_tools::GameVersion,
+    patcher,
+    updater::{CURRENT_VERSION, check_for_update, perform_update},
 };
 use dioxus::prelude::*;
 use std::sync::mpsc;
@@ -52,22 +55,20 @@ fn UpdateChecker() -> Element {
 
     use_effect(move || {
         is_checking.set(true);
-        
+
         let (sender, receiver) = mpsc::channel();
         update_receiver.set(Some(receiver));
 
         // Spawn the update check thread
-        std::thread::spawn(move || {
-            match check_for_update() {
-                Ok(Some(asset_name)) => {
-                    let _ = sender.send(UpdateStatus::UpdateAvailable(asset_name));
-                }
-                Ok(None) => {
-                    let _ = sender.send(UpdateStatus::NoUpdate);
-                }
-                Err(e) => {
-                    let _ = sender.send(UpdateStatus::Failed(format!("Update check failed: {}", e)));
-                }
+        std::thread::spawn(move || match check_for_update() {
+            Ok(Some(asset_name)) => {
+                let _ = sender.send(UpdateStatus::UpdateAvailable(asset_name));
+            }
+            Ok(None) => {
+                let _ = sender.send(UpdateStatus::NoUpdate);
+            }
+            Err(e) => {
+                let _ = sender.send(UpdateStatus::Failed(format!("Update check failed: {}", e)));
             }
         });
     });
@@ -89,7 +90,9 @@ fn UpdateChecker() -> Element {
                                     is_checking.set(false);
                                 }
                                 UpdateStatus::DownloadComplete => {
-                                    info.set("Update complete! Please re-launch the app.".to_string());
+                                    info.set(
+                                        "Update complete! Please re-launch the app.".to_string(),
+                                    );
                                     is_downloading.set(false);
                                     showing_info.set(true);
                                     update_complete.set(true);
@@ -114,21 +117,19 @@ fn UpdateChecker() -> Element {
     // Handlers
     let handle_yes = move |_| {
         show_confirm_popup.set(false);
-        
+
         if let Some(asset_name) = pending_update.read().clone() {
             is_downloading.set(true);
-            
+
             let (sender, receiver) = mpsc::channel();
             update_receiver.set(Some(receiver));
-            
-            std::thread::spawn(move || {
-                match perform_update(&asset_name) {
-                    Ok(_) => {
-                        let _ = sender.send(UpdateStatus::DownloadComplete);
-                    }
-                    Err(e) => {
-                        let _ = sender.send(UpdateStatus::Failed(format!("Update failed: {}", e)));
-                    }
+
+            std::thread::spawn(move || match perform_update(&asset_name) {
+                Ok(_) => {
+                    let _ = sender.send(UpdateStatus::DownloadComplete);
+                }
+                Err(e) => {
+                    let _ = sender.send(UpdateStatus::Failed(format!("Update failed: {}", e)));
                 }
             });
         }

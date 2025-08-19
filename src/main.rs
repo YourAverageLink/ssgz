@@ -80,18 +80,24 @@ pub fn is_ready_to_patch(version: GameVersion) -> bool {
 }
 
 fn do_noui(version: GameVersion) -> anyhow::Result<()> {
-    if let Some(asset_name) = check_for_update()? {
-        if Confirm::new()
-            .with_prompt("Update detected. Do you want to update now?")
-            .default(true)
-            .interact()
-            .context("Failed to read user input")?
-        {
-            perform_update(&asset_name)?;
-            println!("Update complete! Please re-launch the app.");
-            return Ok(());
-        } else {
-            println!("Update canceled.");
+    match check_for_update() {
+        Ok(Some(asset_name)) => {
+            if Confirm::new()
+                .with_prompt("Update detected. Do you want to update now?")
+                .default(true)
+                .interact()
+                .context("Failed to read user input")?
+            {
+                perform_update(&asset_name)?;
+                println!("Update complete! Please re-launch the app.");
+                return Ok(());
+            } else {
+                println!("Update canceled.");
+            }
+        }
+        Ok(None) => {}
+        Err(e) => {
+            eprintln!("Update check failed: {e}");
         }
     }
 

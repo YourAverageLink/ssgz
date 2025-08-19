@@ -1,7 +1,7 @@
+use anyhow::Context;
 use self_update::{self, backends::github::Update, cargo_crate_version};
 use semver::Version;
 use std::env;
-use anyhow::Context;
 
 pub const CURRENT_VERSION: &str = cargo_crate_version!();
 
