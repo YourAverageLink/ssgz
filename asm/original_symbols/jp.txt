@@ -61,6 +61,7 @@ main.dol:
     ActorEventFlowMgr__triggerEntryPoint: 0x801b1f10
     ActorEventFlowMgr__getCurrentActorEventFlowMgr: 0x80038940
     ENEMY_LIST: 0x805782f8
+    SCGetAspectRatio: 0x803D6E30
     # --------------- FLAG MANAGERS ---------------------------
     SceneflagManager__checkFlag: 0x800be400
     SceneflagManager__checkFlagGlobal: 0x800be470

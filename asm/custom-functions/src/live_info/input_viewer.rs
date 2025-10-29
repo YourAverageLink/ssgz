@@ -1,5 +1,6 @@
 use crate::system::button::*;
 use crate::utils::char_writer::TextWriterBase;
+use crate::utils::menu::get_y_top;
 use wchar::wchz;
 
 struct StickDir {}
@@ -53,7 +54,7 @@ impl DPadDir {
 pub fn display() {
     let mut writer = TextWriterBase::new();
     writer.set_font_color(0xFFFFFFFF, 0xFFFFFFFF);
-    writer.set_position(0f32, 0f32);
+    writer.set_position(0f32, get_y_top() - 10.0);
     writer.set_scale(0.75f32);
     writer.print(wchz!(u16, "Inputs: "));
     StickDir::display(&mut writer);
