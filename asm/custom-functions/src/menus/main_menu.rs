@@ -10,7 +10,7 @@ use core::fmt::Write;
 use crate::system::button::*;
 use crate::utils::char_writer::{TextWriterBase, CharWriter};
 use crate::utils::graphics::draw_rect;
-use crate::utils::menu::SimpleMenu;
+use crate::utils::menu::{get_y_bottom, SimpleMenu};
 
 use wchar::wchz;
 
@@ -32,6 +32,7 @@ enum MenuState {
 const GZ_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 const NUM_MENUS: usize = 6;
+
 
 impl MenuState {
     fn from_u32(num: u32) -> MenuState {
@@ -133,7 +134,7 @@ impl super::Menu for MainMenu {
         if MainMenu::is_active() {
             draw_rect(0f32, 0f32, 640f32, 480f32, 0.0f32, 0x000000C0);
             writer.set_font_color(0xFFFFFFFF, 0xFFFFFFFF);
-            writer.set_position(10f32, 420f32);
+            writer.set_position(10f32, get_y_bottom());
             writer.print_symbol(wchz!(u16, "\x20"));
             writer.print(wchz!(u16, "Select\t"));
             writer.print_symbol(wchz!(u16, "\x21"));
@@ -227,7 +228,7 @@ impl super::Menu for MainMenu {
         }
 
         if MainMenu::is_active() && main_menu.extra_hotkeys_on {
-            writer.set_position(10f32, 380f32);
+            writer.set_position(10f32, get_y_bottom() - 40.0);
             writer.print_symbol(wchz!(u16, "\x26\x32"));
             writer.print(wchz!(u16, " Save File "));
             writer.print_symbol(wchz!(u16, "\x26\x31"));
@@ -239,7 +240,7 @@ impl super::Menu for MainMenu {
         }
 
         if MainMenu::is_active() && !main_menu.description.is_empty() {
-            writer.set_position(10f32, 400f32);
+            writer.set_position(10f32, get_y_bottom() - 20.0);
             let mut line = CharWriter::new();
             let _ = line.write_str(main_menu.description);
             line.draw(&mut writer);

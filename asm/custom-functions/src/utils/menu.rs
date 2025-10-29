@@ -20,10 +20,38 @@ pub struct SimpleMenu {
     pub descriptions: Vec<&'static str>,
 }
 
+const WIDESCREEN_HEIGHT: f32 = 480.0;
+const STANDARD_HEIGHT: f32 = 360.0;
+const HEIGHT_DIFF: f32 = WIDESCREEN_HEIGHT - STANDARD_HEIGHT;
+const WIDESCREEN_Y_TOP: f32 = 10.0;
+const WIDESCREEN_Y_BOTTOM: f32 = 420.0;
+const STANDARD_Y_TOP: f32 = WIDESCREEN_Y_TOP * 0.75 + HEIGHT_DIFF * 0.5;
+const STANDARD_Y_BOTTOM: f32 = WIDESCREEN_Y_BOTTOM - HEIGHT_DIFF * 0.5;
+
+extern "C" {
+    fn SCGetAspectRatio() -> u8;
+}
+
+pub fn get_y_top() -> f32 {
+    if unsafe { SCGetAspectRatio() == 0 } {
+        STANDARD_Y_TOP
+    } else {
+        WIDESCREEN_Y_TOP
+    }
+}
+
+pub fn get_y_bottom() -> f32 {
+    if unsafe { SCGetAspectRatio() == 0 } {
+        STANDARD_Y_BOTTOM
+    } else {
+        WIDESCREEN_Y_BOTTOM
+    }
+}
+
 impl SimpleMenu {
     pub fn new() -> Self {
         Self {
-            pos:            [10f32; 2],
+            pos:            [10f32, get_y_top()],
             font_color:     Color::from_u32(0xFFFFFFFF),
             bg_color:       Color::from_u32(0x000000FF),
             max_view_lines: 10,
