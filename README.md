@@ -1,4 +1,4 @@
-# ssgz 0.3.0 (name pending)
+# ssgz 0.3.1 (name pending)
 
 A ROM hack for *The Legend of Zelda: Skyward Sword* aimed to help out speedrunners with practice and research.
 
