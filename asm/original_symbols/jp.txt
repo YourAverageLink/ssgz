@@ -1,4 +1,13 @@
 main.dol:
+    # --------------- LINKER SYMBOLS --------------------------
+    SDA_13_BASE: 0x8057C6A0
+    # --------------- CORE HOOK -------------------------------
+    IMPORTANT_UPDATE_FUNCTION: 0x80062F30
+    # --------------- MORE HOOKS - MAYBE SORT -----------------
+    dvdCallback__4dDylFPv: 0x80053760
+    rnd__2cMFv: 0x802E1110
+    draw__15dLytMeterMain_cFv: 0x800D80A0
+    executeState_OutputText__15dLytMsgWindow_cFv: 0x80116050
     # --------------- C STUFFS --------------------------------
     printf: 0x802df3e0
     float_to_unsigned: 0x804c73b4
@@ -33,6 +42,7 @@ main.dol:
     TextManager__setNumericArgs: 0x800b8fb0
     TextManager__setStringArg: 0x800b84f0
     AcOTBox__initDowsingTarget: 0x8026dcb0
+    s_rnd: 0x80578E00
     cM_rnd: 0x802e1110
     RELOCATE_RAND: 0x802e1118 # addr to return to for relocated rng func
     REST_OF_RNG_FUNC: 0x802E1220

@@ -1,6 +1,7 @@
 import glob
 import re
 from subprocess import call
+from pathlib import Path
 import os
 import tempfile
 import shutil
@@ -26,6 +27,11 @@ else:
             r"Could not find devkitPPC. Path to devkitPPC should be in the DEVKITPPC env var."
         )
     devkitbasepath = os.environ.get("DEVKITPPC") + "/bin"
+
+
+version = sys.argv[1]
+if version not in ["us", "jp"]:
+    print("not a supported version:", version)
 
 
 def get_bin(name):
@@ -64,10 +70,10 @@ print()
 custom_symbols = OrderedDict()
 custom_symbols["main.dol"] = OrderedDict()
 
-with open("original_symbols/us.txt", "r") as f:
+with open(f'original_symbols/{version}.txt', "r") as f:
     original_symbols = yaml.safe_load(f)
 
-with open("free_space_start_offsets/us.txt", "r") as f:
+with open(f'free_space_start_offsets/{version}.txt', "r") as f:
     free_space_start_offsets = yaml.safe_load(f)
 
 next_free_space_offsets = {}
@@ -170,8 +176,7 @@ def try_apply_local_relocation(bin_name, elf_relocation, elf_symbol):
 
 
 SDA_RE = re.compile(r"([a-z]+) (r[0-9]+), *([a-zA-Z0-9_]+)@sda21 *\(r13\).*")
-SDA_13_BASE = 0x80579440  # US 1.0
-# SDA_13_BASE = 0x8057c6a0 # JP 1.0
+SDA_13_BASE = original_symbols["main.dol"]["SDA_13_BASE"]
 SDA_13_MAX = SDA_13_BASE + 0x7FFF
 SDA_13_MIN = SDA_13_BASE - 0x8000
 
@@ -187,7 +192,7 @@ def handle_sda_instr(line: str) -> str:
     address = original_symbols["main.dol"][lbl]
     if address < SDA_13_MIN or address > SDA_13_MAX:
         raise Exception(
-            f"Relocation failed, SDA for symbol {elf_symbol.name} out of range."
+            f"Relocation failed, SDA for symbol {lbl} out of range."
         )
     if instr == "la":
         return f"addi {reg}, r13, {address-SDA_13_BASE}"
@@ -206,20 +211,20 @@ try:
     with open("asm_macros.asm") as f:
         asm_macros = f.read()
 
-    all_asm_file_paths = glob.glob("./patches/us/*.asm")
-    all_asm_files = [os.path.basename(rel_path) for rel_path in all_asm_file_paths]
+    all_asm_file_paths = [*glob.glob(f'./patches/{version}/*.asm'), *glob.glob("./patches/all/*.asm")]
+    all_asm_files = [Path(rel_path) for rel_path in all_asm_file_paths]
 
     # First parse all the asm files into code chunks.
     code_chunks = OrderedDict()
     local_branches_linker_script_for_file = {}
     next_free_space_id_for_file = {}
-    for patch_filename in all_asm_files:
+    for patch_path in all_asm_files:
+        patch_filename = patch_path.name
         print("Assembling " + patch_filename)
-        patch_path = os.path.join(".", "patches", "us", patch_filename)
         with open(patch_path) as f:
             asm = f.read()
 
-        patch_name = os.path.splitext(patch_filename)[0]
+        patch_name = f'{patch_path.parent.name}-{patch_path.stem}'
         code_chunks[patch_name] = OrderedDict()
 
         most_recent_file_path = None
@@ -230,10 +235,10 @@ try:
 
             open_file_match = re.match(r"\.open\s+\"([^\"]+)\"$", line, re.IGNORECASE)
             org_match = re.match(
-                r"\.org\s+(0x[0-9a-f]+|@MainInjection)$", line, re.IGNORECASE
+                r"\.org\s+(0x[0-9a-f])$", line, re.IGNORECASE
             )
             org_symbol_match = re.match(
-                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)$", line, re.IGNORECASE
+                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)(\s*\+\s*0x[0-9a-f]+)?$", line, re.IGNORECASE
             )
             branch_match = re.match(
                 r"(?:b|beq|bne|blt|bgt|ble|bge)\s+0x([0-9a-f]+)(?:$|\s)",
@@ -258,9 +263,6 @@ try:
                     raise Exception("Found .org directive when no file was open.")
 
                 org_symbol = org_match.group(1)
-
-                if org_symbol == "@MainInjection":
-                    org_symbol = "0x80062e60"  # JP: 0x80062f40, US: 0x80062e60
 
                 org_offset = int(org_symbol, 16)
 
@@ -288,6 +290,15 @@ try:
                         % next_free_space_id_for_file[most_recent_file_path]
                     )
                     next_free_space_id_for_file[most_recent_file_path] += 1
+                elif len(org_symbol_match.groups()) == 2:
+                    orig_symbols_for_file = original_symbols[most_recent_file_path]
+                    if org_symbol_match.group(2) is not None:
+                        offset = int(org_symbol_match.group(2), 16)
+                    else:
+                        offset = 0
+
+                    org_symbol = orig_symbols_for_file[org_symbol] + offset
+
 
                 code_chunks[patch_name][most_recent_file_path][org_symbol] = ""
                 most_recent_org_offset = org_symbol
@@ -339,6 +350,10 @@ try:
         diffs = OrderedDict()
 
         for file_path, code_chunks_for_file in code_chunks_for_patch.items():
+            if file_path not in original_symbols:
+                original_symbols[file_path] = OrderedDict()
+            orig_symbols_for_file = original_symbols[file_path]
+
             if file_path not in custom_symbols:
                 custom_symbols[file_path] = OrderedDict()
             custom_symbols_for_file = custom_symbols[file_path]
@@ -448,7 +463,7 @@ try:
                         ["cargo", "build", "--no-default-features", "--features", "static", "--release"],
                         cwd="./custom-functions",
                     ):
-                        raise Exception("Building rust main.dol functions failed.")
+                        raise Exception("Building rust functions failed.")
 
                     command.extend(
                         (
@@ -534,7 +549,7 @@ try:
                 if relocations:
                     diffs[file_path][org_offset]["Relocations"] = relocations
 
-        diff_path = os.path.join(".", "patch_diffs", "us", patch_name + "_diff.txt")
+        diff_path = os.path.join(".", "patch_diffs", version, patch_name + "_diff.txt")
         with open(diff_path, "w") as f:
             f.write(
                 yaml.dump(
@@ -554,7 +569,7 @@ try:
 
         output_custom_symbols[file_path] = custom_symbols_for_file
 
-    with open("./custom_symbols/us.txt", "w") as f:
+    with open(f'./custom_symbols/{version}.txt', "w") as f:
         f.write(
             yaml.dump(
                 output_custom_symbols,
@@ -565,7 +580,7 @@ try:
         )
 
     feature = "dynamic"
-    if len(sys.argv) > 1 and sys.argv[1] == "debug":
+    if len(sys.argv) > 2 and sys.argv[2] == "debug":
         feature = "debug_dyn"
 
     # Build dynamic rust code (for a custom rel)
@@ -605,20 +620,20 @@ try:
     if result := call(command):
         raise Exception("Linker call failed.")
 
-    create_lst("us", temp_dir)
+    create_lst(version, temp_dir)
     map_rel(
-        os.path.join(temp_dir, "us_dyn.lst"),
+        os.path.join(temp_dir, f'{version}_dyn.lst'),
         None,
-        os.path.join(temp_dir, "us.lst"),
+        os.path.join(temp_dir, f'{version}.lst'),
         0,
         [custom_elf],
     )
     with open(custom_elf, "rb") as elf_file, open(
-        os.path.join(temp_dir, "us_dyn.lst")
+        os.path.join(temp_dir, f'{version}_dyn.lst')
     ) as sym:
         dat = elf_to_rel(1000, elf_file, sym)
 
-    with open("../custom-rel/US/customNP.rel", "wb") as f:
+    with open(f'../custom-rel/{version.upper()}/customNP.rel', "wb") as f:
         f.write(dat)
 
 except Exception as e:
