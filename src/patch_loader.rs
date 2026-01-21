@@ -17,7 +17,7 @@ macro_rules! embed_patch_diffs {
         include_str!(concat!(
             "../asm/patch_diffs/",
             $version,
-            "/ss_necessary_diff.txt"
+            "/all-ss_necessary_diff.txt"
         ))
     };
 }
