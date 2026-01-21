@@ -30,7 +30,7 @@ lfs f1, HARDCODED_RNG_FLOAT@l(r3)
 blr
 
 use_game_rng:
-b RELOCATE_RAND
+b rnd__2cMFv+0x8
 
 handle_hide_ui:
 lis r9, UI_HIDDEN@ha

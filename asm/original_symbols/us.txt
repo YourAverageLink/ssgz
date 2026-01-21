@@ -50,7 +50,6 @@ main.dol:
     AcOTBox__initDowsingTarget: 0x8026d780
     s_rnd: 0x80575BA0
     cM_rnd: 0x802e0d10
-    RELOCATE_RAND: 0x802e0d18 # addr to return to for relocated rng func
     REST_OF_RNG_FUNC: 0x802E0E20
     cM_rndI: 0x802e0d20
     LYT_MSG_MANAGER: 0x80575488
