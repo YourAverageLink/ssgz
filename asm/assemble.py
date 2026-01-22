@@ -238,7 +238,7 @@ try:
                 r"\.org\s+(0x[0-9a-f])$", line, re.IGNORECASE
             )
             org_symbol_match = re.match(
-                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)(\s*[\+-]\s*0x[0-9a-f]+)?$", line, re.IGNORECASE
+                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)([\+-]0x[0-9a-f]+)?$", line, re.IGNORECASE
             )
             branch_match = re.match(
                 r"(?:b|beq|bne|blt|bgt|ble|bge)\s+0x([0-9a-f]+)(?:$|\s)",
