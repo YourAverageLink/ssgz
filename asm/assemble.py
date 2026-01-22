@@ -238,7 +238,7 @@ try:
                 r"\.org\s+(0x[0-9a-f])$", line, re.IGNORECASE
             )
             org_symbol_match = re.match(
-                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)(\s*\+\s*0x[0-9a-f]+)?$", line, re.IGNORECASE
+                r"\.org\s+([\._a-z][\._a-z0-9]+|@NextFreeSpace)(\s*[\+-]\s*0x[0-9a-f]+)?$", line, re.IGNORECASE
             )
             branch_match = re.match(
                 r"(?:b|beq|bne|blt|bgt|ble|bge)\s+0x([0-9a-f]+)(?:$|\s)",
@@ -290,15 +290,21 @@ try:
                         % next_free_space_id_for_file[most_recent_file_path]
                     )
                     next_free_space_id_for_file[most_recent_file_path] += 1
-                elif len(org_symbol_match.groups()) == 2:
+                else:
+                    if file_path not in original_symbols:
+                        original_symbols[file_path] = OrderedDict()
+
                     orig_symbols_for_file = original_symbols[most_recent_file_path]
-                    if org_symbol_match.group(2) is not None:
-                        offset = int(org_symbol_match.group(2), 16)
-                    else:
-                        offset = 0
+                    orig_addr = orig_symbols_for_file.get(org_symbol, None)
+                    if orig_addr is not None:
+                        if org_symbol_match.group(2) is not None:
+                            offset = int(org_symbol_match.group(2), 16)
+                        else:
+                            offset = 0
 
-                    org_symbol = orig_symbols_for_file[org_symbol] + offset
-
+                        org_symbol = orig_symbols_for_file[org_symbol] + offset
+                    elif org_symbol_match.group(2) is not None:
+                        raise Exception('Tried to use .org with presumably custom symbol %s and an offset, not supported' % org_symbol)
 
                 code_chunks[patch_name][most_recent_file_path][org_symbol] = ""
                 most_recent_org_offset = org_symbol
