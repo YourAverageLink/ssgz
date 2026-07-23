@@ -65,13 +65,13 @@ const TRICKS: [Trick; 17] = [
         name:            "Ghirahim 1",
         description:     "Practice fighting Ghirahim in Skyview Temple (with Goddess Sword).",
         associated_enum: ActiveTrick::Ghirahim1,
-        on_select:       Some(reload_g1),
+        on_select:       Some(load_g1),
     },
     Trick {
         name:            "Scaldera",
         description:     "Practice fighting Scaldera in Earth Temple (with Goddess Sword).",
         associated_enum: ActiveTrick::Scaldera,
-        on_select:       Some(reload_scaldera),
+        on_select:       Some(load_scaldera),
     },
     Trick {
         name:            "Moldarach",
@@ -89,19 +89,19 @@ const TRICKS: [Trick; 17] = [
         name:            "Koloktos",
         description:     "Practice fighting Koloktos in Ancient Cistern (with Goddess Sword).",
         associated_enum: ActiveTrick::Koloktos,
-        on_select:       Some(reload_koloktos),
+        on_select:       Some(load_koloktos),
     },
     Trick {
         name:            "Tentalus",
         description:     "Practice fighting Tentalus in Sandship.",
         associated_enum: ActiveTrick::Tentalus,
-        on_select:       Some(reload_tentalus),
+        on_select:       Some(load_tentalus),
     },
     Trick {
         name:            "Ghirahim 2",
         description:     "Practice fighting Ghirahim in Fire Sanctuary.",
         associated_enum: ActiveTrick::Ghirahim2(G2State::Phase1),
-        on_select:       Some(reload_g2),
+        on_select:       Some(load_g2),
     },
     // Trick {
     // name:   "Imprisoned 2",
@@ -120,19 +120,19 @@ const TRICKS: [Trick; 17] = [
         description:
             "Practice fighting Bilocyte in the Thunderhead (currently at the main entrance).",
         associated_enum: ActiveTrick::Bilocyte,
-        on_select:       Some(reload_bilocyte),
+        on_select:       Some(load_bilocyte),
     },
     Trick {
         name:            "Horde",
         description:     "Practice fighting the Horde Battle in Hylia's Realm.",
         associated_enum: ActiveTrick::Horde,
-        on_select:       Some(reload_horde),
+        on_select:       Some(load_horde),
     },
     Trick {
         name:            "Ghirahim 3",
         description:     "Practice fighting Ghirahim in Hylia's Realm.",
         associated_enum: ActiveTrick::Ghirahim3,
-        on_select:       Some(reload_g3),
+        on_select:       Some(load_g3),
     },
     Trick {
         name:            "Demise",
@@ -474,11 +474,15 @@ fn reload_keese_yeet() {
     reloader::set_reload_trigger(5);
 }
 
+fn load_g1() {
+    set_sword_to_goddess();
+    reload_g1();
+}
+
 fn reload_g1() {
     SceneflagManager::set_global(13, 102); // Heart Container obtained
     StoryflagManager::set_to_value(466, 0); // Unset intro cutscene flag
     StoryflagManager::do_commit();
-    set_sword_to_goddess();
     reloader::trigger_entrance(
         b"B100\0".as_ptr(),
         0,
@@ -494,6 +498,12 @@ fn reload_g1() {
     file_manager::set_current_health(8);
 }
 
+fn load_scaldera() {
+    set_sword_to_goddess();
+    ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
+    reload_scaldera();
+}
+
 fn reload_scaldera() {
     SceneflagManager::set_global(14, 47); // Boulder rolling cutscene
     SceneflagManager::set_global(14, 37); // Fi Text in Room
@@ -502,9 +512,7 @@ fn reload_scaldera() {
                                            // StoryflagManager::set_to_value(7, 0); // Unset ET Beaten
                                            // StoryflagManager::set_to_value(189, 0); // Unset flag after Scaldera CS
     StoryflagManager::do_commit();
-    ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
     ItemflagManager::increase_counter(2, 10); // Refill Bombs
-    set_sword_to_goddess();
     let current_file = file_manager::get_file_A();
     // Positioned for Scaldera cutscene trigger
     current_file.pos_t1.x = 407.0;
@@ -559,6 +567,11 @@ fn reload_moldarach() {
     file_manager::set_current_health(24);
 }
 
+fn load_koloktos() {
+    set_sword_to_goddess();
+    reload_koloktos();
+}
+
 fn reload_koloktos() {
     SceneflagManager::set_global(12, 77); // Heart Container obtained
     StoryflagManager::set_to_value(58, 1); // Give B-Wheel
@@ -568,7 +581,6 @@ fn reload_koloktos() {
     ItemflagManager::increase_counter(4, 20); // Refill Seeds
     ItemflagManager::set_to_value(92, 1); // Give Bomb Bag
     ItemflagManager::increase_counter(2, 10); // Refill Bombs
-    set_sword_to_goddess();
     let current_file = file_manager::get_file_A();
     current_file.equipped_b_item = 6; // Whip
     reloader::trigger_entrance(
@@ -586,6 +598,11 @@ fn reload_koloktos() {
     file_manager::set_current_health(16);
 }
 
+fn load_tentalus() {
+    ItemflagManager::set_to_value(12, 1); // Give Goddess Longsword (unless player already has a higher sword)
+    reload_tentalus();
+}
+
 fn reload_tentalus() {
     SceneflagManager::unset_global(18, 82); // Crest rises
     SceneflagManager::unset_global(18, 84); // Crest struck
@@ -594,7 +611,6 @@ fn reload_tentalus() {
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(19, 1); // Give Bow
     ItemflagManager::increase_counter(1, 20); // Refill Arrows
-    ItemflagManager::set_to_value(12, 1); // Give Goddess Longsword (unless player already has a higher sword)
     let current_file = file_manager::get_file_A();
     current_file.equipped_b_item = 1; // Bow
     reloader::trigger_entrance(
@@ -612,12 +628,16 @@ fn reload_tentalus() {
     file_manager::set_current_health(16);
 }
 
+fn load_g2() {
+    ItemflagManager::set_to_value(9, 1); // Give Goddess White Sword (unless player already has a higher sword)
+    reload_g2();
+}
+
 fn reload_g2() {
     SceneflagManager::set_global(15, 124); // Heart Container obtained
     StoryflagManager::set_to_value(84, 0); // Unset defeated G2 storyflag
     StoryflagManager::set_to_value(464, 0); // Unset intro cutscene flag
     StoryflagManager::do_commit();
-    ItemflagManager::set_to_value(9, 1); // Give Goddess White Sword (unless player already has a higher sword)
     reloader::trigger_entrance(
         b"B201\0".as_ptr(),
         0,
@@ -633,11 +653,15 @@ fn reload_g2() {
     file_manager::set_current_health(8);
 }
 
+fn load_horde() {
+    ItemflagManager::set_to_value(13, 1); // Give Master Sword (unless player already has a higher sword)
+    reload_horde();
+}
+
 fn reload_horde() {
     StoryflagManager::set_to_value(134, 0); // Unset horde defeated
     StoryflagManager::set_to_value(347, 0); // Unset horde cutscene
     StoryflagManager::do_commit();
-    ItemflagManager::set_to_value(13, 1); // Give Master Sword (unless player already has a higher sword)
     reloader::trigger_entrance(
         b"F403\0".as_ptr(),
         1,
@@ -654,6 +678,11 @@ fn reload_horde() {
                                           // max health happens to be
 }
 
+fn load_g3() {
+    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword (unless player already has a higher sword)
+    reload_g3();
+}
+
 fn reload_g3() {
     StoryflagManager::set_to_value(347, 1); // Set horde cutscene (for barriers)
     StoryflagManager::set_to_value(225, 0); // Unset G3 defeated
@@ -661,7 +690,6 @@ fn reload_g3() {
     StoryflagManager::set_to_value(30, 1); // Give Pouch Storyflag
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(112, 1); // Give Pouch itemflag
-    ItemflagManager::set_to_value(11, 1); // Give Goddess Sword (unless player already has a higher sword)
     let current_file = file_manager::get_file_A();
     current_file.pouch_items[0] = 0x100074; // Wooden Shield
     current_file.shield_pouch_slot = 0;
@@ -813,6 +841,11 @@ fn reload_demise() {
 // reload_imprisoned(3);
 // }
 
+fn load_bilocyte() {
+    ItemflagManager::set_to_value(14, 1); // Give True Master Sword
+    reload_bilocyte();
+}
+
 fn reload_bilocyte() {
     StoryflagManager::set_to_value(364, 1); // Spiral Charge
     StoryflagManager::set_to_value(366, 1);
@@ -823,7 +856,6 @@ fn reload_bilocyte() {
     StoryflagManager::do_commit();
     ItemflagManager::set_to_value(19, 1); // Give Bow
     ItemflagManager::increase_counter(1, 20); // Refill Arrows
-    ItemflagManager::set_to_value(14, 1); // Give True Master Sword
                                           // let current_file = file_manager::get_file_A();
                                           // current_file.pos_t1.x = -111223.0;
                                           // current_file.pos_t1.y = -1206.0;
