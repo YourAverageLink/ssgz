@@ -74,6 +74,22 @@ pub fn short_to_rad(ang: i16) -> f32 {
     (ang as f32) * MIN_ANGLE
 }
 
+pub fn normalize_angle(mut angle: f32) -> f32 {
+    while angle >= consts::TAU {
+        angle -= consts::TAU;
+    }
+    while angle < 0.0 {
+        angle += consts::TAU;
+    }
+    angle
+}
+
+pub fn rad_to_short(angle: f32) -> i16 {
+    let wrapped = normalize_angle(angle);
+    let turns = wrapped / consts::TAU;
+    ((turns * 65536.0) as u16) as i16
+}
+
 pub fn rad_to_deg(ang: f32) -> f32 {
     ang * 180f32 * consts::FRAC_1_PI
 }

@@ -1,6 +1,8 @@
 #![allow(non_snake_case)]
 use core::ffi::c_void;
 
+use crate::game::is_valid_game_ptr;
+
 #[repr(C)]
 pub struct SpawnStruct {
     pub name:                   [u8; 32], // 0x00
@@ -127,5 +129,5 @@ pub fn soft_reset() {
 }
 
 pub fn in_reset() -> bool {
-    unsafe { (*reload_color_fader).other_state == 1}
+    unsafe { is_valid_game_ptr(reload_color_fader) && (*reload_color_fader).other_state == 1}
 }

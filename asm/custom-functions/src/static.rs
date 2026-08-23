@@ -1,7 +1,7 @@
 mod system;
-use crate::system::heap::{Heap, get_dylink_heap};
-use core::{ffi::{c_char, c_void}, option::Option};
+use crate::system::heap::{get_dylink_heap, Heap};
 use alloc::boxed::Box;
+use core::{ffi::{c_char, c_void}, option::Option};
 
 #[no_mangle]
 #[link_section = "data"]
@@ -35,7 +35,7 @@ pub extern "C" fn custom_main_additions() -> u32 {
         }
     }
 
-    return 1;
+    1
 }
 
 #[no_mangle]
@@ -89,7 +89,7 @@ pub fn load_rel(path: *const c_char) -> bool {
         let rel = Box::new_in(DynamicModuleControl {
             dat: [0; 0x48usize],
         }, heap);
-        
+
         let rel_ptr = Box::into_raw(rel) as *mut DynamicModuleControl;
         __ct__DynamicModuleControl(rel_ptr, path, core::ptr::null_mut());
         DynamicModuleControlBase__link(rel_ptr)

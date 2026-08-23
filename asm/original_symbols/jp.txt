@@ -23,7 +23,9 @@ main.dol:
     # ActorLink, Vec3f* pos, Vec3s* rot, zero1, one, zero2
     ActorLink__setPosRot: 0x80241c00
     ActorLink__getTargetedActor: 0x80246a90
+    ActorLink__getRidingActor: 0x80246b90
     LINK_PTR: 0x805789ec
+    EVENT_MANAGER_INSTANCE: 0x805785d8
     EQUIPPED_SWORD: 0x80574ed4
     ActorLink__doFinalBlow: 0x801cb590
     # --------------- MISC   STUFF ----------------------------
@@ -43,6 +45,7 @@ main.dol:
     findActorByActorType: 0x802e2d20
     GAME_FRAME: 0x80578dd8
     C_GAME: 0x80578a10
+    SCN_ROOT_PTR: 0x80578E34
     CORE_CONTROLLER: 0x80578eb8
     CURRENT_HEAP: 0x805799a0
     HEAP_MEM1: 0x8057848c
@@ -69,6 +72,14 @@ main.dol:
     SCGetAspectRatio: 0x803D6E30
     TITLE_LOADER: 0x805789e0
     BGS_INSTANCE: 0x80578f50
+    dCcS__GetInstance: 0x803559D0
+    dBgS_ObjLinChk__LineCross: 0x80342B10
+    dBgS_ObjLinChk__GetTriPla: 0x80342BA0
+    dBgS_ObjLinChk__ChkGround: 0x80342C50
+    dBgS_ObjLinChk__ChkWall: 0x80342C90
+    dBgS_ObjLinChk__ChkRoof: 0x80342CE0
+    cBgS__GetTriPnt: 0x8033B390
+    BgS__GroundCross: 0x8033AE00
     Acch__CrrPos: 0x80340890
     Acch__ChkGndHit: 0x803411b0
     dLytMeterMain__draw: 0x800d80a0
@@ -109,6 +120,7 @@ main.dol:
     Reloader__triggerExit: 0x801bb5b0
     isCurrentStage: 0x801bb8f0
     actuallyTriggerEntrance: 0x801bbb00
+    dScGame_c__getCamera: 0x801bbc20
     RELOADER_PTR: 0x805789f4
     RELOADER_TYPE: 0x805789fd
     SPAWN_MASTER: 0x805b6b0c
@@ -140,6 +152,7 @@ main.dol:
     returnForInstantText: 0x801160B8
     # ----------------- GX Stuffs -----------------------------
     PSMTXIdentity: 0x803b8890
+    C_MTXPerspective: 0x803b8f80
     C_MTXOrtho: 0x803b99c0
     GXSetProjection: 0x803c2ba0
     GXLoadPosMtxImm: 0x803c2ca0
@@ -168,6 +181,10 @@ main.dol:
     GXSetChanCtrl: 0x803bf350
     __GXSetIndirectMask: 0x803c0c90
     GXSetChanMatColor: 0x803bf240
+    GXSetLineWidth: 0x803be020
+    DRAW_GX_CAMERA_MTX: 0x80675748
+    EGG_DrawGX__BeginDrawLine: 0x8049FA90
+    EGG_DrawGX__DrawLine: 0x8049FD50
     # ----------------- REL Stuffs ------------------------------
     __ct__DynamicModuleControl: 0x802df7d0
     DynamicModuleControlBase__link: 0x802df5f0
@@ -177,3 +194,6 @@ main.dol:
     EGGCos: 0x8049b530
     EGGAcos: 0x8049b560
     EGGAtan2: 0x8049b590
+
+
+

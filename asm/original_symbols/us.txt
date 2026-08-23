@@ -28,7 +28,9 @@ main.dol:
     # ActorLink, Vec3f* pos, Vec3s* rot, zero1, one, zero2
     ActorLink__setPosRot: 0x802416d0
     ActorLink__getTargetedActor: 0x80246560
+    ActorLink__getRidingActor: 0x80246660
     LINK_PTR: 0x8057578C
+    EVENT_MANAGER_INSTANCE: 0x80575378
     EQUIPPED_SWORD: 0x80571C74
     isInEvent: 0x8005B750
     ActorLink__doFinalBlow: 0x801CB060
@@ -49,6 +51,7 @@ main.dol:
     findActorByActorType: 0x802e2920
     GAME_FRAME: 0x80575b78
     C_GAME: 0x805757b0
+    SCN_ROOT_PTR: 0x80575BD4
     CORE_CONTROLLER: 0x80575c58
     CURRENT_HEAP: 0x80576740
     HEAP_MEM1: 0x8057522c
@@ -94,6 +97,13 @@ main.dol:
     SCGetAspectRatio: 0x803D64E0
     TITLE_LOADER: 0x80575780
     BGS_INSTANCE: 0x80575CF0
+    dCcS__GetInstance: 0x80355080
+    dBgS_ObjLinChk__LineCross: 0x803421C0
+    dBgS_ObjLinChk__GetTriPla: 0x80342250
+    dBgS_ObjLinChk__ChkGround: 0x80342300
+    dBgS_ObjLinChk__ChkWall: 0x80342340
+    dBgS_ObjLinChk__ChkRoof: 0x80342390
+    cBgS__GetTriPnt: 0x8033AA40
     Acch__GroundCheck: 0x8033f750
     BgS__GroundCross: 0x8033a4b0
     Acch__CrrPos: 0x80340490
@@ -139,6 +149,7 @@ main.dol:
     Reloader__triggerExit: 0x801bb080
     isCurrentStage: 0x801bb3c0
     actuallyTriggerEntrance: 0x801bb5d0
+    dScGame_c__getCamera: 0x801bb6f0
     RELOADER_PTR: 0x80575794
     RELOADER_TYPE: 0x8057579d
     SPAWN_MASTER: 0x805b388c
@@ -171,6 +182,7 @@ main.dol:
     returnForInstantText: 0x80115A08
     # ----------------- GX Stuffs -----------------------------
     PSMTXIdentity: 0x803b7f40
+    C_MTXPerspective: 0x803b8630
     C_MTXOrtho: 0x803b9070
     GXSetProjection: 0x803c2250
     GXLoadPosMtxImm: 0x803c2350
@@ -199,6 +211,10 @@ main.dol:
     GXSetChanCtrl: 0x803bea00
     __GXSetIndirectMask: 0x803c0340
     GXSetChanMatColor: 0x803be8f0
+    GXSetLineWidth: 0x803bd6d0
+    DRAW_GX_CAMERA_MTX: 0x80674df8
+    EGG_DrawGX__BeginDrawLine: 0x8049F140
+    EGG_DrawGX__DrawLine: 0x8049F400
     # ----------------- REL Stuffs ------------------------------
     __ct__DynamicModuleControl: 0x802df3d0
     DynamicModuleControlBase__link: 0x802DF1F0
@@ -208,3 +224,4 @@ main.dol:
     EGGCos: 0x8049ABE0
     EGGAcos: 0x8049AC10
     EGGAtan2: 0x8049AC40
+

@@ -41,6 +41,7 @@ pub fn dyn_hook() -> u32 {
         // The game would softlock if the menu were still open during a soft reset
         if in_reset() {
             main_menu::MainMenu::disable();
+            menus::force_disable_runtime_tools();
         }
         menus::update();
         if menus::is_active() {
@@ -83,6 +84,7 @@ pub extern "C" fn _prolog() {
 
 #[no_mangle]
 pub extern "C" fn _epilog() {
+    menus::force_disable_runtime_tools();
     unsafe {
         clear_hook();
     }

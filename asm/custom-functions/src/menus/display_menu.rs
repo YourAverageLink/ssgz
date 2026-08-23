@@ -1,3 +1,4 @@
+use crate::game::camera;
 use crate::live_info;
 use crate::system::button::*;
 use crate::utils::menu::SimpleMenu;
@@ -19,6 +20,40 @@ pub static mut DISPLAY_MENU: DisplayMenu = DisplayMenu {
     state:  DisplayMenuState::Off,
     cursor: 0,
 };
+
+#[link_section = "data"]
+#[no_mangle]
+pub static mut FREE_CAM_ENABLED: bool = false;
+
+#[link_section = "data"]
+#[no_mangle]
+pub static mut FREE_CAM_RUNTIME_ACTIVE: bool = false;
+
+#[link_section = "data"]
+#[no_mangle]
+pub static mut FREEZE_CAMERA_ENABLED: bool = false;
+
+pub fn update_display_features() {
+    unsafe {
+        if FREE_CAM_ENABLED && ButtonBuffer::check_combo_pressed(Z | TWO) {
+            FREE_CAM_RUNTIME_ACTIVE ^= true;
+        }
+        if !FREE_CAM_ENABLED || super::cheats_menu::is_move_link_runtime_active() {
+            FREE_CAM_RUNTIME_ACTIVE = false;
+        }
+        camera::update(FREE_CAM_RUNTIME_ACTIVE, FREEZE_CAMERA_ENABLED);
+    }
+}
+
+pub fn is_free_cam_runtime_active() -> bool {
+    unsafe { FREE_CAM_RUNTIME_ACTIVE }
+}
+
+pub fn force_disable_free_cam() {
+    unsafe {
+        FREE_CAM_RUNTIME_ACTIVE = false;
+    }
+}
 
 impl super::Menu for DisplayMenu {
     fn enable() {
@@ -52,6 +87,15 @@ impl super::Menu for DisplayMenu {
                             },
                             3 => {
                                 live_info::FRAME_VIEWER ^= true;
+                            },
+                            4 => {
+                                FREE_CAM_ENABLED ^= true;
+                                if !FREE_CAM_ENABLED {
+                                    FREE_CAM_RUNTIME_ACTIVE = false;
+                                }
+                            },
+                            5 => {
+                                FREEZE_CAMERA_ENABLED ^= true;
                             },
                             _ => {},
                         }
@@ -116,6 +160,20 @@ impl super::Menu for DisplayMenu {
             } else {
                 "The game's frame count is currently hidden."
             }
+        );
+        menu.add_entry_fmt(
+            format_args!(
+                "FreeCam [{}]",
+                if unsafe { FREE_CAM_ENABLED } { "x" } else { " " }
+            ),
+            "Toggle with Z+2. Move with Stick, Hold C to rotate, Z for 5x speed, Z+Minus for 25x speed.",
+        );
+        menu.add_entry_fmt(
+            format_args!(
+                "Freeze Camera [{}]",
+                if unsafe { FREEZE_CAMERA_ENABLED } { "x" } else { " " }
+            ),
+            "Freeze the camera at its current position.",
         );
         menu.set_cursor(disp_menu.cursor);
         menu.draw();
