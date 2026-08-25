@@ -1,2 +1,2 @@
-py -3.8 assemble_us.py
-py -3.8 assemble_jp.py
+py -3.8 assemble.py us
+py -3.8 assemble.py jp

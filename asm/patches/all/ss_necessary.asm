@@ -30,7 +30,7 @@ lfs f1, HARDCODED_RNG_FLOAT@l(r3)
 blr
 
 use_game_rng:
-b RELOCATE_RAND
+b rnd__2cMFv+0x8
 
 handle_hide_ui:
 lis r9, UI_HIDDEN@ha
@@ -44,34 +44,25 @@ finish_ui:
 stwu r1, -0x10(r1)
 b dLytMeterMain__draw + 0x4
 
-; 0x80062f40 in JP 1.0
-; 0x80062e60 in US 1.0
-.org @MainInjection
+.org IMPORTANT_UPDATE_FUNCTION+0x10
 bl custom_main_additions
 
-.org 0x80053728 ; end of callback after rel initialization
+.org dvdCallback__4dDylFPv+0xD8 ; end of callback after rel initialization
 b load_custom_rel
 
-;.org 0x80064660
-;lis r3, 0x16
-
-;.org 0x80064690
-;lis r3, 0x60
-
-;.org 0x800646a0
-;lis r3, 0xD0
-
-.org 0x80115A04 ; instant text patch
+.org executeState_OutputText__15dLytMsgWindow_cFv+0x64 ; instant text patch
 b handle_instant_text
 
-.org 0x802e0d10
+.org rnd__2cMFv
 b hijack_rng
 
-.org 0x802e0d18
-subi r3, r13, 0x38A0
+; exploiting function alignment here - we have exactly 8 bytes here
+; to copy the original rand function
+.org rnd__2cMFv+0x8
+la r3, s_rnd@sda21(r13)
 b REST_OF_RNG_FUNC
 
-.org 0x800d7b50 ; dLytMeterMain__draw
+.org draw__15dLytMeterMain_cFv ; dLytMeterMain__draw
 b handle_hide_ui
 
 .close
