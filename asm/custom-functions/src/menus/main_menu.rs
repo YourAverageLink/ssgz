@@ -7,7 +7,7 @@ use super::warp_menu::WarpMenu;
 use super::inventory_menu::InventoryMenu;
 use super::tricks_menu::TricksMenu;
 use core::fmt::Write;
-use crate::system::button::*;
+use crate::system::button::{self, *};
 use crate::utils::char_writer::{TextWriterBase, CharWriter};
 use crate::utils::graphics::draw_rect;
 use crate::utils::menu::{get_y_bottom, SimpleMenu};
@@ -27,12 +27,11 @@ enum MenuState {
     FlagMenu,
     InventoryMenu,
     TricksMenu,
+    ExtraHotkeysToggle,
+    FrameAdvanceToggle,
 }
 
 const GZ_VERSION: &str = env!("CARGO_PKG_VERSION");
-
-const NUM_MENUS: usize = 6;
-
 
 impl MenuState {
     fn from_u32(num: u32) -> MenuState {
@@ -46,9 +45,17 @@ impl MenuState {
             5 => MenuState::FlagMenu,
             6 => MenuState::InventoryMenu,
             7 => MenuState::TricksMenu,
+            8 => MenuState::ExtraHotkeysToggle,
+            9 => MenuState::FrameAdvanceToggle,
             _ => MenuState::MenuSelect,
         }
     }
+}
+
+enum FrameAdvanceState {
+    Disabled,
+    Unpaused,
+    Paused,
 }
 
 pub struct MainMenu {
@@ -57,6 +64,33 @@ pub struct MainMenu {
     force_close: bool,
     description: &'static str,
     extra_hotkeys_on: bool,
+    frame_advance_state: FrameAdvanceState,
+}
+
+impl MainMenu {
+    pub fn frame_advance_enabled() -> bool {
+        match unsafe { &MAIN_MENU.frame_advance_state } {
+            FrameAdvanceState::Paused | FrameAdvanceState::Unpaused => true,
+            FrameAdvanceState::Disabled => false,
+        }
+    }
+
+    pub fn should_advance_frame() -> bool {
+        match unsafe { &MAIN_MENU.frame_advance_state } {
+            FrameAdvanceState::Disabled | FrameAdvanceState::Unpaused => true,
+            FrameAdvanceState::Paused => button::is_any_pressed(button::ONE | button::DPAD_RIGHT),
+        }
+    }
+
+    pub fn toggle_pause_state() {
+        unsafe {
+            match &MAIN_MENU.frame_advance_state {
+                FrameAdvanceState::Disabled => {},
+                FrameAdvanceState::Paused => { MAIN_MENU.frame_advance_state = FrameAdvanceState::Unpaused; },
+                FrameAdvanceState::Unpaused => { MAIN_MENU.frame_advance_state = FrameAdvanceState::Paused; },
+            }
+        }
+    }
 }
 
 #[link_section = "data"]
@@ -67,6 +101,7 @@ pub static mut MAIN_MENU: MainMenu = MainMenu {
     force_close: false,
     description: "",
     extra_hotkeys_on: false,
+    frame_advance_state: FrameAdvanceState::Disabled,
 };
 
 pub fn check_extra_hotkey_pressed(button: Buttons) -> bool {
@@ -99,7 +134,7 @@ impl super::Menu for MainMenu {
         let main_menu = unsafe { &mut MAIN_MENU };
         match main_menu.state {
             // MenuState::Off => {},
-            MenuState::MenuSelect => {
+            MenuState::MenuSelect | MenuState::ExtraHotkeysToggle | MenuState::FrameAdvanceToggle => {
                 if is_pressed(B) {
                     main_menu.state = MenuState::Off;
                     set_buttons_not_pressed(B);
@@ -115,7 +150,14 @@ impl super::Menu for MainMenu {
                         MenuState::FlagMenu => FlagMenu::enable(),
                         MenuState::InventoryMenu => InventoryMenu::enable(),
                         MenuState::TricksMenu => TricksMenu::enable(),
-                        _ => {main_menu.extra_hotkeys_on ^= true},
+                        MenuState::ExtraHotkeysToggle => {main_menu.extra_hotkeys_on ^= true},
+                        MenuState::FrameAdvanceToggle => {
+                            match main_menu.frame_advance_state {
+                                FrameAdvanceState::Disabled => main_menu.frame_advance_state = FrameAdvanceState::Paused,
+                                FrameAdvanceState::Unpaused | FrameAdvanceState::Paused => main_menu.frame_advance_state = FrameAdvanceState::Disabled,
+                            }
+                        }
+                        _ => {},
                     };
                 }
             },
@@ -155,7 +197,7 @@ impl super::Menu for MainMenu {
             MenuState::Off => {
                 write_description("");
             },
-            MenuState::MenuSelect => {
+            MenuState::MenuSelect | MenuState::ExtraHotkeysToggle | MenuState::FrameAdvanceToggle => {
                 let menu = crate::reset_menu();
                 menu.set_heading_fmt(format_args!("SSGZ {} - Select a Menu", GZ_VERSION));
                 menu.add_entry("Display Menu", "Passively display info on-screen.");
@@ -172,6 +214,11 @@ impl super::Menu for MainMenu {
                 } else {
                     menu.add_entry("Extra Hotkeys []", "Toggle action hotkeys from holding C and pressing a D-Pad direction.");
                 }
+                match main_menu.frame_advance_state {
+                    FrameAdvanceState::Disabled => menu.add_entry("Frame Advance []", "Toggle frame advance mode."),
+                    FrameAdvanceState::Unpaused => menu.add_entry("Frame Advance [x]", "Game is unpaused. D-Pad Right to pause game again."),
+                    FrameAdvanceState::Paused => menu.add_entry("Frame Advance [x]", "Game is paused. (1) to advance frame, D-Pad Right to unpause."),
+                };
                 menu.set_cursor(main_menu.cursor);
                 menu.draw();
 
