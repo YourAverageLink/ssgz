@@ -3,6 +3,7 @@ mod heap_viewer;
 mod input_viewer;
 mod link_pos_viewer;
 mod frame_viewer;
+mod enemy_viewer;
 
 #[link_section = "data"]
 pub static mut INPUT_VIEWER: bool = false;
@@ -14,6 +15,8 @@ pub static mut SCENE_FLAG_VIEWER: bool = false;
 pub static mut HEAP_VIEWER: bool = false;
 #[link_section = "data"]
 pub static mut FRAME_VIEWER: bool = false;
+#[link_section = "data"]
+pub static mut ENEMY_VIEWER: bool = false;
 
 pub fn display() {
     if unsafe { INPUT_VIEWER } {
@@ -31,4 +34,7 @@ pub fn display() {
     // if unsafe { HEAP_VIEWER } {
     // heap_viewer::disp_heaps();
     // }
+    if unsafe { ENEMY_VIEWER } {
+        enemy_viewer::display_actor_info();
+    }
 }

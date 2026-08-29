@@ -97,6 +97,9 @@ impl super::Menu for DisplayMenu {
                             5 => {
                                 FREEZE_CAMERA_ENABLED ^= true;
                             },
+                            6 => {
+                                live_info::ENEMY_VIEWER ^= true;
+                            }
                             _ => {},
                         }
                     }
@@ -174,6 +177,13 @@ impl super::Menu for DisplayMenu {
                 if unsafe { FREEZE_CAMERA_ENABLED } { "x" } else { " " }
             ),
             "Freeze the camera at its current position.",
+        );
+        menu.add_entry_fmt(
+            format_args!(
+                "Enemy Info Viewer [{}]",
+                if unsafe { live_info::ENEMY_VIEWER } { "x" } else { " " }
+            ),
+            "Show the position of the targeted enemy (or other actor).",
         );
         menu.set_cursor(disp_menu.cursor);
         menu.draw();
