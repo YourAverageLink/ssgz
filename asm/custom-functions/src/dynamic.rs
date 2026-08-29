@@ -5,6 +5,8 @@ mod system;
 mod utils;
 
 use alloc::boxed::Box;
+use crate::system::button;
+use crate::system::button::Buttons;
 use crate::utils::menu::SimpleMenu;
 use crate::menus::Menu;
 use crate::menus::main_menu;
@@ -36,8 +38,21 @@ pub fn reset_menu() -> &'static mut SimpleMenu {
 // Update menus each frame
 #[no_mangle]
 pub fn dyn_hook() -> u32 {
+    let frame_advance = main_menu::MainMenu::frame_advance_enabled();
+    let continue_game = main_menu::MainMenu::should_advance_frame();
+    
     if unsafe {INITIALIZED} {
-        ButtonBuffer::update();
+        if frame_advance {
+            if continue_game {
+                // we should set all buttons currently held down that weren't held last active frame as pressed
+                let last_active_down = ButtonBuffer::buttons_down() | button::ONE | button::DPAD_RIGHT;
+                let actual_down = button::buttons_down();
+                button::add_buttons_pressed(actual_down & !last_active_down);
+                ButtonBuffer::update();
+            }
+        } else {
+            ButtonBuffer::update();
+        }
         // The game would softlock if the menu were still open during a soft reset
         if in_reset() {
             main_menu::MainMenu::disable();
@@ -60,7 +75,12 @@ pub fn dyn_hook() -> u32 {
         }
     }
 
-    1
+    if frame_advance {
+        // Disable frame advance-related buttons in frame advance mode
+        button::set_buttons_not_down(button::ONE | button::DPAD_RIGHT);
+    }
+
+    continue_game as u32
 }
 
 extern "C" { 
