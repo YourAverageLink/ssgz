@@ -5,6 +5,7 @@ mod iso_tools;
 mod patch_loader;
 mod patcher;
 mod paths;
+mod updater;
 
 use anyhow::Context;
 use clap::Parser;
@@ -12,13 +13,12 @@ use dialoguer::Confirm;
 use indicatif::ProgressBar;
 use iso_tools::*;
 use rfd::FileDialog;
-use std::{env, fs};
-
-pub const GZ_VERSION: &str = env!("CARGO_PKG_VERSION");
+use std::fs;
+use updater::{CURRENT_VERSION, check_for_update, perform_update};
 
 #[derive(Parser, Debug)]
 #[clap(about = "Practice ROM Hack Patcher for Skyward Sword")]
-#[clap(version = GZ_VERSION)]
+#[clap(version = CURRENT_VERSION)]
 struct Args {
     #[arg(long)]
     noui: bool,
@@ -31,6 +31,7 @@ fn fix_macos_working_directory() -> anyhow::Result<()> {
     // (unless running from source or with dx serve)
     #[cfg(target_os = "macos")]
     {
+        use std::env;
         if let Ok(exe_path) = env::current_exe() {
             let mut current = exe_path.as_path();
             while let Some(parent) = current.parent() {
@@ -80,9 +81,30 @@ pub fn is_ready_to_patch(version: GameVersion) -> bool {
 }
 
 fn do_noui(version: GameVersion) -> anyhow::Result<()> {
+    match check_for_update() {
+        Ok(Some(asset_name)) => {
+            if Confirm::new()
+                .with_prompt("Update detected. Do you want to update now?")
+                .default(true)
+                .interact()
+                .context("Failed to read user input")?
+            {
+                perform_update(&asset_name)?;
+                println!("Update complete! Please re-launch the app.");
+                return Ok(());
+            } else {
+                println!("Update canceled.");
+            }
+        }
+        Ok(None) => {}
+        Err(e) => {
+            eprintln!("Update check failed: {e}");
+        }
+    }
+
     assert!(version.is_supported()); // arg parser should only accept supported versions
 
-    println!("Starting SSGZ Patcher {GZ_VERSION} for the {version} version");
+    println!("Starting SSGZ Patcher {CURRENT_VERSION} for the {version} version");
 
     let extract_done = paths::extract_dol_exists(version);
     let dol_copied = paths::dol_copy_exists(version);
