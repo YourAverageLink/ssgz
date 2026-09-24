@@ -50,6 +50,10 @@ pub fn do_global_updates() {
     else if main_menu::check_extra_hotkey_pressed(crate::system::button::DPAD_DOWN) {
         action_menu::action_load_file();
     }
+
+    if crate::system::button::is_pressed(crate::system::button::DPAD_RIGHT) {
+        main_menu::MainMenu::toggle_pause_state();
+    }
 }
 
 pub fn force_disable_runtime_tools() {

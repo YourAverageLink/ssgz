@@ -321,15 +321,17 @@ const CSWW_MAP_UPDATE: u32 = 178; // Map changes to File 1's map around this tim
 const CSWW_FILE_DUPE_END_FRAME: u32 = 32;
 
 pub fn update_buffer() {
-    // The buffer's bits store whether or not A was pressed in the last 8 frames
-    unsafe {
-        A_PRESS_BUFFER <<= 1;
-        TWO_HOLD_BUFFER <<= 1;
-        if is_pressed(A) {
-            A_PRESS_BUFFER += 1;
-        }
-        if is_down(TWO) {
-            TWO_HOLD_BUFFER += 1;
+    if main_menu::MainMenu::should_advance_frame() {
+        // The buffer's bits store whether or not A was pressed in the last 8 frames
+        unsafe {
+            A_PRESS_BUFFER <<= 1;
+            TWO_HOLD_BUFFER <<= 1;
+            if is_pressed(A) {
+                A_PRESS_BUFFER += 1;
+            }
+            if is_down(TWO) {
+                TWO_HOLD_BUFFER += 1;
+            }
         }
     }
 }

@@ -81,10 +81,20 @@ pub fn set_buttons_down(buttons: Buttons) {
         (*CORE_CONTROLLER).buttons_down = buttons.bits();
     }
 }
+pub fn set_buttons_not_down(buttons: Buttons) {
+    unsafe {
+        (*CORE_CONTROLLER).buttons_down &= !buttons.bits();
+    }
+}
 
 pub fn set_buttons_pressed(buttons: Buttons) {
     unsafe {
         (*CORE_CONTROLLER).buttons_pressed = buttons.bits();
+    }
+}
+pub fn add_buttons_pressed(buttons: Buttons) {
+    unsafe {
+        (*CORE_CONTROLLER).buttons_pressed |= buttons.bits();
     }
 }
 pub fn set_buttons_not_pressed(buttons: Buttons) {
@@ -219,6 +229,28 @@ impl ButtonBuffer {
             .map(|btn| buf.frames_down[btn.bits().trailing_zeros() as usize])
             .min()
             .unwrap_or(0)
+    }
+
+    pub fn buttons_down() -> Buttons {
+        let buf = Self::get_buf();
+        let mut bits = 0u32;
+        for (index, frames) in buf.frames_down.iter().enumerate() {
+            if *frames > 0 {
+                bits |= 1u32 << index;
+            }
+        }
+        Buttons::from_bits_truncate(bits)
+    }
+
+    pub fn buttons_pressed() -> Buttons {
+        let buf = Self::get_buf();
+        let mut bits = 0u32;
+        for (index, frames) in buf.frames_down.iter().enumerate() {
+            if *frames == 1 {
+                bits |= 1u32 << index;
+            }
+        }
+        Buttons::from_bits_truncate(bits)
     }
 
     pub fn check_combo_down(buttons: Buttons) -> bool {
