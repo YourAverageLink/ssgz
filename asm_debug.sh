@@ -1,4 +1,4 @@
 cd asm
-python3 assemble_us.py debug
-python3 assemble_jp.py debug
+python3 assemble.py us debug
+python3 assemble.py jp debug
 cd ..
