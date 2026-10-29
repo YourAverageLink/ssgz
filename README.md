@@ -142,6 +142,10 @@ You may enable extra hotkeys in the main menu. When enabled, you may run the fol
 - **C + D-Pad Up**: Direct Load File
 - **C + D-Pad Down**: Load File
 
+### Frame Advance
+
+You may toggle Frame Advance mode in the main menu. When enabled, the game is paused, and can be unpaused by pressing D-Pad Right. While paused, you may advance the game by 1 frame by tapping the 1 button. Button inputs can be buffered (that is, any buttons you hold while advancing a frame will be treated as though you began tapping them this frame unless they were already held), however, motion control inputs cannot be buffered currently.
+
 ## Debug / Extra Features
 
 If you're running from source, you may enable certain experimental / extra features. You will need Python, along with certain dependencies, and devkitPPC to run the assemble scripts.
